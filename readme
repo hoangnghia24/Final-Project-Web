@@ -1,0 +1,5 @@
+
+tạo DATABASE
+CREATE DATABASE mxh CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+sửa mật khẩu trong file application.properties thành mật khẩu DATABASE

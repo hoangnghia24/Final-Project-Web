@@ -1,0 +1,32 @@
+# 1. Định nghĩa Input Object (Tương ứng với RegisterRequest DTO)
+input RegisterInput {
+    username: String!
+    email: String!
+    password: String!
+    fullName: String
+}
+
+# 2. Định nghĩa Output Type (Tương ứng với UserResponse DTO)
+type UserPayload {
+    id: ID
+    username: String
+    email: String
+    fullName: String
+    avatarUrl: String
+    role: String # GraphQL trả về String cho Enum
+}
+
+# 3. Định nghĩa Mutation (Hành động thay đổi dữ liệu)
+type Mutation {
+    # Tên hàm: register
+    # Tham số: input (kiểu RegisterInput)
+    # Trả về: UserPayload
+    register(input: RegisterInput!): UserPayload
+}
+
+# ... Các phần type User, type Mutation cũ giữ nguyên ...
+
+# THÊM PHẦN NÀY VÀO:
+type Query {
+    hello: String
+}

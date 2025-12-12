@@ -1,0 +1,45 @@
+/* style.css */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Cấu hình khung bao ngoài để căn giữa */
+.login-container {
+    min-height: 100vh;
+    /* Chiều cao full màn hình */
+    display: flex;
+    align-items: center;
+    /* Căn giữa dọc */
+    justify-content: center;
+    /* Căn giữa ngang */
+    background-color: #f0f2f5;
+    padding: 15px;
+    /* Đệm để khi màn hình nhỏ không bị sát lề */
+}
+
+/* Cấu hình hộp Login */
+.login-card {
+    width: 100%;
+    /* Mặc định chiếm hết chiều ngang cho phép */
+    max-width: 396px;
+    /* Nhưng không vượt quá 396px (khi màn hình to) */
+    height: 314px;
+    /* Chiều cao cố định */
+
+    /* Flex để căn nội dung bên trong hộp */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    /* Hiệu ứng bóng đổ nhẹ */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    border-radius: 8px;
+    /* Bo tròn góc nhẹ */
+}

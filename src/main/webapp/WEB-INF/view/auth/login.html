@@ -1,36 +1,139 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login</title>
-    <!-- Latest compiled and minified CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập - MXH</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Latest compiled JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        /* CSS căn giữa màn hình */
+        body {
+            background-color: #f0f2f5;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="card position-absolute top-50 start-50 translate-middle container overflow-hidden text-center">
-        <div class=" card-body">
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" placeholder="userName" aria-label="userName"
-                    aria-describedby="basic-addon1">
-                <input type="password" class="form-control" placeholder="password" aria-label="password"
-                    aria-describedby="basic-addon2">
+
+    <div class="login-card card p-4">
+        <div class="card-body">
+            <h3 class="text-center mb-4 fw-bold text-primary">Đăng Nhập</h3>
+
+            <div id="error-alert" class="alert alert-danger d-none" role="alert">
+                Sai tên đăng nhập hoặc mật khẩu!
             </div>
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" placeholder="gmail" aria-label="gmail"
-                    aria-describedby="basic-addon2">
-                <span class="input-group-text" id="basic-addon2">@gmail.com</span>
+
+            <form onsubmit="handleLogin(event)">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Tên đăng nhập / Email</label>
+                    <input type="text" id="username" class="form-control" placeholder="Nhập username" required
+                        autofocus>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Mật khẩu</label>
+                    <input type="password" id="password" class="form-control" placeholder="Nhập mật khẩu" required>
+                </div>
+
+                <div class="d-grid mb-3">
+                    <button type="submit" id="btnLogin" class="btn btn-primary fw-bold py-2">
+                        Đăng nhập
+                    </button>
+                </div>
+            </form>
+
+            <div class="d-flex justify-content-between mt-3 text-sm">
+                <a href="#" class="text-decoration-none text-secondary">Quên mật khẩu?</a>
+                <a href="/register" class="text-decoration-none fw-bold text-primary">Tạo tài khoản mới</a>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        async function handleLogin(event) {
+            event.preventDefault(); // Ngăn form reload trang
+
+            // 1. Lấy dữ liệu
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const errorAlert = document.getElementById("error-alert");
+            const btnLogin = document.getElementById("btnLogin");
+
+            // Reset trạng thái lỗi & nút bấm
+            errorAlert.classList.add("d-none");
+            btnLogin.disabled = true;
+            btnLogin.innerText = "Đang xử lý...";
+
+            // 2. Chuẩn bị câu lệnh GraphQL (Mutation)
+            // LƯU Ý: Đây là cấu trúc giả định, tý nữa chúng ta phải viết API Login ở Backend trả về đúng như này
+            const query = `
+                mutation {
+                    login(input: {
+                        username: "${username}",
+                        password: "${password}"
+                    }) {
+                        token
+                        user {
+                            id
+                            username
+                            role
+                        }
+                    }
+                }
+            `;
+
+            try {
+                // 3. Gọi API
+                const response = await fetch('/graphql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                });
+
+                const result = await response.json();
+
+                // 4. Xử lý kết quả
+                if (result.errors) {
+                    // Có lỗi từ server (sai pass, user không tồn tại...)
+                    errorAlert.innerText = result.errors[0].message;
+                    errorAlert.classList.remove("d-none");
+                } else if (result.data && result.data.login) {
+                    // 5. Đăng nhập thành công
+                    const token = result.data.login.token;
+
+                    // Lưu token vào localStorage để dùng cho các request sau
+                    localStorage.setItem("authToken", token);
+
+                    // Chuyển hướng vào trang chủ (Feed)
+                    alert("Đăng nhập thành công!");
+                    window.location.href = "/";
+                }
+            } catch (err) {
+                console.error(err);
+                errorAlert.innerText = "Lỗi kết nối server!";
+                errorAlert.classList.remove("d-none");
+            } finally {
+                btnLogin.disabled = false;
+                btnLogin.innerText = "Đăng nhập";
+            }
+        }
+    </script>
 </body>
 
 </html>
