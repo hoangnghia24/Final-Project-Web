@@ -1,5 +1,53 @@
-
+cách chạy: ./mvnw spring-boot:run
 tạo DATABASE
 CREATE DATABASE mxh CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 sửa mật khẩu trong file application.properties thành mật khẩu DATABASE
+
+
+thông tin DATABASE
+users
+Tên cột,Kiểu dữ liệu (MySQL),Ràng buộc (Constraints),Mô tả
+id,BIGINT,"PK, Auto Increment","Khóa chính, ID duy nhất."
+username,VARCHAR(50),"UNIQUE, Not Null",Tên đăng nhập (không trùng lặp).
+email,VARCHAR(100),"UNIQUE, Not Null",Email đăng ký (không trùng lặp).
+password_hash,VARCHAR(255),Not Null,Mật khẩu đã mã hóa (BCrypt).
+full_name,VARCHAR(100),Nullable,Họ và tên hiển thị.
+avatar_url,VARCHAR(255),Nullable,Link ảnh đại diện.
+bio,TEXT,Nullable,Giới thiệu bản thân.
+role,VARCHAR(20),Default 'USER',"Quyền hạn (USER, ADMIN)."
+created_at,DATETIME(6),,Ngày giờ tạo tài khoản.
+
+posts
+Tên cột,Kiểu dữ liệu,Ràng buộc,Mô tả
+id,BIGINT,"PK, Auto Increment",Khóa chính.
+user_id,BIGINT,FK (users.id),ID người đăng bài.
+content,TEXT,Nullable,Nội dung văn bản status.
+image_url,VARCHAR(255),Nullable,Link ảnh đính kèm (nếu có).
+privacy_level,VARCHAR(20),Default 'PUBLIC',"PUBLIC, FRIENDS_ONLY, PRIVATE."
+created_at,DATETIME(6),,Ngày giờ đăng bài.
+
+comments
+Tên cột,Kiểu dữ liệu,Ràng buộc,Mô tả
+id,BIGINT,"PK, Auto Increment",Khóa chính.
+post_id,BIGINT,FK (posts.id),Bình luận thuộc bài viết nào.
+user_id,BIGINT,FK (users.id),Ai là người bình luận.
+content,TEXT,Not Null,Nội dung bình luận.
+created_at,DATETIME(6),,Ngày giờ bình luận.
+
+likes
+Tên cột,Kiểu dữ liệu,Ràng buộc,Mô tả
+id,BIGINT,"PK, Auto Increment",Khóa chính.
+post_id,BIGINT,FK (posts.id),Bài viết được like.
+user_id,BIGINT,FK (users.id),Người thực hiện like.
+created_at,DATETIME(6),,Ngày giờ like.
+Composite Unique,,"(user_id, post_id)",Quan trọng: 1 người chỉ like 1 bài 1 lần.
+
+friendships
+Tên cột,Kiểu dữ liệu,Ràng buộc,Mô tả
+id,BIGINT,"PK, Auto Increment",Khóa chính.
+requester_id,BIGINT,FK (users.id),Người GỬI lời mời.
+addressee_id,BIGINT,FK (users.id),Người NHẬN lời mời.
+status,VARCHAR(20),Default 'PENDING',"PENDING (Chờ), ACCEPTED (Bạn bè), BLOCKED."
+created_at,DATETIME(6),,Ngày gửi lời mời.
+Composite Unique,,"(requester_id, addressee_id)",Không được gửi lời mời trùng lặp.
