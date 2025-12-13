@@ -1,0 +1,104 @@
+/* body {
+    background-color: #f0f2f5;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 200px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+body {
+    background-color: #f0f2f5;
+}
+
+.fb-logo {
+    font-size: 4rem;
+    font-weight: bold;
+}
+
+.fb-slogan {
+    font-size: 1.75rem;
+    font-weight: normal;
+    line-height: 32px;
+} */
+/* 1. CẤU HÌNH CHUNG & NỀN GRADIENT */
+body {
+    /* Hiệu ứng màu nền chuyển động */
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+
+    /* Font chữ và chiều cao */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+
+    /* Căn giữa nội dung nếu không dùng Bootstrap Container (Dự phòng) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Định nghĩa chuyển động của nền */
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* 2. LOGO VÀ SLOGAN */
+.fb-logo {
+    font-size: 4rem;
+    font-weight: bold;
+    /* Đổi màu chữ sang trắng để nổi trên nền màu */
+    color: #fff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.fb-slogan {
+    font-size: 1.75rem;
+    font-weight: normal;
+    line-height: 32px;
+    /* Màu trắng ngà cho slogan */
+    color: #f0f2f5 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* 3. KHUNG ĐĂNG NHẬP / ĐĂNG KÝ (Glassmorphism) */
+.card,
+.register-card,
+.login-card {
+    /* Nền trắng trong suốt 90% */
+    background-color: rgba(255, 255, 255, 0.9) !important;
+
+    /* Hiệu ứng kính mờ phía sau */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    /* Hỗ trợ Safari */
+
+    /* Viền mỏng và bóng đổ */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    border-radius: 1rem;
+    /* Bo góc tròn hơn */
+}
+
+/* Tinh chỉnh input khi bấm vào */
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    border-color: #86b7fe;
+}
