@@ -1,4 +1,105 @@
-# 1. Định nghĩa Input Object (Tương ứng với RegisterRequest DTO)
+# =========================
+# 1. ĐỊNH NGHĨA ENUMS
+# =========================
+
+enum Role {
+    USER
+    ADMIN
+}
+
+enum FriendshipStatus {
+    PENDING
+    ACCEPTED
+    DECLINED
+    BLOCKED
+}
+
+enum PrivacyLevel {
+    PUBLIC
+    FRIENDS
+    PRIVATE
+}
+
+# =========================
+# 2. ĐỊNH NGHĨA TYPES (OUTPUT)
+# =========================
+
+type User {
+    id: ID!
+    username: String
+    email: String
+    fullName: String
+    avatarUrl: String
+    bio: String
+    role: Role
+    createdAt: String # Trả về dạng ISO String (yyyy-MM-ddTHH:mm:ss)
+
+    # Quan hệ
+    posts: [Post]
+    friends: [User] # Danh sách bạn bè (Logic xử lý trong Controller)
+}
+
+# Type trả về cho Login/Register (Khớp với UserResponse DTO + Token)
+type AuthPayload {
+    token: String       # JWT Token
+    user: UserResponse  # Thông tin user rút gọn
+}
+
+# Type rút gọn khớp với UserResponse.java
+type UserResponse {
+    id: ID
+    username: String
+    email: String
+    fullName: String
+    avatarUrl: String
+    role: Role
+}
+
+type Post {
+    id: ID!
+    content: String
+    imageUrl: String
+    privacyLevel: PrivacyLevel
+    createdAt: String
+
+    # Quan hệ
+    user: User
+    comments: [Comment]
+    likes: [Like]
+
+    # Computed fields (Tính toán số lượng)
+    likeCount: Int
+    commentCount: Int
+}
+
+type Comment {
+    id: ID!
+    content: String
+    createdAt: String
+    user: User
+    post: Post
+}
+
+type Like {
+    id: ID!
+    createdAt: String
+    user: User
+    post: Post
+}
+
+type Friendship {
+    id: ID!
+    status: FriendshipStatus
+    createdAt: String
+    requester: User
+    addressee: User
+}
+
+# =========================
+# 3. ĐỊNH NGHĨA INPUTS (INPUT)
+# =========================
+
+# Khớp với RegisterRequest.java
 input RegisterInput {
     username: String!
     email: String!
@@ -6,27 +107,59 @@ input RegisterInput {
     fullName: String
 }
 
-# 2. Định nghĩa Output Type (Tương ứng với UserResponse DTO)
-type UserPayload {
-    id: ID
-    username: String
-    email: String
-    fullName: String
-    avatarUrl: String
-    role: String # GraphQL trả về String cho Enum
+# Khớp với LoginRequest.java
+input LoginInput {
+    username: String! # Hoặc email
+    password: String!
 }
 
-# 3. Định nghĩa Mutation (Hành động thay đổi dữ liệu)
-type Mutation {
-    # Tên hàm: register
-    # Tham số: input (kiểu RegisterInput)
-    # Trả về: UserPayload
-    register(input: RegisterInput!): UserPayload
+# Input tạo bài viết
+input PostInput {
+    content: String
+    imageUrl: String
+    privacyLevel: PrivacyLevel
 }
 
-# ... Các phần type User, type Mutation cũ giữ nguyên ...
+# =========================
+# 4. QUERY (ĐỌC DỮ LIỆU)
+# =========================
 
-# THÊM PHẦN NÀY VÀO:
 type Query {
-    hello: String
+    # --- USER ---
+    users: [User]               # Lấy danh sách tất cả user (Admin)
+    user(id: ID!): User         # Lấy profile user theo ID
+    me: User                    # Lấy thông tin user đang đăng nhập
+
+    # --- POST ---
+    posts: [Post]               # Lấy News Feed (bài viết công khai/bạn bè)
+    post(id: ID!): Post         # Chi tiết 1 bài viết
+    postsByUserId(userId: ID!): [Post] # Lấy bài viết trên tường nhà ai đó
+
+    # --- FRIENDSHIP ---
+    friendRequests: [Friendship] # Xem lời mời kết bạn đang chờ (của mình)
+}
+
+# =========================
+# 5. MUTATION (GHI DỮ LIỆU)
+# =========================
+
+type Mutation {
+    # --- AUTH ---
+    register(input: RegisterInput!): AuthPayload
+    login(input: LoginInput!): AuthPayload
+
+    # --- POST ---
+    createPost(input: PostInput!): Post
+    deletePost(id: ID!): Boolean
+
+    # --- COMMENT ---
+    createComment(postId: ID!, content: String!): Comment
+    deleteComment(id: ID!): Boolean
+
+    # --- LIKE ---
+    toggleLike(postId: ID!): Boolean # Like hoặc Unlike
+
+    # --- FRIENDSHIP ---
+    sendFriendRequest(addresseeId: ID!): Friendship
+    respondToFriendRequest(friendshipId: ID!, status: FriendshipStatus!): Friendship
 }
