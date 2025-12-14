@@ -27,8 +27,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**", "/graphql/**", "/graphiql/**").permitAll()
 
                         // 2. Cho phép truy cập các trang VIEW (HTML) dành cho khách
-                        .requestMatchers("/login", "/register").permitAll()
-
+                        .requestMatchers("/login", "/register","/profile/**", "/u/**").permitAll()
                         // 3. Cho phép truy cập các file tĩnh (CSS, JS, Ảnh)
                         // Lưu ý: "/client/**" là vì trong file register.html bạn dùng
                         // th:href="@{client/css/...}"

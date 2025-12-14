@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TFT Profile - Static Purple</title>
+    <style>
+        /* 1. Cài đặt chung */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            /* Background tĩnh: Gradient nhẹ từ trên xuống dưới, cố định */
+            background: #4e54c8;
+            background: -webkit-linear-gradient(to left, #8f94fb, #4e54c8);
+            background: linear-gradient(to left, #8f94fb, #4e54c8);
+            /* Giữ background đứng yên khi cuộn */
+            min-height: 100vh;
+            color: #1c1c1c;
+        }
+
+        /* 2. Header */
+        header {
+            background-color: #ffffff;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #edeff1;
+            /* Bỏ shadow động, dùng border nhẹ */
+        }
+
+        .logo-placeholder {
+            font-weight: bold;
+            font-size: 20px;
+            color: #6200ea;
+            /* Tím đậm tĩnh */
+            margin-right: 20px;
+        }
+
+        .search-bar {
+            background-color: #f6f7f8;
+            border: 1px solid #edeff1;
+            border-radius: 20px;
+            height: 32px;
+            width: 400px;
+            padding-left: 15px;
+            display: flex;
+            align-items: center;
+            color: #878a8c;
+            font-size: 14px;
+        }
+
+        /* 3. Layout chính */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 24px;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+        }
+
+        /* 4. Cột trái */
+        .main-column {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-identity {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .avatar-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            /* Nền màu tím phẳng, không bóng bẩy */
+            background-color: #6200ea;
+            background-image: url('https://www.redditstatic.com/avatars/defaults/v2/avatar_default_1.png');
+            background-size: cover;
+            border: 4px solid #ffffff;
+            margin-right: 16px;
+        }
+
+        .user-text h1 {
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 28px;
+            color: #ffffff;
+        }
+
+        .user-text span {
+            font-size: 14px;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        /* Thanh Menu */
+        .tabs-container {
+            background-color: #ffffff;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .tabs-scroll {
+            display: flex;
+            overflow-x: auto;
+        }
+
+        .tab-item {
+            padding: 15px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #7c7c7c;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            text-transform: uppercase;
+        }
+
+        /* Trạng thái Active: Tím đậm, không hiệu ứng loang */
+        .tab-item.active {
+            color: #6200ea;
+            border-bottom: 3px solid #6200ea;
+            background-color: #f3f0fa;
+            /* Tím rất nhạt làm nền */
+        }
+
+        .tab-item:hover {
+            /* Hover đơn giản đổi màu nền xám nhẹ */
+            background-color: #f6f7f8;
+            color: #1c1c1c;
+        }
+
+        /* Nội dung Feed */
+        .content-feed {
+            background-color: #ffffff;
+            border-radius: 4px;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .feed-btn {
+            margin-top: 15px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #6200ea;
+            color: #6200ea;
+            background: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Hover đổi màu nền cứng, không fade */
+        .feed-btn:hover {
+            background-color: #f3f0fa;
+        }
+
+        /* 5. Cột phải (Sidebar) */
+        .sidebar-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            /* Bóng đổ tĩnh nhẹ nhàng */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            position: sticky;
+            top: 70px;
+        }
+
+        /* Banner Sidebar: Gradient Tĩnh (Deep Purple -> Blue) */
+        .sidebar-header-bg {
+            height: 80px;
+            /* Màu tím sang xanh, cố định, không đổi góc */
+            background: linear-gradient(90deg, #654ea3, #eaafc8);
+            /* Style tím pastel nhẹ nhàng hơn */
+            /* Hoặc dùng màu đậm này nếu thích mạnh mẽ: */
+            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+            /* Xanh tím than */
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            /* Style Login tím xanh kinh điển */
+        }
+
+        .sidebar-content {
+            padding: 12px;
+            position: relative;
+        }
+
+        .sidebar-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 8px;
+            background-image: url('https://www.redditstatic.com/avatars/defaults/v2/avatar_default_1.png');
+            background-size: cover;
+            border: 3px solid #ffffff;
+            position: absolute;
+            top: -40px;
+            left: 12px;
+            background-color: #fff;
+        }
+
+        .sidebar-username {
+            margin-top: 35px;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .sidebar-tag {
+            font-size: 12px;
+            color: #7c7c7c;
+            margin-bottom: 10px;
+        }
+
+        /* Nút tạo bài đăng: Màu tím phẳng hoặc Gradient tĩnh */
+        .create-post-btn {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* Hover chỉ làm tối màu đi 1 chút, không phóng to thu nhỏ */
+        .create-post-btn:hover {
+            opacity: 0.9;
+        }
+
+        .sidebar-stats {
+            display: flex;
+            margin-top: 15px;
+            justify-content: space-between;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #7c7c7c;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo-placeholder">TFT</div>
+        <div class="search-bar">
+            <span>🔍 Tìm kiếm...</span>
+        </div>
+        <div style="margin-left: auto; font-weight:600; color:#333; font-size: 14px;">Login / Register</div>
+    </header>
+
+    <div class="container">
+
+        <div class="main-column">
+            <div class="user-identity">
+                <div class="avatar-circle"></div>
+                <div class="user-text">
+                    <h1>Agitated_Oil_1089</h1>
+                    <span>u/Agitated_Oil_1089</span>
+                </div>
+            </div>
+
+            <div class="tabs-container">
+                <div class="tabs-scroll">
+                    <div class="tab-item active">TỔNG QUAN</div>
+                    <div class="tab-item">BÀI ĐĂNG</div>
+                    <div class="tab-item">BÌNH LUẬN</div>
+                    <div class="tab-item">ĐÃ LƯU</div>
+                    <div class="tab-item">LỊCH SỬ</div>
+                    <div class="tab-item">BỊ ẨN</div>
+                </div>
+            </div>
+
+            <div class="content-feed">
+                <div style="font-size: 40px; color: #ccc; margin-bottom: 10px;">🤖</div>
+                <h3>Bạn chưa có bài đăng nào</h3>
+                <p style="color: #7c7c7c; font-size: 14px; margin-bottom: 20px;">Khi bạn đăng bài, bài đăng sẽ hiển thị
+                    ở đây.</p>
+                <button class="feed-btn">
+                    Cập nhật cài đặt
+                </button>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-card">
+                <div class="sidebar-header-bg"></div>
+
+                <div class="sidebar-content">
+                    <div class="sidebar-avatar"></div>
+
+                    <div class="sidebar-username">Agitated_Oil_1089</div>
+                    <div class="sidebar-tag">u/Agitated_Oil_1089</div>
+
+                    <div style="font-size: 12px; margin-top: 10px; color: #1c1c1c; line-height: 1.4;">
+                        Chào mừng đến với profile cá nhân của tôi.
+                    </div>
+
+                    <div class="sidebar-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">1</span>
+                            <span class="stat-label">Karma</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">0</span>
+                            <span class="stat-label">Ngày tạo</span>
+                        </div>
+                    </div>
+
+                    <button class="create-post-btn">Tạo bài đăng mới</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
