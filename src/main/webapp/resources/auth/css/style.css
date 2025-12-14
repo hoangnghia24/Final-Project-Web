@@ -28,77 +28,213 @@ body {
     font-weight: normal;
     line-height: 32px;
 } */
-/* 1. CẤU HÌNH CHUNG & NỀN GRADIENT */
+/* src/main/webapp/resources/auth/css/style.css */
+
+/* style.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
 body {
-    /* Hiệu ứng màu nền chuyển động */
-    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
-
-    /* Font chữ và chiều cao */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Màu nền gradient tĩnh làm base */
+    background: #4e54c8;
+    background: -webkit-linear-gradient(to left, #8f94fb, #4e54c8);
+    background: linear-gradient(to left, #8f94fb, #4e54c8);
     min-height: 100vh;
-
-    /* Căn giữa nội dung nếu không dùng Bootstrap Container (Dự phòng) */
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+    /* Ẩn thanh cuộn do hiệu ứng bay */
+    position: relative;
+    overflow-y: scroll;
 }
 
-/* Định nghĩa chuyển động của nền */
-@keyframes gradientBG {
-    0% {
-        background-position: 0% 50%;
-    }
+/* --- HIỆU ỨNG NỀN ĐỘNG (FLOATING SQUARES) --- */
+.area {
+    background: #4e54c8;
+    background: -webkit-linear-gradient(to left, #8f94fb, #4e54c8);
+    width: 100%;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    /* Đẩy xuống dưới cùng */
+}
 
-    50% {
-        background-position: 100% 50%;
+.circles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.circles li {
+    position: absolute;
+    display: block;
+    list-style: none;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    animation: animate 25s linear infinite;
+    bottom: -150px;
+}
+
+/* Các khối vuông với kích thước và tốc độ khác nhau */
+.circles li:nth-child(1) {
+    left: 25%;
+    width: 80px;
+    height: 80px;
+    animation-delay: 0s;
+}
+
+.circles li:nth-child(2) {
+    left: 10%;
+    width: 20px;
+    height: 20px;
+    animation-delay: 2s;
+    animation-duration: 12s;
+}
+
+.circles li:nth-child(3) {
+    left: 70%;
+    width: 20px;
+    height: 20px;
+    animation-delay: 4s;
+}
+
+.circles li:nth-child(4) {
+    left: 40%;
+    width: 60px;
+    height: 60px;
+    animation-delay: 0s;
+    animation-duration: 18s;
+}
+
+.circles li:nth-child(5) {
+    left: 65%;
+    width: 20px;
+    height: 20px;
+    animation-delay: 0s;
+}
+
+.circles li:nth-child(6) {
+    left: 75%;
+    width: 110px;
+    height: 110px;
+    animation-delay: 3s;
+}
+
+.circles li:nth-child(7) {
+    left: 35%;
+    width: 150px;
+    height: 150px;
+    animation-delay: 7s;
+}
+
+.circles li:nth-child(8) {
+    left: 50%;
+    width: 25px;
+    height: 25px;
+    animation-delay: 15s;
+    animation-duration: 45s;
+}
+
+.circles li:nth-child(9) {
+    left: 20%;
+    width: 15px;
+    height: 15px;
+    animation-delay: 2s;
+    animation-duration: 35s;
+}
+
+.circles li:nth-child(10) {
+    left: 85%;
+    width: 150px;
+    height: 150px;
+    animation-delay: 0s;
+    animation-duration: 11s;
+}
+
+@keyframes animate {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+        border-radius: 0;
     }
 
     100% {
-        background-position: 0% 50%;
+        transform: translateY(-1000px) rotate(720deg);
+        opacity: 0;
+        border-radius: 50%;
     }
 }
 
-/* 2. LOGO VÀ SLOGAN */
+/* --- LOGO & SLOGAN --- */
 .fb-logo {
     font-size: 4rem;
-    font-weight: bold;
-    /* Đổi màu chữ sang trắng để nổi trên nền màu */
+    font-weight: 700;
     color: #fff !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .fb-slogan {
-    font-size: 1.75rem;
-    font-weight: normal;
-    line-height: 32px;
-    /* Màu trắng ngà cho slogan */
-    color: #f0f2f5 !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.9) !important;
 }
 
-/* 3. KHUNG ĐĂNG NHẬP / ĐĂNG KÝ (Glassmorphism) */
+/* --- GLASSMORPHISM CARD (GIỮ NGUYÊN) --- */
 .card,
 .register-card,
 .login-card {
-    /* Nền trắng trong suốt 90% */
-    background-color: rgba(255, 255, 255, 0.9) !important;
-
-    /* Hiệu ứng kính mờ phía sau */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    /* Hỗ trợ Safari */
-
-    /* Viền mỏng và bóng đổ */
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    border-radius: 1rem;
-    /* Bo góc tròn hơn */
+    background: rgba(255, 255, 255, 0.85) !important;
+    /* Đục hơn 1 chút để dễ đọc */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    border-radius: 20px;
 }
 
-/* Tinh chỉnh input khi bấm vào */
+.form-control {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #eee;
+    padding: 12px;
+}
+
 .form-control:focus {
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    border-color: #86b7fe;
+    box-shadow: 0 0 0 4px rgba(78, 84, 200, 0.2);
+    border-color: #4e54c8;
+}
+
+.btn-success {
+    background: #4e54c8;
+    border: none;
+    padding: 12px;
+    transition: all 0.3s;
+}
+
+.btn-success:hover {
+    background: #3f44a5;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.text-edit {
+    color: #3f44a5 !important;
+}
+
+.btn-secondary:hover {
+    background: #3f44a5;
+    border-color: #3f44a5;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(63, 68, 165, 0.4)
 }

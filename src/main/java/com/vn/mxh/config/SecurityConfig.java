@@ -32,7 +32,7 @@ public class SecurityConfig {
                         // 3. Cho phép truy cập các file tĩnh (CSS, JS, Ảnh)
                         // Lưu ý: "/client/**" là vì trong file register.html bạn dùng
                         // th:href="@{client/css/...}"
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/client/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/client/**", "/auth/**").permitAll()
 
                         // 4. Tất cả các request còn lại đều phải đăng nhập mới được vào
                         .anyRequest().authenticated());
