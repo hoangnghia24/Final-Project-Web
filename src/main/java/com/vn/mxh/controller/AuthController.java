@@ -1,12 +1,11 @@
 package com.vn.mxh.controller;
 
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import com.vn.mxh.service.UserService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -18,8 +17,18 @@ import com.vn.mxh.repository.UserRepository;
 
 @Controller
 public class AuthController {
-    @Autowired
-    private UserRepository userRepository;
+
+    private final UserService userService;
+
+    private final UserRepository userRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, UserService userService) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
+    }
 
     @GetMapping("/login")
     public String login() {
@@ -32,8 +41,12 @@ public class AuthController {
     }
 
     @QueryMapping
-    public List<User> getAllUser() {
-        return userRepository.findAll();
+    public User getUserLogin(@Argument String username, @Argument String password) {
+        User userLogin = this.userService.getUserByUsername(username);
+        if (userLogin == null || !this.passwordEncoder.matches(password, userLogin.getPasswordHash())) {
+            throw new DuplicateRecordException("Tên đăng nhập hoặc mật khẩu không đúng.");
+        }
+        return userLogin;
     }
 
     @MutationMapping
@@ -52,11 +65,11 @@ public class AuthController {
         // 3. Nếu không trùng thì lưu
         User newUser = new User();
         newUser.setUsername(input.username());
-        newUser.setPasswordHash(input.password());
+        String hashPassword = this.passwordEncoder.encode(input.password());
+        newUser.setPasswordHash(hashPassword);
         newUser.setEmail(input.email());
         newUser.setFullName(input.fullName());
-        newUser.setRole(Role.USER); // Đã thêm import Role
-
+        newUser.setRole(Role.USER);
         return userRepository.save(newUser);
     }
 }

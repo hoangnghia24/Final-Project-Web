@@ -1,95 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>TFT - Đăng nhập hoặc đăng ký</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link th:href="@{/auth/css/style.css}" rel="stylesheet" />
-
-</head>
-
-<body>
-    <div class="area">
-        <ul class="circles">
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-        </ul>
-    </div>
-    <div class="container d-flex flex-column justify-content-center min-vh-100 py-5"
-        style="position: relative; z-index: 2;">
-    </div>
-    <div class="container d-flex flex-column justify-content-center min-vh-100 py-5">
-    </div>
-    <div class="container d-flex flex-column justify-content-center min-vh-100 py-5">
-
-        <div class="row align-items-center g-lg-5 py-5">
-
-            <div class="col-lg-7 text-center text-lg-start mb-5 mb-lg-0">
-                <h1 class="fb-logo text-success my-0">TFT</h1>
-                <h2 class="fb-slogan mt-2">Mạng xã hội kết nối đôi ta, chia sẻ mọi khoảnh khắc.</h2>
-            </div>
-
-            <div class="col-lg-5">
-                <div class="card shadow-lg border-0 rounded-3">
-                    <div class="card-body p-4 p-md-5">
-                        <h3 class="text-center mb-4 fw-bold text-success">Đăng Nhập</h3>
-
-                        <div id="error-alert" class="alert alert-danger d-none" role="alert">
-                            Sai tên đăng nhập hoặc mật khẩu!
-                        </div>
-
-                        <form onsubmit="handleLogin(event)">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="username" placeholder="Nhập username"
-                                    required autofocus>
-                                <label for="username">Tên đăng nhập / Email</label>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <input type="password" class="form-control" id="password" placeholder="Mật khẩu"
-                                    required>
-                                <label for="password">Mật khẩu</label>
-                            </div>
-
-                            <div class="d-grid gap-2 mb-3">
-                                <button type="submit" id="btnLogin" class="btn btn-success btn-lg fw-bold">
-                                    Đăng nhập
-                                </button>
-                            </div>
-
-                            <div class="text-center my-3">
-                                <a href="#" class="text-decoration-none text-success small">Quên mật khẩu?</a>
-                            </div>
-
-                            <hr class="my-4">
-
-                            <div class="d-grid gap-2 text-center">
-                                <a href="/register" class="btn btn-secondary btn-lg fw-bold">Tạo tài khoản mới</a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script th:src="@{/auth/js/main.js}"></script>
-</body>
-
-</html> -->
-
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
@@ -143,7 +51,7 @@
 
                         <div id="client-error" class="alert alert-danger d-none" role="alert"></div>
 
-                        <form id="loginForm" onsubmit="handleLogin(event)">
+                        <form id="loginForm">
                             <div class="form-floating mb-3">
                                 <input type="text" class="form-control" id="username" placeholder="Nhập username"
                                     required autofocus>

@@ -22,5 +22,5 @@ type Mutation{
 }
 
 type Query{
-    getAllUser: [User]
+    getUserLogin(username: String!, password: String!): User
 }
