@@ -1,165 +1,26 @@
-# =========================
-# 1. ĐỊNH NGHĨA ENUMS
-# =========================
-
-enum Role {
-    USER
-    ADMIN
-}
-
-enum FriendshipStatus {
-    PENDING
-    ACCEPTED
-    DECLINED
-    BLOCKED
-}
-
-enum PrivacyLevel {
-    PUBLIC
-    FRIENDS
-    PRIVATE
-}
-
-# =========================
-# 2. ĐỊNH NGHĨA TYPES (OUTPUT)
-# =========================
-
-type User {
+type User{
     id: ID!
-    username: String
-    email: String
-    fullName: String
+    fullName: String!
+    email: String!
+    passwordHash: String!
+    username: String!
     avatarUrl: String
     bio: String
-    role: Role
-    createdAt: String # Trả về dạng ISO String (yyyy-MM-ddTHH:mm:ss)
-
-    # Quan hệ
-    posts: [Post]
-    friends: [User] # Danh sách bạn bè (Logic xử lý trong Controller)
-}
-
-# Type trả về cho Login/Register (Khớp với UserResponse DTO + Token)
-type AuthPayload {
-    token: String       # JWT Token
-    user: UserResponse  # Thông tin user rút gọn
-}
-
-# Type rút gọn khớp với UserResponse.java
-type UserResponse {
-    id: ID
-    username: String
-    email: String
-    fullName: String
-    avatarUrl: String
-    role: Role
-}
-
-type Post {
-    id: ID!
-    content: String
-    imageUrl: String
-    privacyLevel: PrivacyLevel
+    role: String
     createdAt: String
-
-    # Quan hệ
-    user: User
-    comments: [Comment]
-    likes: [Like]
-
-    # Computed fields (Tính toán số lượng)
-    likeCount: Int
-    commentCount: Int
 }
 
-type Comment {
-    id: ID!
-    content: String
-    createdAt: String
-    user: User
-    post: Post
-}
-
-type Like {
-    id: ID!
-    createdAt: String
-    user: User
-    post: Post
-}
-
-type Friendship {
-    id: ID!
-    status: FriendshipStatus
-    createdAt: String
-    requester: User
-    addressee: User
-}
-
-# =========================
-# 3. ĐỊNH NGHĨA INPUTS (INPUT)
-# =========================
-
-# Khớp với RegisterRequest.java
-input RegisterInput {
+input RegisterInput{
     username: String!
+    password: String!
     email: String!
-    password: String!
-    fullName: String
+    fullName: String!
 }
 
-# Khớp với LoginRequest.java
-input LoginInput {
-    username: String! # Hoặc email
-    password: String!
+type Mutation{
+    createRegister(input: RegisterInput!): User!
 }
 
-# Input tạo bài viết
-input PostInput {
-    content: String
-    imageUrl: String
-    privacyLevel: PrivacyLevel
-}
-
-# =========================
-# 4. QUERY (ĐỌC DỮ LIỆU)
-# =========================
-
-type Query {
-    # --- USER ---
-    users: [User]               # Lấy danh sách tất cả user (Admin)
-    user(id: ID!): User         # Lấy profile user theo ID
-    me: User                    # Lấy thông tin user đang đăng nhập
-
-    # --- POST ---
-    posts: [Post]               # Lấy News Feed (bài viết công khai/bạn bè)
-    post(id: ID!): Post         # Chi tiết 1 bài viết
-    postsByUserId(userId: ID!): [Post] # Lấy bài viết trên tường nhà ai đó
-
-    # --- FRIENDSHIP ---
-    friendRequests: [Friendship] # Xem lời mời kết bạn đang chờ (của mình)
-}
-
-# =========================
-# 5. MUTATION (GHI DỮ LIỆU)
-# =========================
-
-type Mutation {
-    # --- AUTH ---
-    register(input: RegisterInput!): AuthPayload
-    login(input: LoginInput!): AuthPayload
-
-    # --- POST ---
-    createPost(input: PostInput!): Post
-    deletePost(id: ID!): Boolean
-
-    # --- COMMENT ---
-    createComment(postId: ID!, content: String!): Comment
-    deleteComment(id: ID!): Boolean
-
-    # --- LIKE ---
-    toggleLike(postId: ID!): Boolean # Like hoặc Unlike
-
-    # --- FRIENDSHIP ---
-    sendFriendRequest(addresseeId: ID!): Friendship
-    respondToFriendRequest(friendshipId: ID!, status: FriendshipStatus!): Friendship
+type Query{
+    getAllUser: [User]
 }
