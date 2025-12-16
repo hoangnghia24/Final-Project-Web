@@ -10,6 +10,17 @@ type User{
     createdAt: String
 }
 
+type InfoUserForAdmin{
+    id: ID!
+    fullName: String!
+    email: String!
+    avatarUrl: String
+    bio: String
+    role: String
+    createdAt: String
+}
+
+
 input RegisterInput{
     username: String!
     password: String!
@@ -24,4 +35,5 @@ type Mutation{
 type Query{
     getUserLogin(username: String!, password: String!): User
     getUserByUsername(username: String!): User
+    getAllUsers: [InfoUserForAdmin]
 }

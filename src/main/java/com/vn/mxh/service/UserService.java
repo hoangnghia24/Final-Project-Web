@@ -1,8 +1,11 @@
 package com.vn.mxh.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.vn.mxh.domain.User;
+import com.vn.mxh.domain.dto.InfoUserForAdmin;
 import com.vn.mxh.repository.UserRepository;
 
 @Service
@@ -27,5 +30,17 @@ public class UserService {
 
     public User getUserByUsername(String username) {
         return this.userRepository.findByUsername(username).orElse(null);
+    }
+
+    public List<InfoUserForAdmin> getAllUsers() {
+        List<InfoUserForAdmin> infoUserForAdmins = this.getAllUsers().stream()
+                .map(user -> new InfoUserForAdmin(
+                        user.id(),
+                        user.fullName(),
+                        user.email(),
+                        user.fullName(),
+                        user.role()))
+                .toList();
+        return infoUserForAdmins;
     }
 }
