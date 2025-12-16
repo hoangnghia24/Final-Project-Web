@@ -23,4 +23,5 @@ type Mutation{
 
 type Query{
     getUserLogin(username: String!, password: String!): User
+    getUserByUsername(username: String!): User
 }

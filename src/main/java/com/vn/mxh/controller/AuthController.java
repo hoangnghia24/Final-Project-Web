@@ -1,6 +1,5 @@
 package com.vn.mxh.controller;
 
-import java.util.List;
 import com.vn.mxh.service.UserService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -32,12 +31,12 @@ public class AuthController {
 
     @GetMapping("/login")
     public String login() {
-        return "/auth/login";
+        return "/auth/Login";
     }
 
     @GetMapping("/register")
     public String register() {
-        return "/auth/register";
+        return "/auth/Register";
     }
 
     @QueryMapping

@@ -1,77 +1,72 @@
-function handleRegister(event) {
-    // 1. Ngăn chặn form submit mặc định (tránh load lại trang)
-    event.preventDefault();
+$(document).ready(function () {
+    // 1. Lấy các element giao diện
+    // (Giả sử Form của bạn có id="registerForm" - xem phần hướng dẫn HTML bên dưới)
+    const $registerForm = $("#registerForm");
+    const $errorAlert = $("#error-alert");
+    // Tìm nút submit nằm bên trong form
+    const $btnSubmit = $registerForm.find("button[type='submit']");
 
-    // 2. Lấy các element giao diện
-    var errorAlert = document.getElementById('error-alert');
-    var btnSubmit = document.querySelector('button[type="submit"]');
+    // Gắn sự kiện submit cho Form
+    $registerForm.on("submit", function (event) {
 
-    // Reset thông báo lỗi
-    errorAlert.classList.add('d-none');
-    errorAlert.innerText = '';
+        // Ngăn chặn reload trang
+        event.preventDefault();
 
-    // 3. Lấy dữ liệu từ input (Dựa trên id trong file register.html)
-    var fullName = document.getElementById('fullname').value;
-    var email = document.getElementById('email').value;
-    var username = document.getElementById('username').value;
-    var password = document.getElementById('password').value;
-    var confirmPassword = document.getElementById('confirm_password').value;
+        // Reset thông báo lỗi cũ
+        $errorAlert.addClass("d-none");
+        $errorAlert.text("");
 
-    // 4. Validate phía Client
-    if (password !== confirmPassword) {
-        showError("Mật khẩu xác nhận không khớp!");
-        return;
-    }
+        // 2. Lấy dữ liệu từ input
+        const fullName = $("#fullname").val();
+        const email = $("#email").val();
+        const username = $("#username").val();
+        const password = $("#password").val();
+        const confirmPassword = $("#confirm_password").val();
 
-    // 5. Chuẩn bị dữ liệu GraphQL (Payload)
-    // Cấu trúc biến "input" phải khớp với RegisterInput trong Java và schema.graphqls
-    var graphqlData = {
-        query: `
-            mutation CreateRegister($input: RegisterInput!) {
-                createRegister(input: $input) {
-                    id
-                    username
-                    email
+        // 3. Validate phía Client (Giữ nguyên logic cũ)
+        if (password !== confirmPassword) {
+            showError("Mật khẩu xác nhận không khớp!");
+            return;
+        }
+
+        // 4. Chuẩn bị dữ liệu GraphQL (Payload giữ nguyên)
+        const graphqlData = {
+            query: `
+                mutation CreateRegister($input: RegisterInput!) {
+                    createRegister(input: $input) {
+                        id
+                        username
+                        email
+                    }
+                }
+            `,
+            variables: {
+                input: {
+                    username: username,
+                    password: password,
+                    email: email,
+                    fullName: fullName
                 }
             }
-        `,
-        variables: {
-            input: {
-                username: username,
-                password: password,
-                email: email,
-                fullName: fullName
-            }
-        }
-    };
+        };
 
-    // 6. Khởi tạo đối tượng AJAX (XMLHttpRequest)
-    var xhr = new XMLHttpRequest();
+        // 5. GỌI AJAX VỚI JQUERY
 
-    // Mở kết nối POST đến endpoint /graphql
-    xhr.open("POST", "/graphql", true);
+        // Hiệu ứng loading
+        const originalBtnText = $btnSubmit.text(); // Lấy text cũ (Đăng ký...)
+        $btnSubmit.prop("disabled", true);
+        $btnSubmit.text("Đang xử lý...");
 
-    // Set Header để Server hiểu là đang gửi JSON
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.setRequestHeader("Accept", "application/json");
+        $.ajax({
+            url: "/graphql",
+            type: "POST",
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(graphqlData),
 
-    // Hiệu ứng loading (disable nút bấm)
-    btnSubmit.disabled = true;
-    btnSubmit.innerText = "Đang xử lý...";
-
-    // 7. Xử lý sự kiện khi nhận phản hồi từ Server
-    xhr.onreadystatechange = function () {
-        // ReadyState 4 nghĩa là request đã hoàn thành
-        if (xhr.readyState === 4) {
-            // Bật lại nút bấm
-            btnSubmit.disabled = false;
-            btnSubmit.innerText = "Đăng ký tài khoản";
-
-            if (xhr.status === 200) {
-                // Parse kết quả JSON trả về
-                var response = JSON.parse(xhr.responseText);
-
-                // Kiểm tra lỗi từ GraphQL (GraphQL thường trả về 200 kèm field errors nếu lỗi)
+            // Xử lý thành công (HTTP 200)
+            success: function (response) {
+                // Kiểm tra lỗi từ GraphQL
                 if (response.errors && response.errors.length > 0) {
                     showError(response.errors[0].message);
                 }
@@ -83,24 +78,28 @@ function handleRegister(event) {
                 else {
                     showError("Phản hồi không hợp lệ từ máy chủ.");
                 }
-            } else {
-                // Xử lý lỗi HTTP (403, 500, etc.)
+            },
+
+            // Xử lý lỗi HTTP (403, 500...)
+            error: function (xhr) {
                 if (xhr.status === 403) {
                     showError("Lỗi 403: Bạn không có quyền thực hiện hành động này (Xem ghi chú bên dưới).");
                 } else {
                     showError("Lỗi hệ thống (" + xhr.status + "). Vui lòng thử lại sau.");
                 }
+            },
+
+            // Chạy cuối cùng để reset nút bấm
+            complete: function () {
+                $btnSubmit.prop("disabled", false);
+                $btnSubmit.text(originalBtnText); // Trả lại text gốc
             }
-        }
-    };
+        });
+    });
 
-    // 8. Gửi request
-    xhr.send(JSON.stringify(graphqlData));
-}
-
-// Hàm phụ trợ để hiển thị lỗi
-function showError(msg) {
-    var errorAlert = document.getElementById('error-alert');
-    errorAlert.innerText = msg;
-    errorAlert.classList.remove('d-none');
-}
+    // Hàm hiển thị lỗi
+    function showError(msg) {
+        $errorAlert.text(msg);
+        $errorAlert.removeClass("d-none");
+    }
+});
