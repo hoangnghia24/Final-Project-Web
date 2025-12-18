@@ -42,6 +42,7 @@ $(document).ready(function () {
     }
 
     function renderTable(users) {
+        ``
         const $tbody = $("#userTableBody");
         $tbody.empty();
 

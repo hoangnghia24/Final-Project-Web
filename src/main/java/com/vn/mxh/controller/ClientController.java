@@ -33,4 +33,9 @@ public class ClientController {
 
         return user; // Trả về null nếu không tìm thấy
     }
+
+    @GetMapping("/home")
+    public String getHome() {
+        return "client/Home";
+    }
 }
