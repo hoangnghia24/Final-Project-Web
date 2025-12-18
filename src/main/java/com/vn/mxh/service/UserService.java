@@ -3,7 +3,7 @@ package com.vn.mxh.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-
+import java.util.stream.Collectors;
 import com.vn.mxh.domain.User;
 import com.vn.mxh.domain.dto.InfoUserForAdmin;
 import com.vn.mxh.repository.UserRepository;
@@ -32,15 +32,31 @@ public class UserService {
         return this.userRepository.findByUsername(username).orElse(null);
     }
 
+    // public List<InfoUserForAdmin> getAllUsers() {
+    //     List<InfoUserForAdmin> infoUserForAdmins = this.getAllUsers().stream()
+    //             .map(user -> new InfoUserForAdmin(
+    //                     user.id(),
+    //                     user.fullName(),
+    //                     user.email(),
+    //                     user.fullName(),
+    //                     user.role()))
+    //             .toList();
+    //     return infoUserForAdmins;
+    // }
+
     public List<InfoUserForAdmin> getAllUsers() {
-        List<InfoUserForAdmin> infoUserForAdmins = this.getAllUsers().stream()
-                .map(user -> new InfoUserForAdmin(
-                        user.id(),
-                        user.fullName(),
-                        user.email(),
-                        user.fullName(),
-                        user.role()))
-                .toList();
-        return infoUserForAdmins;
+        List<User> users = this.userRepository.findAll();
+        
+        return users.stream().map(user -> new InfoUserForAdmin(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getRole().toString(),
+                user.getAvatarUrl(),
+                user.getBio(),
+                (user.getCreatedAt() != null) ? user.getCreatedAt().toString() : ""
+        )).collect(Collectors.toList());
     }
+
 }

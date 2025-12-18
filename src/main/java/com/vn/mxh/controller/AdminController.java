@@ -23,7 +23,13 @@ public class AdminController {
 
     @GetMapping("/admin")
     public String getMethodName() {
-        return "admin/dashboard";
+        return "admin/Dashboard";
     }
+
+    // @GetMapping("/admin") // Hoặc /admin/dashboard
+    // public String dashboard(Model model) {
+    //     model.addAttribute("currentPage", "dashboard");
+    //     return "admin/dashboard"; // Trỏ đến file html vừa tạo
+    // }
 
 }

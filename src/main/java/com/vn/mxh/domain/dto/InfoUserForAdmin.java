@@ -5,5 +5,8 @@ public record InfoUserForAdmin(
         String username,
         String email,
         String fullName,
-        String role) {
+        String role,
+        String avatarUrl,
+        String bio,
+        String createdAt) {
 }
