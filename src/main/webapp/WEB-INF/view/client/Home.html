@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TFT - Newsfeed</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link th:href="@{/client/css/Profile.css}" rel="stylesheet" />
@@ -14,11 +15,11 @@
     <header>
         <div class="logo-placeholder">TFT</div>
         <div class="search-bar">
-            <span>Tìm kiếm trên TFT...</span>
+            <span>🔍 Tìm kiếm trên TFT...</span>
         </div>
         <div style="margin-left: auto; display: flex; align-items: center; gap: 15px;">
-            <span style="color: #333; font-weight: 600;">Chào Nguyên!</span>
-            <div class="avatar-circle" style="width: 35px; height: 35px;"></div>
+            <span style="color: #333; font-weight: 600;">Chào, <span id="display-username">Người dùng</span>!</span>
+            <div id="header-avatar-top" class="avatar-circle" style="width: 35px; height: 35px;"></div>
         </div>
     </header>
 
@@ -26,49 +27,40 @@
 
         <aside class="left-sidebar">
             <nav class="nav-menu">
-                <a href="/home" class="nav-item">Bảng tin</a>
-                <a href="/profile" class="nav-item">Trang cá nhân</a>
-                <a href="#" class="nav-item">Bạn bè</a>
-                <a href="#" class="nav-item">Đã lưu</a>
-                <a href="#" class="nav-item">Video</a>
+                <a href="/home" class="nav-item">🏠 Bảng tin</a>
+                <a href="/profile" class="nav-item">👤 Trang cá nhân</a>
+                <a href="#" class="nav-item">👥 Bạn bè</a>
+                <a href="#" class="nav-item">🔖 Đã lưu</a>
+                <a href="#" class="nav-item">📺 Video</a>
                 <hr style="color: white">
                 <a href="/admin" class="nav-item" style="color: #ffeb3b;">⚙️ Quản trị (Admin)</a>
             </nav>
         </aside>
 
-        <main class="main-feed">
+        <main class="main-feed" id="post-container">
+
             <div class="post-form-card">
                 <div class="post-input-wrapper">
                     <div class="avatar-circle" style="width: 40px; height: 40px;"></div>
-                    <input type="text" placeholder="Huỳnh Nguyên ơi, bạn đang nghĩ gì thế?">
+                    <input type="text" id="post-content" placeholder="Bạn đang nghĩ gì thế?">
                 </div>
                 <hr>
                 <div class="d-flex justify-content-between">
-                    <button class="btn btn-light text-secondary fw-bold">Video trực tiếp</button>
-                    <button class="btn btn-light text-secondary fw-bold">Ảnh/Video</button>
-                    <button class="btn btn-primary px-4 fw-bold">Đăng</button>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-light text-secondary fw-bold">📹 Trực tiếp</button>
+                        <button class="btn btn-light text-secondary fw-bold">🖼️ Ảnh/Video</button>
+                    </div>
+                    <button id="btn-post" class="btn btn-primary px-4 fw-bold">Đăng bài</button>
                 </div>
             </div>
 
-            <div class="feed-card">
-                <div class="feed-header">
-                    <img src="https://www.redditstatic.com/avatars/defaults/v2/avatar_default_2.png"
-                        class="feed-avatar">
-                    <div>
-                        <h6 class="mb-0 fw-bold">Admin Hệ Thống</h6>
-                        <small class="text-muted">1 giờ trước •</small>
-                    </div>
+            <div id="loading-spinner" class="text-center py-5">
+                <div class="spinner-border text-light" role="status">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
-                <div class="feed-content">
-                    Chào mừng các bạn đã tham gia mạng xã hội TFT!
-                </div>
-                <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97" class="feed-image">
-                <hr>
-                <div class="d-flex text-center">
-                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Thích</button>
-                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Bình luận</button>
-                </div>
+                <p class="text-white mt-2">Đang tải bảng tin...</p>
             </div>
+
         </main>
 
         <aside class="right-sidebar">
@@ -78,8 +70,10 @@
                     <div class="avatar-circle" style="width: 40px; height: 40px;"></div>
                     <div>
                         <h6 class="mb-1 small fw-bold">Nguyễn Văn B</h6>
-                        <button class="btn btn-primary btn-sm px-2">Xác nhận</button>
-                        <button class="btn btn-secondary btn-sm px-2">Xóa</button>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-primary btn-sm px-2">Xác nhận</button>
+                            <button class="btn btn-secondary btn-sm px-2">Xóa</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -90,12 +84,18 @@
                     <div class="avatar-circle" style="border: 2px solid #28a745; width: 30px; height: 30px;"></div>
                     <span class="small fw-bold">Ronaldo (Trực tuyến)</span>
                 </div>
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="avatar-circle" style="border: 2px solid #ccc; width: 30px; height: 30px;"></div>
+                    <span class="small fw-bold">Lionel Messi (Ngoại tuyến)</span>
+                </div>
             </div>
         </aside>
 
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/client/js/Home.js}"></script>
 </body>
 
 </html>

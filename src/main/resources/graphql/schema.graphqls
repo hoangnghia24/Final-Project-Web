@@ -30,10 +30,36 @@ input RegisterInput{
 
 type Mutation{
     createRegister(input: RegisterInput!): User!
+    createPost(content: String!, username: String!): Post
 }
 
 type Query{
     getUserLogin(username: String!, password: String!): User
     getUserByUsername(username: String!): User
     getAllUsers: [InfoUserForAdmin]
+    getAllPublicPosts: [Post]
+}
+
+
+type Post {
+    id: ID!
+    content: String
+    imageUrl: String
+    createdAt: String
+    privacyLevel: String
+    user: User!
+    comments: [Comment]
+    likes: [Like]
+}
+
+type Comment {
+    id: ID!
+    content: String!
+    createdAt: String
+    user: User!
+}
+
+type Like {
+    id: ID!
+    user: User!
 }
