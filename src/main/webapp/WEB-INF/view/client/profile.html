@@ -26,102 +26,109 @@
 
         <div class="container">
 
-        <div class="main-column">
-            <div class="user-identity">
-                <div id="header-avatar" class="avatar-circle"></div>
-                <div class="user-text">
-                    <h1 id="header-fullname">Đang tải...</h1>
-                    <span id="header-username">...</span>
-                </div>
-            </div>
-
-            <div class="tabs-container">
-                <div class="tabs-scroll">
-                    <div class="tab-item active" data-tab="overview">TỔNG QUAN</div>
-                    <div class="tab-item" data-tab="posts">BÀI ĐĂNG</div>
-                    <div class="tab-item" data-tab="comments">BÌNH LUẬN</div>
-                    <div class="tab-item" data-tab="saved">ĐÃ LƯU</div>
-                    <div class="tab-item" data-tab="history">LỊCH SỬ</div>
-                    <div class="tab-item" data-tab="hidden">BỊ ẨN</div>
-                </div>
-            </div>
-
-            <!-- Nội dung tab Tổng quan -->
-            <div class="content-feed tab-content active" id="tab-overview">
-                <div style="font-size: 40px; color: #ccc; margin-bottom: 10px;">🏠</div>
-                <h3>Tổng quan hoạt động</h3>
-                <p style="color: #7c7c7c; font-size: 14px; margin-bottom: 20px;">Hiển thị tất cả hoạt động của bạn.</p>
-            </div>
-
-            <!-- Nội dung tab Bài đăng -->
-            <div class="content-feed tab-content" id="tab-posts">
-                <div style="font-size: 40px; color: #ccc; margin-bottom: 10px;">📝</div>
-                <h3>Bạn chưa có bài đăng nào</h3>
-                <p style="color: #7c7c7c; font-size: 14px; margin-bottom: 20px;">Khi bạn đăng bài, bài đăng sẽ hiển thị ở đây.</p>
-                <button class="feed-btn">
-                    Tạo bài đăng mới
-                </button>
-            </div>
-
-            <!-- Nội dung tab Bình luận -->
-            <div class="content-feed tab-content" id="tab-comments">
-                <div style="font-size: 40px; color: #ccc; margin-bottom: 10px;">💬</div>
-                <h3>Bạn chưa có bình luận nào</h3>
-                <p style="color: #7c7c7c; font-size: 14px; margin-bottom: 20px;">Các bình luận của bạn sẽ hiển thị ở đây.</p>
-            </div>
-
-            <!-- Nội dung tab Đã lưu -->
-            <div class="content-feed tab-content" id="tab-saved">
-                <div style="font-size: 40px; color: #ccc; margin-bottom: 10px;">🔖</div>
-                <h3>Bạn chưa lưu bài đăng nào</h3>
-                <p style="color: #7c7c7c; font-size: 14px; margin-bottom: 20px;">Các bài đăng đã lưu sẽ hiển thị ở đây.</p>
-            </div>
-
-            <!-- Nội dung tab Lịch sử -->
-            <div class="content-feed tab-content" id="tab-history">
-                <div style="font-size: 40px; color: #ccc; margin-bottom: 10px;">⏰</div>
-                <h3>Lịch sử trống</h3>
-                <p style="color: #7c7c7c; font-size: 14px; margin-bottom: 20px;">Lịch sử hoạt động của bạn sẽ hiển thị ở đây.</p>
-            </div>
-
-            <!-- Nội dung tab Bị ẩn -->
-            <div class="content-feed tab-content" id="tab-hidden">
-                <div style="font-size: 40px; color: #ccc; margin-bottom: 10px;">🚫</div>
-                <h3>Không có bài đăng bị ẩn</h3>
-                <p style="color: #7c7c7c; font-size: 14px; margin-bottom: 20px;">Các bài đăng bị ẩn sẽ hiển thị ở đây.</p>
-            </div>
-        </div>
-
-        <div class="sidebar">
-            <div class="sidebar-card">
-                <div class="sidebar-header-bg"></div>
-
-                <div class="sidebar-content">
-                    <div id="sidebar-avatar" class="sidebar-avatar"></div>
-
-                    <div id="sidebar-fullname" class="sidebar-username">Đang tải...</div>
-                    <div id="sidebar-tag" class="sidebar-tag">...</div>
-
-                    <div id="sidebar-bio" style="font-size: 12px; margin-top: 10px; color: #1c1c1c; line-height: 1.4;">
+            <div class="main-column">
+                <div class="user-identity">
+                    <div id="header-avatar" class="avatar-circle"></div>
+                    <div class="user-text">
+                        <h1 id="header-fullname">Đang tải...</h1>
+                        <span id="header-username">...</span>
                     </div>
+                </div>
 
-                    <div class="sidebar-stats">
-                        <div class="stat-item">
-                            <span class="stat-value">1</span>
-                            <span class="stat-label">Karma</span>
-                        </div>
-                        <div class="stat-item">
-                            <span id="sidebar-created" class="stat-value">-</span>
-                            <span class="stat-label">Ngày tạo</span>
-                        </div>
+                <div class="tabs-container">
+                    <div class="tabs-scroll">
+                        <div class="tab-item active" data-tab="overview">TỔNG QUAN</div>
+                        <div class="tab-item" data-tab="posts">BÀI ĐĂNG</div>
+                        <div class="tab-item" data-tab="comments">BÌNH LUẬN</div>
+                        <div class="tab-item" data-tab="saved">ĐÃ LƯU</div>
+                        <div class="tab-item" data-tab="history">LỊCH SỬ</div>
+                        <div class="tab-item" data-tab="hidden">BỊ ẨN</div>
                     </div>
+                </div>
 
-                    <button class="create-post-btn">Tạo bài đăng mới</button>
+                <!-- Nội dung tab Tổng quan -->
+                <div class="content-feed tab-content active" id="tab-overview">
+                    <div style="font-size: 40px; color: #ccc; margin-bottom: 10px;">🏠</div>
+                    <h3>Tổng quan hoạt động</h3>
+                    <p style="color: #7c7c7c; font-size: 14px; margin-bottom: 20px;">Hiển thị tất cả hoạt động của bạn.
+                    </p>
+                </div>
+
+                <!-- Nội dung tab Bài đăng -->
+                <div class="content-feed tab-content" id="tab-posts">
+                    <div style="font-size: 40px; color: #ccc; margin-bottom: 10px;">📝</div>
+                    <h3>Bạn chưa có bài đăng nào</h3>
+                    <p style="color: #7c7c7c; font-size: 14px; margin-bottom: 20px;">Khi bạn đăng bài, bài đăng sẽ hiển
+                        thị ở đây.</p>
+                    <button class="feed-btn">
+                        Tạo bài đăng mới
+                    </button>
+                </div>
+
+                <!-- Nội dung tab Bình luận -->
+                <div class="content-feed tab-content" id="tab-comments">
+                    <div style="font-size: 40px; color: #ccc; margin-bottom: 10px;">💬</div>
+                    <h3>Bạn chưa có bình luận nào</h3>
+                    <p style="color: #7c7c7c; font-size: 14px; margin-bottom: 20px;">Các bình luận của bạn sẽ hiển thị ở
+                        đây.</p>
+                </div>
+
+                <!-- Nội dung tab Đã lưu -->
+                <div class="content-feed tab-content" id="tab-saved">
+                    <div style="font-size: 40px; color: #ccc; margin-bottom: 10px;">🔖</div>
+                    <h3>Bạn chưa lưu bài đăng nào</h3>
+                    <p style="color: #7c7c7c; font-size: 14px; margin-bottom: 20px;">Các bài đăng đã lưu sẽ hiển thị ở
+                        đây.</p>
+                </div>
+
+                <!-- Nội dung tab Lịch sử -->
+                <div class="content-feed tab-content" id="tab-history">
+                    <div style="font-size: 40px; color: #ccc; margin-bottom: 10px;">⏰</div>
+                    <h3>Lịch sử trống</h3>
+                    <p style="color: #7c7c7c; font-size: 14px; margin-bottom: 20px;">Lịch sử hoạt động của bạn sẽ hiển
+                        thị ở đây.</p>
+                </div>
+
+                <!-- Nội dung tab Bị ẩn -->
+                <div class="content-feed tab-content" id="tab-hidden">
+                    <div style="font-size: 40px; color: #ccc; margin-bottom: 10px;">🚫</div>
+                    <h3>Không có bài đăng bị ẩn</h3>
+                    <p style="color: #7c7c7c; font-size: 14px; margin-bottom: 20px;">Các bài đăng bị ẩn sẽ hiển thị ở
+                        đây.</p>
                 </div>
             </div>
-        </div>
 
-    </div>
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <div class="sidebar-header-bg"></div>
+
+                    <div class="sidebar-content">
+                        <div id="sidebar-avatar" class="sidebar-avatar"></div>
+
+                        <div id="sidebar-fullname" class="sidebar-username">Đang tải...</div>
+                        <div id="sidebar-tag" class="sidebar-tag">...</div>
+
+                        <div id="sidebar-bio"
+                            style="font-size: 12px; margin-top: 10px; color: #1c1c1c; line-height: 1.4;">
+                        </div>
+
+                        <div class="sidebar-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">1</span>
+                                <span class="stat-label">Karma</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="sidebar-created" class="stat-value">-</span>
+                                <span class="stat-label">Ngày tạo</span>
+                            </div>
+                        </div>
+
+                        <button class="create-post-btn">Tạo bài đăng mới</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
     <!-- Load JavaScript sau khi HTML đã render -->
