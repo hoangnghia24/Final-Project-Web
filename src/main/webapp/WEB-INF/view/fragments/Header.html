@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <!-- Fragment header cho client -->
+    <header th:fragment="client-header">
+        <div class="logo-placeholder">TFT</div>
+        <div class="search-bar">
+            <span>🔍 Tìm kiếm...</span>
+        </div>
+        <div style="margin-left: auto; font-weight:600; color:#333; font-size: 20px;">
+            <a href="/login" class="btn btn-primary">Login</a> / <a href="/register" class="btn btn-primary">Register</a>
+        </div>
+    </header>
+
+    <!-- Fragment header cho user đã login -->
+    <div th:fragment="user-header">
+    <header>
+        <div class="logo-placeholder">
+            <a href="/home" style="text-decoration: none; color: #6200ea;">TFT</a>
+        </div>
+        <div class="search-bar">
+            <span>🔍 Tìm kiếm trên TFT...</span>
+        </div>
+        <div class="header-actions">
+            <!-- Icon Tạo bài viết -->
+            <div class="header-icon" title="Tạo bài viết">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"/>
+                </svg>
+            </div>
+            
+            <!-- Icon Tin nhắn -->
+            <div class="header-icon" id="message-icon" title="Tin nhắn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span class="message-badge" style="display: none;">3</span>
+            </div>
+            
+            <!-- Icon Thông báo -->
+            <div class="notification-menu">
+                <div class="header-icon" id="notification-icon" title="Thông báo">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                    </svg>
+                    <span class="notification-badge" style="display: none;">0</span>
+                </div>
+                
+                <!-- Notification Popup -->
+                <div class="notification-popup" id="notification-popup">
+                    <div class="notification-header">
+                        <h3>Thông báo</h3>
+                        <button class="mark-all-read">Đánh dấu đã đọc</button>
+                    </div>
+                    
+                    <div class="notification-list">
+                        <!-- Notification Item 1 -->
+                        <div class="notification-item unread">
+                            <div class="notification-avatar">
+                                <img src="https://www.redditstatic.com/avatars/defaults/v2/avatar_default_3.png" alt="Avatar">
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-text">
+                                    <strong>Nguyễn Văn A</strong> đã thích bài viết của bạn
+                                </div>
+                                <div class="notification-time" data-timestamp="">5 phút trước</div>
+                            </div>
+                            <div class="unread-dot"></div>
+                        </div>
+                        
+                        <!-- Notification Item 2 -->
+                        <div class="notification-item unread">
+                            <div class="notification-avatar">
+                                <img src="https://www.redditstatic.com/avatars/defaults/v2/avatar_default_4.png" alt="Avatar">
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-text">
+                                    <strong>Trần Thị B</strong> đã bình luận: "Bài viết hay quá!"
+                                </div>
+                                <div class="notification-time" data-timestamp="">1 giờ trước</div>
+                            </div>
+                            <div class="unread-dot"></div>
+                        </div>
+                        
+                        <!-- Notification Item 3 -->
+                        <div class="notification-item unread">
+                            <div class="notification-avatar">
+                                <img src="https://www.redditstatic.com/avatars/defaults/v2/avatar_default_5.png" alt="Avatar">
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-text">
+                                    <strong>Lê Văn C</strong> đã gửi lời mời kết bạn
+                                </div>
+                                <div class="notification-time" data-timestamp="">3 giờ trước</div>
+                            </div>
+                            <div class="unread-dot"></div>
+                        </div>
+                        
+                        <!-- Notification Item 4 - Read -->
+                        <div class="notification-item">
+                            <div class="notification-avatar">
+                                <img src="https://www.redditstatic.com/avatars/defaults/v2/avatar_default_6.png" alt="Avatar">
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-text">
+                                    <strong>Phạm Thị D</strong> đã chia sẻ bài viết của bạn
+                                </div>
+                                <div class="notification-time" data-timestamp="">Hôm qua</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notification Item 5 - Read -->
+                        <div class="notification-item">
+                            <div class="notification-avatar">
+                                <img src="https://www.redditstatic.com/avatars/defaults/v2/avatar_default_7.png" alt="Avatar">
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-text">
+                                    <strong>Hoàng Văn E</strong> đã bắt đầu theo dõi bạn
+                                </div>
+                                <div class="notification-time" data-timestamp="">2 ngày trước</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="notification-footer">
+                        <a href="/notifications" class="view-all-link">Xem tất cả thông báo</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profile Menu -->
+            <div class="profile-menu" id="profile-menu">
+                <div class="avatar-circle header-avatar" id="header-user-avatar"></div>
+                <div class="profile-dropdown" id="profile-dropdown">
+                    <div class="dropdown-header">
+                        <div class="avatar-circle dropdown-avatar" id="dropdown-avatar"></div>
+                        <div style="flex: 1;">
+                            <div id="dropdown-fullname" class="dropdown-name">Đang tải...</div>
+                            <div id="dropdown-username" class="dropdown-username">@username</div>
+                        </div>
+                    </div>
+                    <hr style="margin: 10px 0; border-color: #edeff1;">
+                    
+                    <!-- My Stuff Section -->
+                    <div class="dropdown-section-title">MY STUFF</div>
+                    <a href="/profile" class="dropdown-item">
+                        <span class="dropdown-icon">👤</span>
+                        <span>Trang cá nhân</span>
+                    </a>
+                    <a href="/edit-avatar" class="dropdown-item">
+                        <span class="dropdown-icon">✏️</span>
+                        <span>Chỉnh sửa Avatar</span>
+                    </a>
+                    <a href="/saved" class="dropdown-item">
+                        <span class="dropdown-icon">🔖</span>
+                        <span>Đã lưu</span>
+                    </a>
+                    
+                    <hr style="margin: 10px 0; border-color: #edeff1;">
+                    
+                    <!-- View Options Section -->
+                    <div class="dropdown-section-title">XEM</div>
+                    <div class="dropdown-item toggle-item" id="dark-mode-toggle">
+                        <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                            <span class="dropdown-icon">🌙</span>
+                            <span>Dark Mode</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="dark-mode-checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <hr style="margin: 10px 0; border-color: #edeff1;">
+                    
+                    <!-- Settings Section -->
+                    <a href="/settings" class="dropdown-item">
+                        <span class="dropdown-icon">⚙️</span>
+                        <span>Cài đặt</span>
+                    </a>
+                    
+                    <hr style="margin: 10px 0; border-color: #edeff1;">
+                    
+                    <!-- Logout -->
+                    <a href="/logout" class="dropdown-item" style="color: #ff4444;">
+                        <span class="dropdown-icon">🚪</span>
+                        <span>Đăng xuất</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Chat Window (Reddit style - bottom right) -->
+    <div class="chat-window" id="chat-window">
+        <div class="chat-window-header">
+            <h3>Tin nhắn</h3>
+            <div class="chat-window-actions">
+                <button class="chat-action-btn" id="minimize-chat" title="Thu nhỏ">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+                <button class="chat-action-btn" id="close-chat" title="Đóng">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="chat-window-search">
+            <input type="text" placeholder="Tìm kiếm tin nhắn...">
+        </div>
+        
+        <div class="chat-window-list">
+            <!-- Chat Item 1 -->
+            <div class="chat-window-item" data-user="Nguyễn Văn A">
+                <div class="chat-item-avatar">
+                    <img src="https://www.redditstatic.com/avatars/defaults/v2/avatar_default_3.png" alt="Avatar">
+                    <span class="chat-online-status"></span>
+                </div>
+                <div class="chat-item-content">
+                    <div class="chat-item-name">Nguyễn Văn A</div>
+                    <div class="chat-item-preview">Được rồi, hẹn gặp lại...</div>
+                </div>
+                <div class="chat-item-time">5p</div>
+            </div>
+            
+            <!-- Chat Item 2 -->
+            <div class="chat-window-item" data-user="Trần Thị B">
+                <div class="chat-item-avatar">
+                    <img src="https://www.redditstatic.com/avatars/defaults/v2/avatar_default_4.png" alt="Avatar">
+                    <span class="chat-online-status"></span>
+                </div>
+                <div class="chat-item-content">
+                    <div class="chat-item-name">Trần Thị B</div>
+                    <div class="chat-item-preview">Chào bạn! Mình cần hỏi...</div>
+                </div>
+                <div class="chat-item-time">1h</div>
+            </div>
+            
+            <!-- Chat Item 3 -->
+            <div class="chat-window-item" data-user="Lê Văn C">
+                <div class="chat-item-avatar">
+                    <img src="https://www.redditstatic.com/avatars/defaults/v2/avatar_default_5.png" alt="Avatar">
+                </div>
+                <div class="chat-item-content">
+                    <div class="chat-item-name">Lê Văn C</div>
+                    <div class="chat-item-preview">Cảm ơn bạn nhiều 😊</div>
+                </div>
+                <div class="chat-item-time">3h</div>
+            </div>
+            
+            <!-- Chat Item 4 -->
+            <div class="chat-window-item" data-user="Phạm Thị D">
+                <div class="chat-item-avatar">
+                    <img src="https://www.redditstatic.com/avatars/defaults/v2/avatar_default_6.png" alt="Avatar">
+                </div>
+                <div class="chat-item-content">
+                    <div class="chat-item-name">Phạm Thị D</div>
+                    <div class="chat-item-preview">Ok nhé, mai gửi file</div>
+                </div>
+                <div class="chat-item-time">Hôm qua</div>
+            </div>
+            
+            <!-- Chat Item 5 -->
+            <div class="chat-window-item" data-user="Hoàng Văn E">
+                <div class="chat-item-avatar">
+                    <img src="https://www.redditstatic.com/avatars/defaults/v2/avatar_default_7.png" alt="Avatar">
+                </div>
+                <div class="chat-item-content">
+                    <div class="chat-item-name">Hoàng Văn E</div>
+                    <div class="chat-item-preview">Được rồi! 👍</div>
+                </div>
+                <div class="chat-item-time">2 ngày</div>
+            </div>
+        </div>
+        
+        <!-- Footer with expand button -->
+        <div class="chat-window-footer">
+            <a href="/messages" class="chat-expand-button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
+                </svg>
+                Mở rộng
+            </a>
+        </div>
+    </div>
+    
+    <!-- Messages Popup Window (Two Column Layout) -->
+    <div class="messages-popup" id="messages-popup" style="display: none;">
+        <!-- Left Column: Conversations List -->
+        <div class="messages-popup-left">
+            <div class="messages-popup-header">
+                <h3>Tin nhắn</h3>
+                <div class="messages-popup-actions">
+                    <button class="messages-popup-expand" id="messages-popup-expand" title="Mở rộng">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
+                        </svg>
+                    </button>
+                    <button class="messages-popup-close" id="messages-popup-close" title="Đóng">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="messages-popup-search">
+                <input type="text" placeholder="Tìm kiếm..." id="messages-popup-search-input">
+            </div>
+            
+            <div class="messages-popup-list">
+                <!-- Conversation Item 1 -->
+                <div class="messages-popup-item" data-user-id="1" data-user-name="Nguyễn Văn A">
+                    <div class="messages-popup-avatar">
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=NguyenVanA" alt="Avatar">
+                        <span class="messages-online-status"></span>
+                    </div>
+                    <div class="messages-popup-content">
+                        <div class="messages-popup-name">Nguyễn Văn A</div>
+                        <div class="messages-popup-preview">Được rồi, hẹn gặp lại...</div>
+                    </div>
+                    <div class="messages-popup-meta">
+                        <div class="messages-popup-time">5p</div>
+                        <span class="messages-unread-badge">2</span>
+                    </div>
+                </div>
+                
+                <!-- Conversation Item 2 -->
+                <div class="messages-popup-item" data-user-id="2" data-user-name="Trần Thị B">
+                    <div class="messages-popup-avatar">
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=TranThiB" alt="Avatar">
+                        <span class="messages-online-status"></span>
+                    </div>
+                    <div class="messages-popup-content">
+                        <div class="messages-popup-name">Trần Thị B</div>
+                        <div class="messages-popup-preview">Chào bạn! Mình cần hỏi...</div>
+                    </div>
+                    <div class="messages-popup-meta">
+                        <div class="messages-popup-time">1h</div>
+                        <span class="messages-unread-badge">1</span>
+                    </div>
+                </div>
+                
+                <!-- Conversation Item 3 -->
+                <div class="messages-popup-item" data-user-id="3" data-user-name="Lê Văn C">
+                    <div class="messages-popup-avatar">
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=LeVanC" alt="Avatar">
+                    </div>
+                    <div class="messages-popup-content">
+                        <div class="messages-popup-name">Lê Văn C</div>
+                        <div class="messages-popup-preview">Cảm ơn bạn nhiều 😊</div>
+                    </div>
+                    <div class="messages-popup-meta">
+                        <div class="messages-popup-time">3h</div>
+                    </div>
+                </div>
+                
+                <!-- Conversation Item 4 -->
+                <div class="messages-popup-item" data-user-id="4" data-user-name="Phạm Thị D">
+                    <div class="messages-popup-avatar">
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=PhamThiD" alt="Avatar">
+                    </div>
+                    <div class="messages-popup-content">
+                        <div class="messages-popup-name">Phạm Thị D</div>
+                        <div class="messages-popup-preview">Ok nhé, mai gửi file</div>
+                    </div>
+                    <div class="messages-popup-meta">
+                        <div class="messages-popup-time">Hôm qua</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column: Active Chat -->
+        <div class="messages-popup-right" id="messages-popup-chat">
+            <!-- Empty State -->
+            <div class="messages-popup-empty" id="messages-popup-empty">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <p>Chọn một cuộc trò chuyện để bắt đầu</p>
+            </div>
+            
+            <!-- Active Chat View -->
+            <div class="messages-popup-chat-view" id="messages-popup-chat-view" style="display: none;">
+                <div class="messages-popup-chat-header">
+                    <div class="messages-popup-chat-user">
+                        <img src="" alt="Avatar" id="messages-popup-chat-avatar">
+                        <div class="messages-popup-chat-info">
+                            <div class="messages-popup-chat-name" id="messages-popup-chat-name"></div>
+                            <div class="messages-popup-chat-status">Đang hoạt động</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="messages-popup-chat-messages" id="messages-popup-chat-messages">
+                    <!-- Messages will be loaded here -->
+                </div>
+                
+                <div class="messages-popup-chat-input">
+                    <input type="text" placeholder="Nhập tin nhắn..." id="messages-popup-input">
+                    <button id="messages-popup-send">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div> <!-- End of user-header fragment -->
+</body>
+
+</html>
