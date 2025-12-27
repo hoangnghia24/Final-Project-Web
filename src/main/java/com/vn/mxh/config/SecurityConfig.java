@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
@@ -21,42 +22,27 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // @Bean
-    // public AuthenticationManager
-    // authenticationManager(AuthenticationConfiguration configuration) throws
-    // Exception {
-    // return configuration.getAuthenticationManager();
-    // }
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        // 1. Cho phép truy cập các file tĩnh (CSS, JS, Ảnh) - ĐẶT TRƯỚC
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/client/**", "/auth/**", "/resources/**").permitAll()
+                        
+                        // 2. Cho phép WebSocket endpoints
+                        .requestMatchers("/ws/**").permitAll()
+                        
+                        // 3. Cho phép các API endpoints - QUAN TRỌNG
+                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/graphql/**", "/graphiql/**").permitAll()
+                        
+                        // 4. Cho phép truy cập các trang VIEW (HTML) và POST endpoints
+                        .requestMatchers("/", "/home", "/login", "/register", "/profile/**", "/u/**", "/messages", "/edit-avatar", "/update-avatar").permitAll()
+                        
+                        // 5. Các request còn lại cần authentication
+                        .anyRequest().authenticated());
 
-    // @Bean
-    // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    // http
-    // .csrf(AbstractHttpConfigurer::disable)
-    // .authorizeHttpRequests(auth -> auth
-    // // 1. Cho phép truy cập các API quan trọng
-    // // [QUAN TRỌNG 1]: Phải tắt CSRF mới gửi được POST request
-    // .requestMatchers("/api/auth/**", "/graphql/**", "/graphiql/**").permitAll()
-
-    // // 2. Cho phép truy cập các trang VIEW (HTML) dành cho khách
-    // .requestMatchers("/login", "/register", "/profile/**", "/u/**").permitAll()
-    // // 3. Cho phép truy cập các file tĩnh (CSS, JS, Ảnh)
-    // // Lưu ý: "/client/**" là vì trong file register.html bạn dùng
-    // // th:href="@{client/css/...}"
-    // .requestMatchers("/css/**", "/js/**", "/images/**", "/client/**",
-    // "/auth/**")
-    // .permitAll()
-
-    // // 4. Tất cả các request còn lại đều phải đăng nhập mới được vào
-    // .anyRequest().authenticated());
-
-    // // Có thể thêm cấu hình này nếu bạn muốn Spring tự chuyển hướng về trang
-    // // login
-    // // của bạn khi gặp lỗi 403
-    // // .formLogin(form -> form
-    // // .loginPage("/login")
-    // // .permitAll()
-    // // )
-
-    // return http.build();
-    // }
+        return http.build();
+    }
 }

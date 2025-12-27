@@ -77,11 +77,9 @@ $(document).ready(function () {
                     // 1. Lấy thông tin user từ kết quả trả về
                     const user = response.data.getUserLogin;
 
-                    // 2. Lưu username vào localStorage để trang Profile dùng
+                    // 2. Lưu username và userId vào localStorage
                     localStorage.setItem("username", user.username);
-
-                    // (Tùy chọn) Lưu thêm ID hoặc Email nếu cần
-                    // localStorage.setItem("userId", user.id);
+                    localStorage.setItem("currentUserId", user.id);
 
                     // 3. Sau khi lưu xong mới chuyển trang
                     window.location.href = "/profile";

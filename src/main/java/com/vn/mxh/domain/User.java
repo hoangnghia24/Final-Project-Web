@@ -32,6 +32,8 @@ public class User {
     private String passwordHash;
 
     private String fullName;
+    
+    @Column(columnDefinition = "TEXT")
     private String avatarUrl;
 
     @Column(columnDefinition = "TEXT")

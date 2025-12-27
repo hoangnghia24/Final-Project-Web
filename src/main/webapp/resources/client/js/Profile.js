@@ -1,6 +1,6 @@
+// Updated: 20251227062118
 $(document).ready(function () {
-    // Giả lập lấy username từ localStorage (khi đăng nhập bạn nên lưu lại)
-    // Nếu chưa có login, mình set cứng giá trị giống Mock Data trong Controller để test
+    // Lấy username từ localStorage
     const currentUsername = localStorage.getItem("username");
 
     loadUserProfile(currentUsername);
@@ -57,7 +57,6 @@ $(document).ready(function () {
     // 3. Hàm hiển thị dữ liệu lên HTML
     function renderUserData(user) {
         // Cập nhật Avatar (Header & Sidebar)
-        // Nếu không có avatarUrl thì dùng ảnh mặc định
         const avatarUrl = user.avatarUrl ? user.avatarUrl : "https://www.redditstatic.com/avatars/avatar_default_02_A5A4A4.png";
         $("#header-avatar").css("background-image", `url('${avatarUrl}')`);
         $("#sidebar-avatar").css("background-image", `url('${avatarUrl}')`);
@@ -75,7 +74,6 @@ $(document).ready(function () {
 
         // Cập nhật Ngày tạo (Format lại cho đẹp)
         if (user.createdAt) {
-            // Giả sử createdAt là String dạng ISO hoặc Date
             const date = new Date(user.createdAt);
             const dateString = date.toLocaleDateString("vi-VN");
             $("#sidebar-created").text(dateString);
@@ -83,4 +81,26 @@ $(document).ready(function () {
             $("#sidebar-created").text("N/A");
         }
     }
+
+    // Xử lý chuyển đổi tab
+    $('.tab-item').on('click', function() {
+        // Xóa class active khỏi tất cả tabs
+        $('.tab-item').removeClass('active');
+        
+        // Thêm class active vào tab được click
+        $(this).addClass('active');
+        
+        // Lấy giá trị data-tab
+        const tabName = $(this).data('tab');
+        
+        // Ẩn tất cả nội dung
+        $('.tab-content').removeClass('active');
+        
+        // Hiển thị nội dung của tab được chọn
+        $('#tab-' + tabName).addClass('active');
+    });
+
+    // NOTE: Profile menu dropdown và Dark mode đã được xử lý trong Header.js
+    // Không cần xử lý lại ở đây để tránh conflict với event listeners
 });
+

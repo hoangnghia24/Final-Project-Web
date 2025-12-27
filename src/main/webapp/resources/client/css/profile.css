@@ -7,13 +7,20 @@
 }
 
 body {
-    /* Background tĩnh: Gradient nhẹ từ trên xuống dưới, cố định */
-    background: #4e54c8;
-    background: -webkit-linear-gradient(to left, #8f94fb, #4e54c8);
-    background: linear-gradient(to left, #8f94fb, #4e54c8);
+    /* Background light theme */
+    background: #f0f2f5;
     /* Giữ background đứng yên khi cuộn */
     min-height: 100vh;
-    color: #1c1c1c;
+    color: #050505;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Dark mode for body */
+body.dark-mode {
+    background: #030303;
+    color: #d7dadc;
 }
 
 /* 2. Header */
@@ -22,36 +29,64 @@ header {
     height: 48px;
     display: flex;
     align-items: center;
-    padding: 0 20px;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    border-bottom: 1px solid #edeff1;
-    /* Bỏ shadow động, dùng border nhẹ */
+    padding: 0 40px;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    z-index: 1000 !important;
+    border-bottom: 1px solid #e4e6eb;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+body.dark-mode header {
+    background-color: #1a1a1b;
+    border-bottom: 1px solid #343536;
 }
 
 .logo-placeholder {
     font-weight: bold;
     font-size: 20px;
-    color: #6200ea;
-    /* Tím đậm tĩnh */
+    color: #050505;
     margin-right: 20px;
 }
 
+body.dark-mode .logo-placeholder {
+    color: #d7dadc;
+}
+
 .search-bar {
-    background-color: #f6f7f8;
-    border: 1px solid #edeff1;
+    background-color: #f0f2f5;
+    border: 1px solid #e4e6eb;
     border-radius: 20px;
     height: 32px;
     width: 400px;
     padding-left: 15px;
     display: flex;
     align-items: center;
-    color: #878a8c;
+    color: #65676b;
     font-size: 14px;
 }
 
 /* 3. Layout chính */
+.profile-wrapper {
+    display: flex;
+    background: #f0f2f5;
+    min-height: calc(100vh - 48px);
+    padding-left: 240px;
+    margin-top: 48px;
+    transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.dark-mode .profile-wrapper {
+    background: #030303;
+}
+
+.profile-wrapper.sidebar-collapsed {
+    padding-left: 0;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -59,6 +94,7 @@ header {
     display: grid;
     grid-template-columns: 1fr 320px;
     gap: 24px;
+    flex: 1;
 }
 
 /* 4. Cột trái */
@@ -70,41 +106,61 @@ header {
 .user-identity {
     display: flex;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 24px;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .user-identity {
+    background: #1a1a1b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .avatar-circle {
-    width: 80px;
-    height: 80px;
+    width: 88px;
+    height: 88px;
     border-radius: 50%;
-    /* Nền màu tím phẳng, không bóng bẩy */
-    background-color: #6200ea;
-    background-image: url('https://www.redditstatic.com/avatars/defaults/v2/avatar_default_1.png');
+    background-color: #e4e6eb;
     background-size: cover;
-    border: 4px solid #ffffff;
-    margin-right: 16px;
+    background-position: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-right: 20px;
+    object-fit: cover;
+}
+
+body.dark-mode .avatar-circle {
+    background-color: #3a3a3c;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .user-text h1 {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
-    line-height: 28px;
-    color: #ffffff;
+    line-height: 1.2;
+    color: #050505;
+    margin-bottom: 4px;
 }
 
 .user-text span {
-    font-size: 14px;
-    color: #ffffff;
+    font-size: 15px;
+    color: #65676b;
     font-weight: 500;
 }
 
 /* Thanh Menu */
 .tabs-container {
     background-color: #ffffff;
-    border-radius: 4px;
-    border: 1px solid #ccc;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     margin-bottom: 20px;
     overflow: hidden;
+}
+
+body.dark-mode .tabs-container {
+    background-color: #1a1a1b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .tabs-scroll {
@@ -113,151 +169,213 @@ header {
 }
 
 .tab-item {
-    padding: 15px 20px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #7c7c7c;
+    padding: 16px 24px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #65676b;
     cursor: pointer;
     border-bottom: 3px solid transparent;
     white-space: nowrap;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
 }
 
-/* Trạng thái Active: Tím đậm, không hiệu ứng loang */
+/* Trạng thái Active: Gradient đẹp */
 .tab-item.active {
-    color: #6200ea;
-    border-bottom: 3px solid #6200ea;
-    background-color: #f3f0fa;
-    /* Tím rất nhạt làm nền */
+    color: #667eea;
+    border-bottom: 3px solid #667eea;
+    background: linear-gradient(to bottom, transparent, rgba(102, 126, 234, 0.05));
 }
 
 .tab-item:hover {
-    /* Hover đơn giản đổi màu nền xám nhẹ */
-    background-color: #f6f7f8;
-    color: #1c1c1c;
+    background-color: #f8f9fa;
+    color: #050505;
 }
 
 /* Nội dung Feed */
 .content-feed {
     background-color: #ffffff;
-    border-radius: 4px;
+    border-radius: 12px;
     min-height: 300px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 1px solid #ccc;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     text-align: center;
     padding: 40px;
+    color: #050505;
+}
+
+body.dark-mode .content-feed {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.content-feed h3 {
+    color: #050505;
+    margin-bottom: 8px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.content-feed p {
+    color: #65676b;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+/* Ẩn tất cả tab content mặc định */
+.tab-content {
+    display: none;
+}
+
+/* Chỉ hiển thị tab content có class active */
+.tab-content.active {
+    display: flex;
 }
 
 .feed-btn {
-    margin-top: 15px;
-    padding: 8px 16px;
-    border-radius: 20px;
-    border: 1px solid #6200ea;
-    color: #6200ea;
+    margin-top: 20px;
+    padding: 10px 24px;
+    border-radius: 24px;
+    border: 2px solid #667eea;
+    color: #667eea;
     background: #fff;
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 14px;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 /* Hover đổi màu nền cứng, không fade */
 .feed-btn:hover {
-    background-color: #f3f0fa;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 /* 5. Cột phải (Sidebar) */
 .sidebar-card {
     background-color: #ffffff;
-    border-radius: 12px;
-    /* Bóng đổ tĩnh nhẹ nhàng */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     overflow: hidden;
     position: sticky;
     top: 70px;
 }
 
-/* Banner Sidebar: Gradient Tĩnh (Deep Purple -> Blue) */
+body.dark-mode .sidebar-card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Banner Sidebar: Gradient Tĩnh (Purple -> Blue) */
 .sidebar-header-bg {
     height: 80px;
-    /* Màu tím sang xanh, cố định, không đổi góc */
-    background: linear-gradient(90deg, #654ea3, #eaafc8);
-    /* Style tím pastel nhẹ nhàng hơn */
-    /* Hoặc dùng màu đậm này nếu thích mạnh mẽ: */
-    background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
-    /* Xanh tím than */
-    background: linear-gradient(to right, #6a11cb, #2575fc);
-    /* Style Login tím xanh kinh điển */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .sidebar-content {
-    padding: 12px;
+    padding: 16px;
     position: relative;
 }
 
 .sidebar-avatar {
     width: 70px;
     height: 70px;
-    border-radius: 8px;
-    background-image: url('https://www.redditstatic.com/avatars/defaults/v2/avatar_default_1.png');
+    border-radius: 50%;
     background-size: cover;
+    background-position: center;
     border: 3px solid #ffffff;
     position: absolute;
-    top: -40px;
-    left: 12px;
-    background-color: #fff;
+    top: -35px;
+    left: 16px;
+    background-color: #e4e6eb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode .sidebar-avatar {
+    border-color: #1a1a1b;
+    background-color: #3a3a3c;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .sidebar-username {
     margin-top: 35px;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 17px;
+    color: #050505;
+    margin-bottom: 4px;
 }
 
 .sidebar-tag {
-    font-size: 12px;
-    color: #7c7c7c;
-    margin-bottom: 10px;
+    font-size: 13px;
+    color: #65676b;
+    margin-bottom: 12px;
 }
 
-/* Nút tạo bài đăng: Màu tím phẳng hoặc Gradient tĩnh */
+/* Nút tạo bài đăng: Gradient giống theme */
 .create-post-btn {
-    background: linear-gradient(to right, #6a11cb, #2575fc);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
     width: 100%;
-    padding: 10px;
-    border-radius: 20px;
-    font-weight: 700;
+    padding: 12px;
+    border-radius: 24px;
+    font-weight: 600;
+    font-size: 14px;
     cursor: pointer;
-    margin-top: 10px;
+    margin-top: 16px;
+    transition: all 0.2s ease;
 }
 
 /* Hover chỉ làm tối màu đi 1 chút, không phóng to thu nhỏ */
 .create-post-btn:hover {
-    opacity: 0.9;
+    background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .sidebar-stats {
     display: flex;
-    margin-top: 15px;
-    justify-content: space-between;
+    margin-top: 20px;
+    justify-content: space-around;
+    padding-top: 16px;
+    border-top: 1px solid #e4e6eb;
+}
+
+body.dark-mode .sidebar-stats {
+    border-top-color: #343536;
 }
 
 .stat-item {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
 .stat-value {
-    font-weight: bold;
-    font-size: 14px;
+    font-weight: 700;
+    font-size: 18px;
+    color: #050505;
+    margin-bottom: 4px;
 }
 
 .stat-label {
     font-size: 12px;
-    color: #7c7c7c;
+    color: #65676b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+body.dark-mode .stat-value {
+    color: #d7dadc;
+}
+
+body.dark-mode .stat-label {
+    color: #818384;
 }
 
 @media (max-width: 768px) {
@@ -268,4 +386,67 @@ header {
     .sidebar {
         display: none;
     }
+}
+
+/* Dark Mode Styles */
+body.dark-mode .user-text h1 {
+    color: #d7dadc;
+}
+
+body.dark-mode .user-text span {
+    color: #818384;
+}
+
+body.dark-mode .tab-item {
+    color: #818384;
+}
+
+body.dark-mode .tab-item.active {
+    color: #667eea;
+    border-bottom: 3px solid #667eea;
+    background-color: rgba(102, 126, 234, 0.1);
+}
+
+body.dark-mode .tab-item:hover {
+    background-color: #272729;
+    color: #d7dadc;
+}
+
+body.dark-mode .content-feed {
+    background-color: #1a1a1b;
+    color: #d7dadc;
+}
+
+body.dark-mode .content-feed h3 {
+    color: #d7dadc;
+}
+
+body.dark-mode .content-feed p {
+    color: #818384;
+}
+
+body.dark-mode .feed-btn {
+    border: 1px solid #667eea;
+    color: #667eea;
+    background: #1a1a1b;
+}
+
+body.dark-mode .feed-btn:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+}
+
+body.dark-mode .sidebar-username {
+    color: #d7dadc;
+}
+
+body.dark-mode .sidebar-tag {
+    color: #818384;
+}
+
+body.dark-mode .stat-value {
+    color: #d7dadc;
+}
+
+body.dark-mode .stat-label {
+    color: #818384;
 }

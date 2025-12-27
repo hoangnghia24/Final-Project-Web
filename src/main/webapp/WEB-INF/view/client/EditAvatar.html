@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Chỉnh sửa Avatar - TFT</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/client/css/Profile.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/Header.css}" rel="stylesheet" />
+    
+    <style>
+        .edit-avatar-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar-creator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .preview-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .current-avatar {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            border: 4px solid #6200ea;
+            background-color: #f0f0f0;
+        }
+
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1c1c1c;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-group select {
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .control-group select:hover {
+            border-color: #6200ea;
+        }
+
+        .control-group select:focus {
+            outline: none;
+            border-color: #6200ea;
+            box-shadow: 0 0 0 3px rgba(98, 0, 234, 0.1);
+        }
+
+        .btn-save {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 20px;
+            font-weight: 700;
+            width: 100%;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .btn-save:hover {
+            opacity: 0.9;
+        }
+
+        .btn-cancel {
+            background: white;
+            color: #6200ea;
+            border: 2px solid #6200ea;
+            padding: 12px 30px;
+            border-radius: 20px;
+            font-weight: 700;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .btn-cancel:hover {
+            background-color: #f3f0fa;
+        }
+
+        .random-btn {
+            background: #f3f0fa;
+            color: #6200ea;
+            border: 2px solid #6200ea;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .random-btn:hover {
+            background: #6200ea;
+            color: white;
+        }
+
+        body.dark-mode .edit-avatar-container {
+            background-color: #1e1e1e;
+        }
+
+        body.dark-mode .control-group label {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .control-group select {
+            background-color: #2a2a2a;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .control-group select:hover {
+            border-color: #bb86fc;
+        }
+
+        body.dark-mode .random-btn {
+            background-color: #2a2a2a;
+            color: #bb86fc;
+            border-color: #bb86fc;
+        }
+
+        body.dark-mode .random-btn:hover {
+            background-color: #bb86fc;
+            color: #1e1e1e;
+        }
+
+        @media (max-width: 768px) {
+            .avatar-creator-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .current-avatar {
+                width: 200px;
+                height: 200px;
+            }
+        }
+    </style>
+
+    <script th:src="@{/client/js/Header.js}"></script>
+</head>
+
+<body>
+
+    <!-- Include header fragment -->
+    <div th:replace="~{fragments/header :: user-header}"></div>
+
+    <div class="edit-avatar-container">
+        <h2 style="text-align: center; margin-bottom: 10px;">Tạo Avatar của bạn</h2>
+        <p style="text-align: center; color: #7c7c7c; margin-bottom: 30px;">Tùy chỉnh avatar theo phong cách của bạn</p>
+        
+        <div class="avatar-creator-grid">
+            <!-- Preview Section -->
+            <div class="preview-section">
+                <img id="avatar-preview" class="current-avatar" 
+                     src="https://api.dicebear.com/7.x/avataaars/svg?seed=default" 
+                     alt="Avatar Preview">
+                <button class="random-btn" onclick="randomizeAvatar()">🎲 Ngẫu nhiên</button>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="controls-section">
+                <div class="control-group">
+                    <label>Kiểu tóc</label>
+                    <select id="topType">
+                        <option value="NoHair">Không tóc</option>
+                        <option value="Hat">Mũ</option>
+                        <option value="Hijab">Hijab</option>
+                        <option value="Turban">Khăn xếp</option>
+                        <option value="WinterHat1">Mũ len</option>
+                        <option value="LongHairBigHair" selected>Tóc dài</option>
+                        <option value="LongHairBob">Tóc bob</option>
+                        <option value="LongHairBun">Tóc búi</option>
+                        <option value="LongHairCurly">Tóc xoăn</option>
+                        <option value="LongHairCurvy">Tóc gợn sóng</option>
+                        <option value="LongHairDreads">Tóc dreadlock</option>
+                        <option value="LongHairFrida">Tóc Frida</option>
+                        <option value="LongHairFro">Tóc afro</option>
+                        <option value="LongHairStraight">Tóc thẳng</option>
+                        <option value="LongHairStraight2">Tóc thẳng 2</option>
+                        <option value="ShortHairDreads01">Tóc ngắn dreadlock</option>
+                        <option value="ShortHairDreads02">Tóc ngắn dreadlock 2</option>
+                        <option value="ShortHairShortFlat">Tóc cắt ngắn</option>
+                        <option value="ShortHairShortRound">Tóc tròn</option>
+                        <option value="ShortHairShortWaved">Tóc ngắn gợn sóng</option>
+                        <option value="ShortHairSides">Tóc cạo hai bên</option>
+                        <option value="ShortHairTheCaesar">Tóc Caesar</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Phụ kiện</label>
+                    <select id="accessoriesType">
+                        <option value="Blank" selected>Không</option>
+                        <option value="Eyepatch">Bịt mắt</option>
+                        <option value="Kurt">Kurt</option>
+                        <option value="Prescription01">Kính 1</option>
+                        <option value="Prescription02">Kính 2</option>
+                        <option value="Round">Kính tròn</option>
+                        <option value="Sunglasses">Kính râm</option>
+                        <option value="Wayfarers">Wayfarers</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Màu tóc</label>
+                    <select id="hairColor">
+                        <option value="Auburn" selected>Nâu đỏ</option>
+                        <option value="Black">Đen</option>
+                        <option value="Blonde">Vàng</option>
+                        <option value="BlondeGolden">Vàng kim</option>
+                        <option value="Brown">Nâu</option>
+                        <option value="BrownDark">Nâu sẫm</option>
+                        <option value="PastelPink">Hồng pastel</option>
+                        <option value="Platinum">Bạch kim</option>
+                        <option value="Red">Đỏ</option>
+                        <option value="SilverGray">Xám bạc</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Râu</label>
+                    <select id="facialHairType">
+                        <option value="Blank" selected>Không</option>
+                        <option value="BeardMedium">Râu trung bình</option>
+                        <option value="BeardLight">Râu nhẹ</option>
+                        <option value="BeardMajestic">Râu dài</option>
+                        <option value="MoustacheFancy">Ria mép quý phái</option>
+                        <option value="MoustacheMagnum">Ria mép Magnum</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Quần áo</label>
+                    <select id="clotheType">
+                        <option value="BlazerShirt" selected>Áo blazer</option>
+                        <option value="BlazerSweater">Áo len blazer</option>
+                        <option value="CollarSweater">Áo cổ lọ</option>
+                        <option value="GraphicShirt">Áo thun in</option>
+                        <option value="Hoodie">Áo hoodie</option>
+                        <option value="Overall">Yếm</option>
+                        <option value="ShirtCrewNeck">Áo cổ tròn</option>
+                        <option value="ShirtScoopNeck">Áo cổ thuyền</option>
+                        <option value="ShirtVNeck">Áo cổ V</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Mắt</label>
+                    <select id="eyeType">
+                        <option value="Default" selected>Mặc định</option>
+                        <option value="Close">Nhắm mắt</option>
+                        <option value="Cry">Khóc</option>
+                        <option value="Dizzy">Chóng mặt</option>
+                        <option value="EyeRoll">Lăn mắt</option>
+                        <option value="Happy">Vui vẻ</option>
+                        <option value="Hearts">Trái tim</option>
+                        <option value="Side">Nhìn sang</option>
+                        <option value="Squint">Nheo mắt</option>
+                        <option value="Surprised">Ngạc nhiên</option>
+                        <option value="Wink">Nháy mắt</option>
+                        <option value="WinkWacky">Nháy mắt hài</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Lông mày</label>
+                    <select id="eyebrowType">
+                        <option value="Default" selected>Mặc định</option>
+                        <option value="DefaultNatural">Tự nhiên</option>
+                        <option value="Angry">Giận dữ</option>
+                        <option value="AngryNatural">Giận tự nhiên</option>
+                        <option value="FlatNatural">Phẳng</option>
+                        <option value="RaisedExcited">Phấn khích</option>
+                        <option value="SadConcerned">Buồn lo</option>
+                        <option value="UnibrowNatural">Lông mày nối</option>
+                        <option value="UpDown">Lên xuống</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Miệng</label>
+                    <select id="mouthType">
+                        <option value="Default" selected>Mặc định</option>
+                        <option value="Concerned">Lo lắng</option>
+                        <option value="Disbelief">Không tin</option>
+                        <option value="Eating">Ăn</option>
+                        <option value="Grimace">Nhăn mặt</option>
+                        <option value="Sad">Buồn</option>
+                        <option value="ScreamOpen">Hét lớn</option>
+                        <option value="Serious">Nghiêm túc</option>
+                        <option value="Smile">Cười</option>
+                        <option value="Tongue">Lè lưỡi</option>
+                        <option value="Twinkle">Lấp lánh</option>
+                        <option value="Vomit">Nôn</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Màu da</label>
+                    <select id="skinColor">
+                        <option value="Tanned" selected>Rám nắng</option>
+                        <option value="Yellow">Vàng</option>
+                        <option value="Pale">Nhạt</option>
+                        <option value="Light">Sáng</option>
+                        <option value="Brown">Nâu</option>
+                        <option value="DarkBrown">Nâu đậm</option>
+                        <option value="Black">Đen</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-save" onclick="saveAvatar()">💾 Lưu Avatar</button>
+        <button class="btn-cancel" onclick="window.location.href='/profile'">❌ Hủy</button>
+    </div>
+
+    <script>
+        // Avatar creator - Using DiceBear v9 API with correct parameter names
+        function updateAvatar() {
+            const avatarPreview = document.getElementById('avatar-preview');
+            if (!avatarPreview) {
+                console.error('Avatar preview not found!');
+                return;
+            }
+            
+            // Get all values
+            const topType = document.getElementById('topType').value;
+            const accessoriesType = document.getElementById('accessoriesType').value;
+            const hairColor = document.getElementById('hairColor').value;
+            const facialHairType = document.getElementById('facialHairType').value;
+            const clotheType = document.getElementById('clotheType').value;
+            const eyeType = document.getElementById('eyeType').value;
+            const eyebrowType = document.getElementById('eyebrowType').value;
+            const mouthType = document.getElementById('mouthType').value;
+            const skinColor = document.getElementById('skinColor').value;
+            
+            // Color mappings - API needs hex colors
+            const hairColorMap = {
+                'Auburn': '724133',
+                'Black': '2c1b18',
+                'Blonde': 'd6b370',
+                'BlondeGolden': 'f59797',
+                'Brown': '4a312c',
+                'BrownDark': '2c1b18',
+                'PastelPink': 'f59797',
+                'Platinum': 'ecdcbf',
+                'Red': 'c93305',
+                'SilverGray': 'e8e1e1'
+            };
+            
+            const skinColorMap = {
+                'Tanned': 'd08b5b',
+                'Yellow': 'f8d25c',
+                'Pale': 'ffdbb4',
+                'Light': 'edb98a',
+                'Brown': 'ae5d29',
+                'DarkBrown': '614335',
+                'Black': '614335'
+            };
+            
+            const params = [];
+            
+            // Top (hair style) - comprehensive mapping
+            const topMap = {
+                'Hat': 'hat',
+                'Hijab': 'hijab',
+                'Turban': 'turban',
+                'WinterHat1': 'winterHat1',
+                'LongHairBigHair': 'bigHair',
+                'LongHairBob': 'bob',
+                'LongHairBun': 'bun',
+                'LongHairCurly': 'curly',
+                'LongHairCurvy': 'curvy',
+                'LongHairDreads': 'dreads',
+                'LongHairFrida': 'frida',
+                'LongHairFro': 'fro',
+                'LongHairStraight': 'straight',
+                'LongHairStraight2': 'straight02',
+                'ShortHairDreads01': 'dreads01',
+                'ShortHairDreads02': 'dreads02',
+                'ShortHairShortFlat': 'shortFlat',
+                'ShortHairShortRound': 'shortRound',
+                'ShortHairShortWaved': 'shortWaved',
+                'ShortHairSides': 'sides',
+                'ShortHairTheCaesar': 'theCaesar'
+            };
+            
+            // Handle special cases
+            if (topType === 'NoHair') {
+                // For no hair, set probability to 0
+                params.push('topProbability=0');
+            } else if (topMap[topType]) {
+                params.push(`top=${topMap[topType]}`);
+            }
+            
+            // Hair Color - use hex
+            if (hairColor && hairColorMap[hairColor]) {
+                params.push(`hairColor=${hairColorMap[hairColor]}`);
+            }
+            
+            // Accessories - proper mapping
+            if (accessoriesType && accessoriesType !== 'Blank') {
+                const accessoriesMap = {
+                    'Eyepatch': 'eyepatch',
+                    'Kurt': 'kurt',
+                    'Prescription01': 'prescription01',
+                    'Prescription02': 'prescription02',
+                    'Round': 'round',
+                    'Sunglasses': 'sunglasses',
+                    'Wayfarers': 'wayfarers'
+                };
+                if (accessoriesMap[accessoriesType]) {
+                    params.push(`accessories=${accessoriesMap[accessoriesType]}`);
+                    params.push(`accessoriesProbability=100`);
+                }
+            }
+            
+            // Facial Hair - proper mapping
+            if (facialHairType && facialHairType !== 'Blank') {
+                const facialHairMap = {
+                    'BeardLight': 'beardLight',
+                    'BeardMajestic': 'beardMajestic',
+                    'BeardMedium': 'beardMedium',
+                    'MoustacheFancy': 'moustacheFancy',
+                    'MoustacheMagnum': 'moustacheMagnum'
+                };
+                if (facialHairMap[facialHairType]) {
+                    params.push(`facialHair=${facialHairMap[facialHairType]}`);
+                    params.push(`facialHairProbability=100`);
+                    // Also add facial hair color
+                    if (hairColor && hairColorMap[hairColor]) {
+                        params.push(`facialHairColor=${hairColorMap[hairColor]}`);
+                    }
+                }
+            }
+            
+            // Clothing
+            if (clotheType) {
+                let clothValue = clotheType;
+                if (clothValue === 'BlazerShirt') clothValue = 'blazerAndShirt';
+                else if (clothValue === 'BlazerSweater') clothValue = 'blazerAndSweater';
+                else if (clothValue === 'CollarSweater') clothValue = 'collarAndSweater';
+                else if (clothValue === 'GraphicShirt') clothValue = 'graphicShirt';
+                else if (clothValue === 'Hoodie') clothValue = 'hoodie';
+                else if (clothValue === 'Overall') clothValue = 'overall';
+                else if (clothValue === 'ShirtCrewNeck') clothValue = 'shirtCrewNeck';
+                else if (clothValue === 'ShirtScoopNeck') clothValue = 'shirtScoopNeck';
+                else if (clothValue === 'ShirtVNeck') clothValue = 'shirtVNeck';
+                params.push(`clothing=${clothValue}`);
+            }
+            
+            // Eyes
+            let eyeValue = 'default';
+            if (eyeType && eyeType !== 'Default') {
+                eyeValue = eyeType.charAt(0).toLowerCase() + eyeType.slice(1);
+                if (eyeValue === 'close') eyeValue = 'closed';
+                if (eyeValue === 'eyeRoll') eyeValue = 'eyeRoll';
+                if (eyeValue === 'winkWacky') eyeValue = 'winkWacky';
+                if (eyeValue === 'dizzy') eyeValue = 'xDizzy';
+            }
+            params.push(`eyes=${eyeValue}`);
+            
+            // Eyebrows
+            let ebValue = 'default';
+            if (eyebrowType && eyebrowType !== 'Default') {
+                ebValue = eyebrowType.charAt(0).toLowerCase() + eyebrowType.slice(1);
+            }
+            params.push(`eyebrows=${ebValue}`);
+            
+            // Mouth
+            let mouthValue = 'default';
+            if (mouthType && mouthType !== 'Default') {
+                mouthValue = mouthType.charAt(0).toLowerCase() + mouthType.slice(1);
+                if (mouthValue === 'screamOpen') mouthValue = 'screamOpen';
+            }
+            params.push(`mouth=${mouthValue}`);
+            
+            // Skin Color - use hex
+            if (skinColor && skinColorMap[skinColor]) {
+                params.push(`skinColor=${skinColorMap[skinColor]}`);
+            }
+            
+            // Background color
+            params.push('backgroundColor=b6e3f4');
+            
+            // Use v9 API
+            const url = `https://api.dicebear.com/9.x/avataaars/svg?${params.join('&')}`;
+            
+            console.log('=== UPDATING AVATAR ===');
+            console.log('URL:', url);
+            
+            // Direct assignment with cache buster
+            avatarPreview.src = url + '&t=' + Date.now();
+            
+            avatarPreview.onload = function() {
+                console.log('✓ Avatar loaded successfully!');
+            };
+            
+            avatarPreview.onerror = function(e) {
+                console.error('✗ Failed to load avatar');
+                console.error('Error:', e);
+                console.error('URL:', url);
+            };
+        }
+        
+        function randomizeAvatar() {
+            console.log('🎲 Randomizing...');
+            const selects = ['topType', 'accessoriesType', 'hairColor', 'facialHairType', 
+                           'clotheType', 'eyeType', 'eyebrowType', 'mouthType', 'skinColor'];
+            
+            selects.forEach(id => {
+                const select = document.getElementById(id);
+                if (select && select.options.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * select.options.length);
+                    select.selectedIndex = randomIndex;
+                }
+            });
+            
+            updateAvatar();
+        }
+        
+        function saveAvatar() {
+            const avatarImg = document.getElementById('avatar-preview');
+            if (!avatarImg || !avatarImg.src) {
+                alert('Vui lòng chọn avatar trước!');
+                return;
+            }
+            
+            // Lấy username từ localStorage (đã được lưu khi login)
+            const username = localStorage.getItem('username');
+            
+            if (!username) {
+                alert('⚠️ Bạn chưa đăng nhập! Vui lòng đăng nhập trước.');
+                window.location.href = '/login';
+                return;
+            }
+            
+            console.log('Saving avatar for user:', username);
+            console.log('Avatar URL:', avatarImg.src);
+            
+            // Lưu vào localStorage
+            localStorage.setItem('userAvatarUrl', avatarImg.src);
+            
+            // Gửi về server để lưu vào database
+            $.ajax({
+                url: '/update-avatar',
+                type: 'POST',
+                data: {
+                    username: username,
+                    avatarUrl: avatarImg.src
+                },
+                success: function(response) {
+                    console.log('Server response:', response);
+                    if (response.success) {
+                        alert('✓ ' + response.message);
+                        
+                        // Cập nhật avatar trên header ngay lập tức
+                        const headerAvatar = document.getElementById('header-user-avatar');
+                        if (headerAvatar) {
+                            const avatarInHeader = headerAvatar.querySelector('img');
+                            if (avatarInHeader) {
+                                avatarInHeader.src = avatarImg.src;
+                            }
+                        }
+                        
+                        // Chuyển về trang profile
+                        setTimeout(function() {
+                            window.location.href = '/profile';
+                        }, 500);
+                    } else {
+                        alert('✗ ' + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error saving avatar:', error);
+                    alert('Có lỗi xảy ra khi lưu avatar! Vui lòng thử lại.');
+                }
+            });
+        }
+        
+        // Setup on load
+        window.onload = function() {
+            console.log('=== AVATAR CREATOR READY ===');
+            
+            const selects = document.querySelectorAll('.control-group select');
+            console.log('Found ' + selects.length + ' select elements');
+            
+            selects.forEach(function(select) {
+                select.addEventListener('change', function() {
+                    console.log('Changed: ' + this.id + ' → ' + this.value);
+                    updateAvatar();
+                });
+            });
+            
+            console.log('Generating initial avatar...');
+            updateAvatar();
+        };
+    </script>
+
+</body>
+
+</html>

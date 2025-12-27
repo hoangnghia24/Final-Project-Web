@@ -39,6 +39,12 @@ public class AuthController {
         return "/auth/Register";
     }
 
+    @GetMapping("/logout")
+    public String logout() {
+        // TODO: Clear session/cookies if needed
+        return "redirect:/login";
+    }
+
     @QueryMapping
     public User getUserLogin(@Argument String username, @Argument String password) {
         User userLogin = this.userService.getUserByUsername(username);

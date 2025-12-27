@@ -59,4 +59,13 @@ public class UserService {
         )).collect(Collectors.toList());
     }
 
+    public User updateUserAvatar(String username, String avatarUrl) {
+        User user = this.userRepository.findByUsername(username).orElse(null);
+        if (user != null) {
+            user.setAvatarUrl(avatarUrl);
+            return this.userRepository.save(user);
+        }
+        return null;
+    }
+
 }
