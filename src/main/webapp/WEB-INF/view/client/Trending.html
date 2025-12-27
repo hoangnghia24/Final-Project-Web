@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trending - TFT</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/client/css/Profile.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/Header.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/LeftSidebar.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/Home.css}" rel="stylesheet" />
+    <script th:src="@{/client/js/TimeUtils.js}"></script>
+    <script th:src="@{/client/js/Header.js}"></script>
+    <script th:src="@{/client/js/LeftSidebar.js}"></script>
+    
+    <style>
+        .trending-header {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            color: white;
+            text-align: center;
+        }
+        
+        .trending-header h2 {
+            margin: 0;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .trending-header p {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0;
+        }
+        
+        .filter-tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .filter-tab:hover {
+            color: #FF6B6B;
+        }
+        
+        .filter-tab.active {
+            color: #FF6B6B;
+            border-bottom-color: #FF6B6B;
+        }
+        
+        .trending-badge {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .vote-count {
+            color: #FF6B6B;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .hot-icon {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Include header fragment -->
+    <div th:replace="~{fragments/header :: user-header}"></div>
+
+    <div class="home-container">
+
+        <!-- Include left sidebar fragment -->
+        <div th:replace="~{fragments/left-sidebar :: left-sidebar}"></div>
+
+        <main class="main-feed">
+            <div class="trending-header">
+                <h2>
+                    <span class="hot-icon">🔥</span>
+                    Trending Now
+                </h2>
+                <p>Những bài viết đang hot nhất hiện nay</p>
+            </div>
+            
+            <div class="filter-tabs">
+                <button class="filter-tab active">Hôm nay</button>
+                <button class="filter-tab">Tuần này</button>
+                <button class="filter-tab">Tháng này</button>
+                <button class="filter-tab">Mọi lúc</button>
+            </div>
+
+            <!-- Trending Post 1 -->
+            <div class="feed-card">
+                <div class="feed-header">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=trending1" class="feed-avatar">
+                    <div>
+                        <h6 class="mb-0 fw-bold">
+                            Tech Insider
+                            <span class="trending-badge">🔥 Trending #1</span>
+                        </h6>
+                        <small class="text-muted">2 giờ trước • r/technology</small>
+                    </div>
+                </div>
+                <div class="feed-content">
+                    <h5 class="fw-bold mb-2">AI mới của Google đã vượt qua GPT-4 trong các bài test lập trình</h5>
+                    Google vừa công bố mô hình AI mới có khả năng giải quyết các bài toán lập trình phức tạp tốt hơn 40% so với GPT-4. Đây là bước tiến lớn trong lĩnh vực AI...
+                </div>
+                <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995" class="feed-image">
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="vote-count">↑ 12.5k</span>
+                    <span class="text-muted">💬 1.2k bình luận</span>
+                    <span class="text-muted">🔗 Share</span>
+                </div>
+                <div class="d-flex text-center">
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Upvote</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Bình luận</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Chia sẻ</button>
+                </div>
+            </div>
+
+            <!-- Trending Post 2 -->
+            <div class="feed-card">
+                <div class="feed-header">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=trending2" class="feed-avatar">
+                    <div>
+                        <h6 class="mb-0 fw-bold">
+                            Gaming News
+                            <span class="trending-badge">🔥 Trending #2</span>
+                        </h6>
+                        <small class="text-muted">4 giờ trước • r/gaming</small>
+                    </div>
+                </div>
+                <div class="feed-content">
+                    <h5 class="fw-bold mb-2">Game mới của Nintendo vừa phá kỷ lục doanh thu ngày đầu</h5>
+                    Với hơn 10 triệu bản được bán trong 24 giờ đầu, đây là game có doanh thu cao nhất mọi thời đại của Nintendo...
+                </div>
+                <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f" class="feed-image">
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="vote-count">↑ 8.9k</span>
+                    <span class="text-muted">💬 856 bình luận</span>
+                    <span class="text-muted">🔗 Share</span>
+                </div>
+                <div class="d-flex text-center">
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Upvote</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Bình luận</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Chia sẻ</button>
+                </div>
+            </div>
+
+            <!-- Trending Post 3 -->
+            <div class="feed-card">
+                <div class="feed-header">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=trending3" class="feed-avatar">
+                    <div>
+                        <h6 class="mb-0 fw-bold">
+                            Science Daily
+                            <span class="trending-badge">🔥 Trending #3</span>
+                        </h6>
+                        <small class="text-muted">5 giờ trước • r/science</small>
+                    </div>
+                </div>
+                <div class="feed-content">
+                    <h5 class="fw-bold mb-2">Các nhà khoa học phát hiện ra hành tinh có thể sống được giống Trái Đất</h5>
+                    NASA công bố phát hiện một hành tinh cách chúng ta 120 năm ánh sáng có khí quyển và nhiệt độ phù hợp với sự sống...
+                </div>
+                <img src="https://images.unsplash.com/photo-1614728894747-a83421e2b9c9" class="feed-image">
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="vote-count">↑ 15.2k</span>
+                    <span class="text-muted">💬 2.1k bình luận</span>
+                    <span class="text-muted">🔗 Share</span>
+                </div>
+                <div class="d-flex text-center">
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Upvote</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Bình luận</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Chia sẻ</button>
+                </div>
+            </div>
+
+        </main>
+
+        <aside class="right-sidebar">
+            <div class="contacts-widget">
+                <div class="contacts-header">
+                    <h6 class="contacts-title">📈 Top Communities</h6>
+                </div>
+                
+                <div class="contacts-list">
+                    <div class="contact-item">
+                        <div class="contact-avatar-wrapper">
+                            <div class="avatar-circle" style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                        </div>
+                        <div>
+                            <span class="contact-name">r/technology</span>
+                            <small class="d-block text-muted">1.2M members</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-avatar-wrapper">
+                            <div class="avatar-circle" style="width: 36px; height: 36px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                        </div>
+                        <div>
+                            <span class="contact-name">r/gaming</span>
+                            <small class="d-block text-muted">890K members</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-avatar-wrapper">
+                            <div class="avatar-circle" style="width: 36px; height: 36px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                        </div>
+                        <div>
+                            <span class="contact-name">r/science</span>
+                            <small class="d-block text-muted">750K members</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <script>
+        // Filter tabs functionality
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                console.log('Filter changed to:', this.textContent);
+            });
+        });
+    </script>
+
+</body>
+
+</html>

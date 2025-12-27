@@ -54,6 +54,26 @@ public class ClientController {
         return "client/Messages";
     }
 
+    @GetMapping("/chat-test-to-admin")
+    public String chatTestToAdmin() {
+        return "forward:/resources/chat-test-to-admin.html";
+    }
+
+    @GetMapping("/trending")
+    public String getTrending() {
+        return "client/Trending";
+    }
+
+    @GetMapping("/explore")
+    public String getExplore() {
+        return "client/Explore";
+    }
+
+    @GetMapping("/all")
+    public String getAll() {
+        return "client/All";
+    }
+
     @GetMapping("/saved")
     public String getSaved() {
         // TODO: Implement saved posts page

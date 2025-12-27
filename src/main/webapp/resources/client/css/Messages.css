@@ -26,6 +26,7 @@ body.dark-mode .messages-wrapper {
     height: calc(100vh - 48px);
     background: #e4e6eb;
     gap: 1px;
+    overflow: hidden;
 }
 
 body.dark-mode .messages-container {
@@ -38,6 +39,7 @@ body.dark-mode .messages-container {
     display: flex;
     flex-direction: column;
     border-right: 1px solid #e4e6eb;
+    overflow: hidden;
 }
 
 body.dark-mode .conversations-panel {
@@ -244,8 +246,12 @@ body.dark-mode .conversation-item.active {
 
 .conversation-name {
     font-weight: 600;
-    color: #d7dadc;
+    color: #050505;
     font-size: 15px;
+}
+
+body.dark-mode .conversation-name {
+    color: #d7dadc;
 }
 
 .conversation-time {
@@ -274,10 +280,15 @@ body.dark-mode .conversation-item.active {
 
 /* Right Panel: Chat Area */
 .chat-panel {
-    background: #1a1a1b;
+    background: #ffffff;
     display: flex;
     flex-direction: column;
     position: relative;
+    overflow: hidden;
+}
+
+body.dark-mode .chat-panel {
+    background: #1a1a1b;
 }
 
 /* Empty State */
@@ -325,6 +336,7 @@ body.dark-mode .conversation-item.active {
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0;
 }
 
 /* Chat Header */
@@ -333,6 +345,11 @@ body.dark-mode .conversation-item.active {
     align-items: center;
     justify-content: space-between;
     padding: 12px 20px;
+    border-bottom: 1px solid #e4e6eb;
+    background: #ffffff;
+}
+
+body.dark-mode .chat-header {
     border-bottom: 1px solid #343536;
     background: #1a1a1b;
 }
@@ -358,8 +375,12 @@ body.dark-mode .conversation-item.active {
 .chat-user-name {
     font-size: 16px;
     font-weight: 700;
-    color: #d7dadc;
+    color: #050505;
     margin: 0;
+}
+
+body.dark-mode .chat-user-name {
+    color: #d7dadc;
 }
 
 .chat-user-status {
@@ -405,17 +426,21 @@ body.dark-mode .conversation-item.active {
 }
 
 .messages-area::-webkit-scrollbar-track {
-    background: #1a1a1b;
+    background: #ffffff;
 }
 
 .messages-area::-webkit-scrollbar-thumb {
-    background: #343536;
+    background: #e4e6eb;
     border-radius: 4px;
 }
 
 .messages-area::-webkit-scrollbar-thumb:hover {
-    background: #4a4a4b;
+    background: #d0d2d5;
 }
+
+body.dark-mode .messages-area::-webkit-scrollbar-track { background: #1a1a1b; }
+body.dark-mode .messages-area::-webkit-scrollbar-thumb { background: #343536; }
+body.dark-mode .messages-area::-webkit-scrollbar-thumb:hover { background: #4a4a4b; }
 
 /* Message Group */
 .message-group {
@@ -461,25 +486,26 @@ body.dark-mode .conversation-item.active {
 .message-bubble {
     padding: 10px 16px;
     border-radius: 18px;
-    color: #d7dadc;
+    color: #050505;
     word-wrap: break-word;
     font-size: 15px;
     line-height: 1.4;
 }
 
 .message.received .message-bubble {
-    background: #272729;
+    background: #f0f2f5;
     border-bottom-left-radius: 4px;
 }
 
 .message.sent .message-bubble {
     background: #2e89ff;
     border-bottom-right-radius: 4px;
+    color: #ffffff;
 }
 
 .message-time {
     font-size: 11px;
-    color: #818384;
+    color: #65676b;
     padding: 0 8px;
 }
 
@@ -489,6 +515,13 @@ body.dark-mode .conversation-item.active {
     align-items: center;
     gap: 8px;
     padding: 16px 20px;
+    border-top: 1px solid #e4e6eb;
+    background: #ffffff;
+    position: sticky;
+    bottom: 0;
+}
+
+body.dark-mode .message-input-container {
     border-top: 1px solid #343536;
     background: #1a1a1b;
 }
@@ -510,6 +543,12 @@ body.dark-mode .conversation-item.active {
 
 .attach-btn:hover,
 .emoji-btn:hover {
+    background-color: #f0f2f5;
+    color: #050505;
+}
+
+body.dark-mode .attach-btn:hover,
+body.dark-mode .emoji-btn:hover {
     background-color: #272729;
     color: #d7dadc;
 }
@@ -517,22 +556,30 @@ body.dark-mode .conversation-item.active {
 .message-input {
     flex: 1;
     padding: 10px 16px;
-    background: #272729;
-    border: 1px solid #343536;
+    background: #ffffff;
+    border: 1px solid #e4e6eb;
     border-radius: 20px;
-    color: #d7dadc;
+    color: #050505;
     font-size: 15px;
     outline: none;
     resize: none;
 }
 
 .message-input::placeholder {
-    color: #818384;
+    color: #65676b;
 }
 
 .message-input:focus {
-    border-color: #2e89ff;
+    border-color: #667eea;
 }
+
+body.dark-mode .message-input {
+    background: #272729;
+    border: 1px solid #343536;
+    color: #d7dadc;
+}
+body.dark-mode .message-input::placeholder { color: #818384; }
+body.dark-mode .message-input:focus { border-color: #2e89ff; }
 
 .send-btn {
     width: 36px;

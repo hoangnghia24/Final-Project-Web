@@ -34,5 +34,7 @@ public class WebConfiguration implements WebMvcConfigurer {
         registry.addResourceHandler("/client/**").addResourceLocations("/resources/client/");
         registry.addResourceHandler("/auth/**").addResourceLocations("/resources/auth/");
         registry.addResourceHandler("/resources/admin/**").addResourceLocations("/resources/admin/");
+        // Serve uploaded files under /uploads/** from local filesystem 'uploads' directory
+        registry.addResourceHandler("/uploads/**").addResourceLocations("file:uploads/");
     }
 }

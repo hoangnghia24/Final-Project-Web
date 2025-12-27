@@ -346,8 +346,13 @@ $(document).ready(function() {
                 </div>
             `;
             
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            // Prepend newest on top
+            if (messagesContainer.firstChild) {
+                messagesContainer.insertBefore(messageDiv, messagesContainer.firstChild);
+            } else {
+                messagesContainer.appendChild(messageDiv);
+            }
+            messagesContainer.scrollTop = 0;
         }
         
         function loadConversationPartners() {
@@ -381,7 +386,20 @@ $(document).ready(function() {
             }
             
             container.innerHTML = '';
-            partners.forEach(partner => {
+            // Sort conversations by lastMessageTime (newest first)
+            const sorted = partners.slice().sort((a, b) => {
+                const parse = (val) => {
+                    try {
+                        if (!val) return new Date(0);
+                        if (typeof val === 'string') return new Date(val.replace('T', ' '));
+                        if (Array.isArray(val)) return new Date(val[0], val[1]-1, val[2], val[3]||0, val[4]||0, val[5]||0);
+                        const d = new Date(val);
+                        return isNaN(d.getTime()) ? new Date(0) : d;
+                    } catch { return new Date(0); }
+                };
+                return parse(b.lastMessageTime) - parse(a.lastMessageTime);
+            });
+            sorted.forEach(partner => {
                 const currentUserId = parseInt(localStorage.getItem('currentUserId'));
                 const hasUnread = partner.unreadCount > 0;
                 const isFromOther = partner.lastMessageSenderId && partner.lastMessageSenderId != currentUserId;
@@ -551,7 +569,20 @@ $(document).ready(function() {
             const otherAvatar = messageItem ? messageItem.querySelector('.messages-popup-avatar img').src : 'https://www.redditstatic.com/avatars/defaults/v2/avatar_default_2.png';
             
             messagesContainer.innerHTML = '';
-            messages.forEach(msg => {
+            const sorted = messages.slice().sort((a, b) => {
+                const da = (() => {
+                    if (typeof a.sentAt === 'string') return new Date(a.sentAt.replace('T', ' '));
+                    if (Array.isArray(a.sentAt)) return new Date(a.sentAt[0], a.sentAt[1]-1, a.sentAt[2], a.sentAt[3]||0, a.sentAt[4]||0, a.sentAt[5]||0);
+                    return new Date(a.sentAt);
+                })();
+                const db = (() => {
+                    if (typeof b.sentAt === 'string') return new Date(b.sentAt.replace('T', ' '));
+                    if (Array.isArray(b.sentAt)) return new Date(b.sentAt[0], b.sentAt[1]-1, b.sentAt[2], b.sentAt[3]||0, b.sentAt[4]||0, b.sentAt[5]||0);
+                    return new Date(b.sentAt);
+                })();
+                return db - da;
+            });
+            sorted.forEach(msg => {
                 const isSent = msg.senderId == currentUserId;
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message-bubble ${isSent ? 'sent' : 'received'}`;
@@ -595,8 +626,8 @@ $(document).ready(function() {
                 messagesContainer.appendChild(messageDiv);
             });
             
-            // Scroll to bottom
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            // Keep top (newest-first)
+            messagesContainer.scrollTop = 0;
         }
     } else {
         console.log('Messages popup elements not found');

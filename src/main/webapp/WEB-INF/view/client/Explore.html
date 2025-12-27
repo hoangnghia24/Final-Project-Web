@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore - TFT</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/client/css/Profile.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/Header.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/LeftSidebar.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/Home.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/Explore.css}" rel="stylesheet" />
+    <script th:src="@{/client/js/TimeUtils.js}"></script>
+    <script th:src="@{/client/js/Header.js}"></script>
+    <script th:src="@{/client/js/LeftSidebar.js}"></script>
+    
+    <style></style>
+</head>
+
+<body>
+
+    <!-- Include header fragment -->
+    <div th:replace="~{fragments/header :: user-header}"></div>
+
+    <div class="home-container">
+
+        <!-- Include left sidebar fragment -->
+        <div th:replace="~{fragments/left-sidebar :: left-sidebar}"></div>
+
+        <main class="main-feed">
+            <div class="explore-hero">
+                <div class="explore-title">🔍 Explore</div>
+                <input class="explore-search" placeholder="Tìm cộng đồng, bài viết, chủ đề..." />
+                <div class="topic-chips">
+                    <span class="chip active">Hot</span>
+                    <span class="chip">New</span>
+                    <span class="chip">Top</span>
+                    <span class="chip">Technology</span>
+                    <span class="chip">Gaming</span>
+                    <span class="chip">Science</span>
+                    <span class="chip">Sports</span>
+                </div>
+            </div>
+
+            <div class="explore-tabs">
+                <button class="tab-btn active" data-kind="for-you">Dành cho bạn</button>
+                <button class="tab-btn" data-kind="trending">Đang thịnh hành</button>
+                <button class="tab-btn" data-kind="communities">Cộng đồng</button>
+            </div>
+
+            <!-- For You section -->
+            <section data-section="for-you">
+                <div class="cards-grid">
+                    <div class="card">
+                        <img class="card-media" src="https://images.unsplash.com/photo-1531297484001-80022131f5a1" alt="">
+                        <div class="card-body">
+                            <div class="card-title">React 19: Những thay đổi quan trọng</div>
+                            <div class="card-meta">↑ 2.1k • 💬 312 • r/programming</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img class="card-media" src="https://images.unsplash.com/photo-1511512578047-dfb367046420" alt="">
+                        <div class="card-body">
+                            <div class="card-title">Tips chụp ảnh đường phố ban đêm</div>
+                            <div class="card-meta">↑ 840 • 💬 67 • r/photography</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img class="card-media" src="https://images.unsplash.com/photo-1520975916090-3105956dac38" alt="">
+                        <div class="card-body">
+                            <div class="card-title">Lập kế hoạch tập luyện 4 tuần</div>
+                            <div class="card-meta">↑ 1.1k • 💬 145 • r/fitness</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="load-more"><button id="exploreLoadMore" class="load-btn">Xem thêm</button></div>
+            </section>
+
+            <!-- Trending section -->
+            <section data-section="trending" style="display:none">
+                <div class="cards-grid">
+                    <div class="card">
+                        <img class="card-media" src="https://images.unsplash.com/photo-1677442136019-21780ecad995" alt="">
+                        <div class="card-body">
+                            <div class="card-title">AI mới vượt qua benchmark lập trình</div>
+                            <div class="card-meta">↑ 12.5k • 💬 1.2k • r/technology</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img class="card-media" src="https://images.unsplash.com/photo-1550745165-9bc0b252726f" alt="">
+                        <div class="card-body">
+                            <div class="card-title">Game Nintendo phá kỷ lục doanh thu</div>
+                            <div class="card-meta">↑ 8.9k • 💬 856 • r/gaming</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img class="card-media" src="https://images.unsplash.com/photo-1614728894747-a83421e2b9c9" alt="">
+                        <div class="card-body">
+                            <div class="card-title">Phát hiện hành tinh có thể sống được</div>
+                            <div class="card-meta">↑ 15.2k • 💬 2.1k • r/science</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Communities section -->
+            <section data-section="communities" style="display:none">
+                <div class="cards-grid">
+                    <div class="card">
+                        <img class="card-media" src="https://images.unsplash.com/photo-1516116216624-53e697fedbea" alt="">
+                        <div class="card-body">
+                            <div class="card-title">r/javascript</div>
+                            <div class="card-meta">2.4M members • ★★★★★</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img class="card-media" src="https://images.unsplash.com/photo-1518779578993-ec3579fee39f" alt="">
+                        <div class="card-body">
+                            <div class="card-title">r/movies</div>
+                            <div class="card-meta">3.1M members • ★★★★☆</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <img class="card-media" src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee" alt="">
+                        <div class="card-body">
+                            <div class="card-title">r/cooking</div>
+                            <div class="card-meta">980K members • ★★★★☆</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <aside class="right-sidebar">
+            <div class="sidebar-card">
+                <div class="header">📈 Trending Communities</div>
+                <div class="body">
+                    <div class="community">
+                        <div class="avatar"></div>
+                        <div>
+                            <div class="name">r/technology</div>
+                            <div class="members">1.2M members</div>
+                        </div>
+                    </div>
+                    <div class="community">
+                        <div class="avatar" style="background: linear-gradient(135deg,#f093fb,#f5576c)"></div>
+                        <div>
+                            <div class="name">r/gaming</div>
+                            <div class="members">890K members</div>
+                        </div>
+                    </div>
+                    <div class="community">
+                        <div class="avatar" style="background: linear-gradient(135deg,#4facfe,#00f2fe)"></div>
+                        <div>
+                            <div class="name">r/science</div>
+                            <div class="members">750K members</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-card" style="margin-top: 16px;">
+                <div class="header">🧩 Chủ đề phổ biến</div>
+                <div class="body">
+                    <div class="topic-chips">
+                        <span class="chip">Programming</span>
+                        <span class="chip">Photography</span>
+                        <span class="chip">Fitness</span>
+                        <span class="chip">Travel</span>
+                        <span class="chip">Music</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <script th:src="@{/client/js/Explore.js}"></script>
+
+</body>
+
+</html>

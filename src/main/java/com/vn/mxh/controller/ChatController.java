@@ -8,10 +8,14 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.io.File;
+import java.io.IOException;
 import java.util.stream.Collectors;
 
 @Controller
@@ -137,6 +141,46 @@ public class ChatController {
         Map<String, Boolean> response = new HashMap<>();
         response.put("success", true);
         return response;
+    }
+
+    /**
+     * REST API: Upload ảnh cho tin nhắn, trả về URL ảnh
+     */
+    @PostMapping("/api/messages/upload-image")
+    @ResponseBody
+    public Map<String, Object> uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
+        Map<String, Object> resp = new HashMap<>();
+        if (file == null || file.isEmpty()) {
+            resp.put("success", false);
+            resp.put("error", "File rỗng");
+            return resp;
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            resp.put("success", false);
+            resp.put("error", "Chỉ hỗ trợ định dạng ảnh");
+            return resp;
+        }
+
+        // Tạo thư mục lưu ảnh: uploads/chat-images
+        File dir = new File("uploads/chat-images");
+        if (!dir.exists()) dir.mkdirs();
+
+        // Tạo tên file duy nhất
+        String original = file.getOriginalFilename();
+        String ext = "";
+        if (original != null && original.contains(".")) {
+            ext = original.substring(original.lastIndexOf('.'));
+        }
+        String filename = UUID.randomUUID().toString().replaceAll("-", "") + ext;
+        File dest = new File(dir, filename);
+        file.transferTo(dest);
+
+        String url = "/uploads/chat-images/" + filename;
+        resp.put("success", true);
+        resp.put("url", url);
+        return resp;
     }
     
     /**

@@ -557,6 +557,7 @@ body.dark-mode .chat-expand-button:hover {
     display: flex;
     flex-direction: column;
     background: white;
+    min-height: 0; /* allow children to flex and scroll */
 }
 
 /* Empty State */
@@ -585,7 +586,8 @@ body.dark-mode .chat-expand-button:hover {
 .messages-popup-chat-view {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    flex: 1;       /* occupy right column */
+    min-height: 0; /* enable inner scroll area */
 }
 
 .messages-popup-chat-header {

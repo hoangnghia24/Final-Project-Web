@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All - TFT</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/client/css/Profile.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/Header.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/LeftSidebar.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/Home.css}" rel="stylesheet" />
+    <script th:src="@{/client/js/TimeUtils.js}"></script>
+    <script th:src="@{/client/js/Header.js}"></script>
+    <script th:src="@{/client/js/LeftSidebar.js}"></script>
+    
+    <style>
+        .all-header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            color: white;
+            text-align: center;
+        }
+        
+        .all-header h2 {
+            margin: 0;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .sort-dropdown {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sort-dropdown select {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .community-tag {
+            background: #f0f0f0;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .community-tag:hover {
+            background: #e0e0e0;
+        }
+        
+        .post-meta {
+            display: flex;
+            gap: 15px;
+            color: #7c7c7c;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .load-more {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .load-more button {
+            padding: 12px 40px;
+            border-radius: 20px;
+            border: 2px solid #11998e;
+            background: white;
+            color: #11998e;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .load-more button:hover {
+            background: #11998e;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Include header fragment -->
+    <div th:replace="~{fragments/header :: user-header}"></div>
+
+    <div class="home-container">
+
+        <!-- Include left sidebar fragment -->
+        <div th:replace="~{fragments/left-sidebar :: left-sidebar}"></div>
+
+        <main class="main-feed">
+            <div class="all-header">
+                <h2>
+                    <span>🌐</span>
+                    All Posts
+                </h2>
+                <p>Tất cả bài viết từ mọi cộng đồng</p>
+            </div>
+            
+            <div class="sort-dropdown">
+                <span style="font-weight: 600; color: #666;">Sắp xếp:</span>
+                <select id="sortSelect">
+                    <option value="hot">🔥 Hot</option>
+                    <option value="new">🆕 Mới nhất</option>
+                    <option value="top">⭐ Top</option>
+                    <option value="rising">📈 Rising</option>
+                </select>
+            </div>
+
+            <!-- All Post 1 -->
+            <div class="feed-card">
+                <div class="feed-header">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=all1" class="feed-avatar">
+                    <div>
+                        <h6 class="mb-0 fw-bold">
+                            Developer Guide
+                            <span class="community-tag">r/programming</span>
+                        </h6>
+                        <small class="text-muted">30 phút trước</small>
+                    </div>
+                </div>
+                <div class="feed-content">
+                    <h5 class="fw-bold mb-2">Best practices khi viết code React năm 2025</h5>
+                    Sau nhiều năm làm việc với React, đây là những kinh nghiệm và best practices mà mình rút ra được...
+                </div>
+                <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee" class="feed-image">
+                <div class="post-meta">
+                    <span>↑ 234</span>
+                    <span>💬 45 bình luận</span>
+                    <span>🔗 15 chia sẻ</span>
+                </div>
+                <hr>
+                <div class="d-flex text-center">
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Upvote</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Bình luận</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Chia sẻ</button>
+                </div>
+            </div>
+
+            <!-- All Post 2 -->
+            <div class="feed-card">
+                <div class="feed-header">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=all2" class="feed-avatar">
+                    <div>
+                        <h6 class="mb-0 fw-bold">
+                            Travel Blogger
+                            <span class="community-tag">r/travel</span>
+                        </h6>
+                        <small class="text-muted">1 giờ trước</small>
+                    </div>
+                </div>
+                <div class="feed-content">
+                    <h5 class="fw-bold mb-2">Hành trình khám phá vịnh Hạ Long tuyệt đẹp</h5>
+                    Vừa trở về từ chuyến đi 3 ngày 2 đêm ở Hạ Long. Chia sẻ với mọi người những trải nghiệm tuyệt vời...
+                </div>
+                <img src="https://images.unsplash.com/photo-1559592413-7cec4d0cae2b" class="feed-image">
+                <div class="post-meta">
+                    <span>↑ 567</span>
+                    <span>💬 89 bình luận</span>
+                    <span>🔗 34 chia sẻ</span>
+                </div>
+                <hr>
+                <div class="d-flex text-center">
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Upvote</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Bình luận</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Chia sẻ</button>
+                </div>
+            </div>
+
+            <!-- All Post 3 -->
+            <div class="feed-card">
+                <div class="feed-header">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=all3" class="feed-avatar">
+                    <div>
+                        <h6 class="mb-0 fw-bold">
+                            Food Lover
+                            <span class="community-tag">r/food</span>
+                        </h6>
+                        <small class="text-muted">2 giờ trước</small>
+                    </div>
+                </div>
+                <div class="feed-content">
+                    <h5 class="fw-bold mb-2">Công thức làm bánh mì Việt Nam chuẩn vị</h5>
+                    Hôm nay mình sẽ chia sẻ công thức làm bánh mì thịt với các nguyên liệu dễ tìm...
+                </div>
+                <img src="https://images.unsplash.com/photo-1598511726623-d2e9996892f0" class="feed-image">
+                <div class="post-meta">
+                    <span>↑ 892</span>
+                    <span>💬 123 bình luận</span>
+                    <span>🔗 67 chia sẻ</span>
+                </div>
+                <hr>
+                <div class="d-flex text-center">
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Upvote</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Bình luận</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Chia sẻ</button>
+                </div>
+            </div>
+
+            <!-- All Post 4 -->
+            <div class="feed-card">
+                <div class="feed-header">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=all4" class="feed-avatar">
+                    <div>
+                        <h6 class="mb-0 fw-bold">
+                            Music Producer
+                            <span class="community-tag">r/music</span>
+                        </h6>
+                        <small class="text-muted">3 giờ trước</small>
+                    </div>
+                </div>
+                <div class="feed-content">
+                    <h5 class="fw-bold mb-2">Top 10 bài hát hay nhất tuần này</h5>
+                    Cập nhật BXH những bài hát đang thịnh hành nhất trên các nền tảng streaming...
+                </div>
+                <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d" class="feed-image">
+                <div class="post-meta">
+                    <span>↑ 445</span>
+                    <span>💬 67 bình luận</span>
+                    <span>🔗 28 chia sẻ</span>
+                </div>
+                <hr>
+                <div class="d-flex text-center">
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Upvote</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Bình luận</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Chia sẻ</button>
+                </div>
+            </div>
+
+            <!-- All Post 5 -->
+            <div class="feed-card">
+                <div class="feed-header">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=all5" class="feed-avatar">
+                    <div>
+                        <h6 class="mb-0 fw-bold">
+                            Fitness Coach
+                            <span class="community-tag">r/fitness</span>
+                        </h6>
+                        <small class="text-muted">4 giờ trước</small>
+                    </div>
+                </div>
+                <div class="feed-content">
+                    <h5 class="fw-bold mb-2">Lịch tập gym cho người mới bắt đầu</h5>
+                    Chào mọi người! Hôm nay mình sẽ share lịch tập gym cơ bản cho các bạn newbie...
+                </div>
+                <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48" class="feed-image">
+                <div class="post-meta">
+                    <span>↑ 1.2k</span>
+                    <span>💬 234 bình luận</span>
+                    <span>🔗 89 chia sẻ</span>
+                </div>
+                <hr>
+                <div class="d-flex text-center">
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Upvote</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Bình luận</button>
+                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Chia sẻ</button>
+                </div>
+            </div>
+
+            <div class="load-more">
+                <button id="loadMoreBtn">Xem thêm bài viết</button>
+            </div>
+
+        </main>
+
+        <aside class="right-sidebar">
+            <div class="contacts-widget">
+                <div class="contacts-header">
+                    <h6 class="contacts-title">📊 Thống kê</h6>
+                </div>
+                
+                <div class="p-3">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="text-muted">Tổng bài viết</small>
+                            <strong>127.5K</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="text-muted">Cộng đồng</small>
+                            <strong>2,345</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="text-muted">Thành viên</small>
+                            <strong>15.2M</strong>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h6 class="fw-bold mb-2">🏆 Top Contributors</h6>
+                    <div class="contact-item">
+                        <div class="contact-avatar-wrapper">
+                            <div class="avatar-circle" style="width: 32px; height: 32px; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);"></div>
+                        </div>
+                        <div>
+                            <span class="contact-name">u/TopPoster</span>
+                            <small class="d-block text-muted">1.2K karma</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <script>
+        // Sort dropdown handler
+        document.getElementById('sortSelect').addEventListener('change', function() {
+            console.log('Sort by:', this.value);
+            // TODO: Reload posts with new sort
+        });
+        
+        // Load more button
+        document.getElementById('loadMoreBtn').addEventListener('click', function() {
+            console.log('Loading more posts...');
+            // TODO: Load more posts via AJAX
+            this.textContent = 'Đang tải...';
+            
+            setTimeout(() => {
+                this.textContent = 'Xem thêm bài viết';
+            }, 1000);
+        });
+    </script>
+
+</body>
+
+</html>

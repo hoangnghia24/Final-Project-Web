@@ -26,6 +26,10 @@ $(document).ready(function() {
     const recipientInput = $('#recipientInput');
     const sendNewMessageBtn = $('#sendNewMessageBtn');
     const searchInput = $('#searchConversations');
+    const imageUploadInput = $('#imageUploadInput');
+    const attachImageBtn = $('#attachImageBtn');
+    const emojiBtn = $('#emojiBtn');
+    const emojiPicker = $('#emojiPicker');
 
     // Initialize
     loadConversations();
@@ -65,13 +69,14 @@ $(document).ready(function() {
      */
     function handleIncomingMessage(messageData) {
         const currentUserId = localStorage.getItem('currentUserId');
-        
-        // Nếu đang chat với người gửi, hiển thị tin nhắn ngay
-        if (currentChatUserId == messageData.senderId || currentChatUserId == messageData.receiverId) {
+
+        // Nếu đang chat với người gửi/người nhận, hiển thị ngay
+        const otherUserId = messageData.senderId == currentUserId ? messageData.receiverId : messageData.senderId;
+        if (currentChatUserId == otherUserId) {
             appendMessage(messageData, currentUserId);
         }
-        
-        // Cập nhật danh sách conversations (reload để có tin nhắn mới nhất)
+
+        // Cập nhật danh sách conversations
         loadConversations();
     }
 
@@ -81,7 +86,7 @@ $(document).ready(function() {
     function appendMessage(msg, currentUserId) {
         const isSent = msg.senderId == currentUserId;
         const messageClass = isSent ? 'sent' : 'received';
-        const time = formatTime(msg.sentAt);
+        const time = formatTime(msg.sentAt || msg.timestamp);
         
         let messageHtml = '<div class="message-group"><div class="message ' + messageClass + '">';
         
@@ -91,16 +96,17 @@ $(document).ready(function() {
                                  alt="${msg.senderName}" class="message-avatar">`;
         }
         
+        const contentHtml = renderMessageContent(msg.content);
         messageHtml += `
             <div class="message-content">
-                <div class="message-bubble">${escapeHtml(msg.content)}</div>
+                <div class="message-bubble">${contentHtml}</div>
                 <span class="message-time">${time}</span>
             </div>
         `;
         
         messageHtml += '</div></div>';
         
-        messagesArea.append(messageHtml);
+        messagesArea.prepend(messageHtml);
         scrollToBottom();
     }
 
@@ -120,6 +126,8 @@ $(document).ready(function() {
             
             // Remove unread badge
             $(this).find('.unread-badge').fadeOut();
+            // Normalize preview style after opening
+            $(this).find('.conversation-preview').css({ fontWeight: '400', color: '#7c7c7c' });
         });
 
         // New message button clicks
@@ -141,6 +149,33 @@ $(document).ready(function() {
         // Send new message
         sendNewMessageBtn.on('click', sendNewMessage);
 
+        // Attach image flow
+        attachImageBtn.on('click', function() {
+            imageUploadInput.trigger('click');
+        });
+        imageUploadInput.on('change', handleImageUpload);
+
+        // Emoji picker toggle and insert
+        emojiBtn.on('click', function(e) {
+            e.stopPropagation();
+            const isShown = emojiPicker.is(':visible');
+            $('.emoji-picker-visible').hide().removeClass('emoji-picker-visible');
+            if (!isShown) {
+                emojiPicker.show().addClass('emoji-picker-visible');
+            }
+        });
+        // Click outside closes picker
+        $(document).on('click', function() {
+            emojiPicker.hide().removeClass('emoji-picker-visible');
+        });
+        // Prevent closing when clicking inside
+        emojiPicker.on('click', function(e) { e.stopPropagation(); });
+        // Handle emoji click
+        emojiPicker.on('click', 'span', function() {
+            const emoji = $(this).text();
+            insertAtCursor($('#messageInput')[0], emoji);
+        });
+
         // Recipient input - search users
         recipientInput.on('input', debounce(searchUsers, 300));
 
@@ -151,6 +186,60 @@ $(document).ready(function() {
         if (messagesArea.length) {
             scrollToBottom();
         }
+    }
+
+    function handleImageUpload() {
+        const file = this.files && this.files[0];
+        if (!file || !currentChatUserId) return;
+        const formData = new FormData();
+        formData.append('file', file);
+        $.ajax({
+            url: '/api/messages/upload-image',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(resp) {
+                if (resp && resp.success && resp.url) {
+                    const now = new Date();
+                    const messageData = {
+                        senderId: parseInt(localStorage.getItem('currentUserId')),
+                        receiverId: parseInt(currentChatUserId),
+                        content: 'IMG::' + resp.url,
+                        timestamp: now.toISOString()
+                    };
+                    if (stompClient && stompClient.connected) {
+                        try { stompClient.send('/app/chat', {}, JSON.stringify(messageData)); } catch (e) {}
+                    }
+                    appendMessage({
+                        senderId: messageData.senderId,
+                        receiverId: messageData.receiverId,
+                        content: messageData.content,
+                        sentAt: messageData.timestamp
+                    }, messageData.senderId);
+                    loadConversations();
+                } else {
+                    alert('Tải ảnh thất bại');
+                }
+                imageUploadInput.val('');
+            },
+            error: function() {
+                alert('Lỗi khi tải ảnh');
+                imageUploadInput.val('');
+            }
+        });
+    }
+
+    function insertAtCursor(input, text) {
+        if (!input) return;
+        const start = input.selectionStart || 0;
+        const end = input.selectionEnd || 0;
+        const value = input.value || '';
+        input.value = value.substring(0, start) + text + value.substring(end);
+        const pos = start + text.length;
+        input.selectionStart = input.selectionEnd = pos;
+        input.focus();
+        $(input).trigger('input');
     }
 
     /**
@@ -209,21 +298,44 @@ $(document).ready(function() {
             return;
         }
 
-        const html = partners.map(partner => `
+        const currentUserId = parseInt(localStorage.getItem('currentUserId'));
+        const sorted = partners.slice().sort((a, b) => {
+            const da = parseDate(a.lastMessageTime) || new Date(0);
+            const db = parseDate(b.lastMessageTime) || new Date(0);
+            return db - da; // newest conversation first
+        });
+        const html = sorted.map(partner => {
+            const hasUnread = (partner.unreadCount || 0) > 0;
+            const isFromOther = partner.lastMessageSenderId && partner.lastMessageSenderId != currentUserId;
+
+            let timeStr = '';
+            if (partner.lastMessageTime) {
+                const d = parseDate(partner.lastMessageTime);
+                if (d) timeStr = formatRelativeTime(d);
+            }
+
+            const rawText = partner.lastMessage || 'Bắt đầu trò chuyện...';
+            const previewHtml = (partner.lastMessageSenderId == currentUserId)
+                ? `<span style="font-weight:700">Bạn:</span> ${escapeHtml(rawText)}`
+                : `${escapeHtml(rawText)}`;
+            const msgStyle = (hasUnread && isFromOther) ? 'font-weight:700; color:#1c1c1c;' : 'font-weight:400; color:#7c7c7c;';
+
+            return `
             <div class="conversation-item" data-user-id="${partner.id}">
                 <div class="conversation-avatar">
-                    <img src="${partner.avatarUrl || 'https://api.dicebear.com/9.x/avataaars/svg?seed=' + partner.username}" 
+                    <img src="${partner.avatarUrl || 'https://api.dicebear.com/9.x/avataaars/svg?seed=' + (partner.username || partner.id)}" 
                          alt="${partner.fullName}">
                 </div>
                 <div class="conversation-content">
                     <div class="conversation-header">
                         <span class="conversation-name">${partner.fullName}</span>
-                        <span class="conversation-time">Gần đây</span>
+                        <span class="conversation-time">${timeStr}</span>
                     </div>
-                    <div class="conversation-preview">${partner.bio || 'Bắt đầu trò chuyện...'}</div>
+                    <div class="conversation-preview" style="${msgStyle}">${previewHtml}</div>
                 </div>
-            </div>
-        `).join('');
+                ${hasUnread ? `<div class="unread-badge">${partner.unreadCount}</div>` : ''}
+            </div>`;
+        }).join('');
 
         conversationsList.html(html);
     }
@@ -247,6 +359,8 @@ $(document).ready(function() {
         
         // Load messages for this user
         loadMessages(userId);
+        // Mark unread as read on open
+        markConversationAsRead(userId);
 
         console.log('Opened chat with:', userName, 'ID:', userId);
     }
@@ -282,6 +396,8 @@ $(document).ready(function() {
                     renderMessages(messages, currentUserId);
                 }
                 scrollToBottom();
+                // Refresh conversations to update last message and unread
+                loadConversations();
             },
             error: function(error) {
                 console.error('Error loading messages:', error);
@@ -294,10 +410,15 @@ $(document).ready(function() {
      * Render messages
      */
     function renderMessages(messages, currentUserId) {
-        const html = messages.map(msg => {
+        const sorted = messages.slice().sort((a, b) => {
+            const da = parseDate(a.sentAt || a.timestamp) || new Date(0);
+            const db = parseDate(b.sentAt || b.timestamp) || new Date(0);
+            return db - da; // newest first
+        });
+        const html = sorted.map(msg => {
             const isSent = msg.senderId == currentUserId;
             const messageClass = isSent ? 'sent' : 'received';
-            const time = formatTime(msg.sentAt);
+            const time = formatTime(msg.sentAt || msg.timestamp);
             
             let messageHtml = '<div class="message-group"><div class="message ' + messageClass + '">';
             
@@ -307,9 +428,10 @@ $(document).ready(function() {
                                      alt="${msg.senderName}" class="message-avatar">`;
             }
             
+            const contentHtml = renderMessageContent(msg.content);
             messageHtml += `
                 <div class="message-content">
-                    <div class="message-bubble">${escapeHtml(msg.content)}</div>
+                    <div class="message-bubble">${contentHtml}</div>
                     <span class="message-time">${time}</span>
                 </div>
             `;
@@ -325,10 +447,49 @@ $(document).ready(function() {
      * Format timestamp
      */
     function formatTime(timestamp) {
-        const date = new Date(timestamp);
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const d = parseDate(timestamp);
+        if (!d) return '';
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
         return hours + ':' + minutes;
+    }
+
+    function parseDate(value) {
+        try {
+            if (!value) return null;
+            if (typeof value === 'string') {
+                return new Date(value.replace('T', ' '));
+            }
+            if (Array.isArray(value)) {
+                return new Date(
+                    value[0],
+                    (value[1] || 1) - 1,
+                    value[2] || 1,
+                    value[3] || 0,
+                    value[4] || 0,
+                    value[5] || 0
+                );
+            }
+            const d = new Date(value);
+            return isNaN(d.getTime()) ? null : d;
+        } catch (e) {
+            console.error('Error parsing date:', value, e);
+            return null;
+        }
+    }
+
+    function formatRelativeTime(date) {
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        if (diffMins < 1) return 'Vừa xong';
+        if (diffMins < 60) return diffMins + ' phút';
+        if (diffMins < 1440) return Math.floor(diffMins / 60) + ' giờ';
+        if (diffMins < 10080) return Math.floor(diffMins / 1440) + ' ngày';
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
     }
 
     /**
@@ -342,48 +503,39 @@ $(document).ready(function() {
         }
 
         const now = new Date();
-        const timeStr = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+        const messageData = {
+            senderId: parseInt(localStorage.getItem('currentUserId')),
+            receiverId: parseInt(currentChatUserId),
+            content: content,
+            timestamp: now.toISOString()
+        };
 
-        // Create message element
-        const messageHtml = `
-            <div class="message-group">
-                <div class="message sent">
-                    <div class="message-content">
-                        <div class="message-bubble">${escapeHtml(content)}</div>
-                        <span class="message-time">${timeStr}</span>
-                    </div>
-                </div>
-            </div>
-        `;
+        // Gửi qua WebSocket nếu có kết nối
+        if (stompClient && stompClient.connected) {
+            try {
+                stompClient.send('/app/chat', {}, JSON.stringify(messageData));
+                console.log('Sent message via WebSocket:', messageData);
+            } catch (e) {
+                console.error('Error sending via WebSocket:', e);
+            }
+        } else {
+            console.warn('WebSocket not connected; message will appear locally');
+        }
 
-        // Append to messages area
-        messagesArea.append(messageHtml);
+        // Hiển thị ngay tin nhắn gửi
+        appendMessage({
+            senderId: messageData.senderId,
+            receiverId: messageData.receiverId,
+            content: messageData.content,
+            sentAt: messageData.timestamp
+        }, messageData.senderId);
 
-        // Clear input
+        // Clear input và scroll
         messageInput.val('');
-
-        // Scroll to bottom
         scrollToBottom();
 
-        // TODO: Send message to server via WebSocket/API
-        console.log('Sending message to user', currentChatUserId, ':', content);
-
-        // Simulate received response after 2 seconds
-        setTimeout(() => {
-            const responseHtml = `
-                <div class="message-group">
-                    <div class="message received">
-                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=user${currentChatUserId}" alt="Avatar" class="message-avatar">
-                        <div class="message-content">
-                            <div class="message-bubble">Cảm ơn bạn đã nhắn tin!</div>
-                            <span class="message-time">${timeStr}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            messagesArea.append(responseHtml);
-            scrollToBottom();
-        }, 2000);
+        // Refresh conversations to update preview/last time
+        loadConversations();
     }
 
     /**
@@ -472,6 +624,36 @@ $(document).ready(function() {
         }
     }
 
+    function markConversationAsRead(otherUserId) {
+        const currentUserId = localStorage.getItem('currentUserId');
+        if (!currentUserId || !otherUserId) return;
+
+        $.ajax({
+            url: `/api/messages/conversation?userId1=${currentUserId}&userId2=${otherUserId}`,
+            type: 'GET',
+            success: function(messages) {
+                messages.forEach(msg => {
+                    if (msg.senderId == otherUserId && !msg.isRead) {
+                        $.ajax({
+                            url: `/api/messages/read?messageId=${msg.id}`,
+                            type: 'POST',
+                            success: function() {
+                                // after marking read, refresh conversations
+                                loadConversations();
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error marking message as read:', error);
+                            }
+                        });
+                    }
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading conversation for markAsRead:', error);
+            }
+        });
+    }
+
     /**
      * Filter conversations by search
      */
@@ -495,8 +677,17 @@ $(document).ready(function() {
      */
     function scrollToBottom() {
         if (messagesArea.length) {
-            messagesArea[0].scrollTop = messagesArea[0].scrollHeight;
+            messagesArea[0].scrollTop = 0; // newest-first view keeps top visible
         }
+    }
+
+    function renderMessageContent(content) {
+        if (!content) return '';
+        if (typeof content === 'string' && content.startsWith('IMG::')) {
+            const url = content.substring(5);
+            return `<img src="${url}" alt="image" style="max-width:240px; border-radius:8px; display:block;" />`;
+        }
+        return escapeHtml(content);
     }
 
     /**

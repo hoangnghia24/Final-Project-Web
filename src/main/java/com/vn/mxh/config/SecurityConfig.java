@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         // 1. Cho phép truy cập các file tĩnh (CSS, JS, Ảnh) - ĐẶT TRƯỚC
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/client/**", "/auth/**", "/resources/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/client/**", "/auth/**", "/resources/**", "/uploads/**").permitAll()
                         
                         // 2. Cho phép WebSocket endpoints
                         .requestMatchers("/ws/**").permitAll()
@@ -38,9 +38,12 @@ public class SecurityConfig {
                         .requestMatchers("/graphql/**", "/graphiql/**").permitAll()
                         
                         // 4. Cho phép truy cập các trang VIEW (HTML) và POST endpoints
-                        .requestMatchers("/", "/home", "/login", "/register", "/profile/**", "/u/**", "/messages", "/edit-avatar", "/update-avatar").permitAll()
+                        .requestMatchers("/", "/home", "/login", "/register", "/profile/**", "/u/**", "/messages", "/edit-avatar", "/update-avatar", "/chat-test-to-admin", "/trending", "/explore", "/all").permitAll()
                         
-                        // 5. Các request còn lại cần authentication
+                        // 5. Cho phép truy cập các file test và HTML trong resources
+                        .requestMatchers("/*.html", "/chat-test-to-admin.html", "/websocket-test.html").permitAll()
+                        
+                        // 6. Các request còn lại cần authentication
                         .anyRequest().authenticated());
 
         return http.build();
