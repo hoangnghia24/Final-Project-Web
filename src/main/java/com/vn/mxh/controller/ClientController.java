@@ -74,6 +74,11 @@ public class ClientController {
         return "client/All";
     }
 
+    @GetMapping("/friends")
+    public String getFriends() {
+        return "client/Friends";
+    }
+
     @GetMapping("/saved")
     public String getSaved() {
         // TODO: Implement saved posts page
@@ -85,6 +90,32 @@ public class ClientController {
         // TODO: Implement settings page
         return "client/Home"; // Tạm thời redirect về home
     }
+
+    @GetMapping("/post-detail")
+    public String getPostDetail() {
+        return "client/PostDetail";
+    }
+
+    @GetMapping("/user-profile")
+    public String getUserProfile() {
+        return "client/UserProfile";
+    }
+
+    @GetMapping("/stories")
+    public String getStories() {
+        return "client/Stories";
+    }
+
+    @GetMapping("/groups")
+public String showGroupsPage(Model model) {
+    // Nếu bạn cần truyền dữ liệu user vào header thì giữ nguyên logic cũ
+    return "client/groups"; // Trả về file groups.html
+}
+
+@GetMapping("/events")
+public String showEventsPage(Model model) {
+    return "client/events"; // Trả về file events.html
+}
 
     @PostMapping("/update-avatar")
     @ResponseBody

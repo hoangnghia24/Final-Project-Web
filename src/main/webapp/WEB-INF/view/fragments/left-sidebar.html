@@ -42,6 +42,13 @@
                 <span>Khám phá</span>
             </a>
             
+            <a href="/friends" class="sidebar-nav-item">
+                <svg class="sidebar-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                </svg>
+                <span>Bạn bè</span>
+            </a>
+            
             <a href="/all" class="sidebar-nav-item">
                 <svg class="sidebar-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="8" y1="6" x2="21" y2="6"></line>
@@ -53,8 +60,137 @@
                 </svg>
                 <span>Tất cả</span>
             </a>
+            <!-- Nhóm của bạn (Accordion) -->
+            <div class="sidebar-accordion-block">
+                <a href="#" class="sidebar-nav-item sidebar-accordion-toggle" style="display:flex;align-items:center;">
+                    <svg class="sidebar-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                    </svg>
+                    <span>Nhóm của bạn</span>
+                    <span class="sidebar-chevron" style="margin-left:auto;transition:transform 0.3s;"><i class="fas fa-chevron-down"></i></span>
+                </a>
+                <ul class="sidebar-submenu" style="display:none;">
+                    <li>
+                        <a href="#" class="sidebar-nav-item sidebar-subitem" style="padding-left:48px;display:flex;align-items:center;">
+                            <img src="https://ui-avatars.com/api/?name=React&background=random&size=28" alt="React Group" class="sidebar-subitem-icon" style="width:28px;height:28px;border-radius:8px;object-fit:cover;margin-right:10px;">
+                            <span>Cộng đồng ReactJS</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-nav-item sidebar-subitem" style="padding-left:48px;display:flex;align-items:center;">
+                            <img src="https://ui-avatars.com/api/?name=JS&background=random&size=28" alt="Javascript Group" class="sidebar-subitem-icon" style="width:28px;height:28px;border-radius:8px;object-fit:cover;margin-right:10px;">
+                            <span>Javascript Việt Nam</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-nav-item sidebar-subitem" style="padding-left:48px;display:flex;align-items:center;">
+                            <img src="https://ui-avatars.com/api/?name=IT&background=random&size=28" alt="IT Group" class="sidebar-subitem-icon" style="width:28px;height:28px;border-radius:8px;object-fit:cover;margin-right:10px;">
+                            <span>Tuyển dụng IT</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-nav-item sidebar-subitem see-all" style="padding-left:48px;">
+                            <span>Xem tất cả</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <!-- Sự kiện (Accordion) -->
+            <div class="sidebar-accordion-block">
+                <a href="#" class="sidebar-nav-item sidebar-accordion-toggle" style="display:flex;align-items:center;">
+                    <svg class="sidebar-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V9h14v11zm0-13H5V6h14v1z"/>
+                    </svg>
+                    <span>Sự kiện</span>
+                    <span class="sidebar-chevron" style="margin-left:auto;transition:transform 0.3s;"><i class="fas fa-chevron-down"></i></span>
+                </a>
+                <ul class="sidebar-submenu" style="display:none;">
+                    <li>
+                        <a href="#" class="sidebar-nav-item sidebar-subitem" style="padding-left:48px;display:flex;align-items:center;">
+                            <img src="https://ui-avatars.com/api/?name=Spring&background=764ba2&color=fff&size=28" alt="Spring Boot" class="sidebar-subitem-icon" style="width:28px;height:28px;border-radius:8px;object-fit:cover;margin-right:10px;">
+                            <span>Workshop Spring Boot</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-nav-item sidebar-subitem" style="padding-left:48px;display:flex;align-items:center;">
+                            <img src="https://ui-avatars.com/api/?name=Hackathon&background=43cea2&color=fff&size=28" alt="Hackathon" class="sidebar-subitem-icon" style="width:28px;height:28px;border-radius:8px;object-fit:cover;margin-right:10px;">
+                            <span>Hackathon 2024</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-nav-item sidebar-subitem" style="padding-left:48px;display:flex;align-items:center;">
+                            <img src="https://ui-avatars.com/api/?name=Tech&background=667eea&color=fff&size=28" alt="Tech Offline" class="sidebar-subitem-icon" style="width:28px;height:28px;border-radius:8px;object-fit:cover;margin-right:10px;">
+                            <span>Tech Offline HCM</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-nav-item sidebar-subitem see-all" style="padding-left:48px;">
+                            <span>Xem tất cả</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </nav>
     </aside>
 </body>
 
+</body>
+<style>
+.sidebar-accordion-toggle .sidebar-chevron {
+    margin-left: auto;
+    transition: transform 0.3s;
+    display: flex;
+    align-items: center;
+}
+.sidebar-accordion-toggle.active .sidebar-chevron {
+    transform: rotate(-180deg);
+}
+.sidebar-submenu {
+    display: none;
+    padding-left: 0;
+    margin: 0;
+}
+.sidebar-subitem {
+    padding-left: 48px !important;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    color: #444;
+    text-decoration: none;
+}
+.sidebar-subitem:hover {
+    background: #f0f2f5;
+    color: #667eea;
+}
+.sidebar-subitem-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    object-fit: cover;
+    margin-right: 10px;
+}
+.sidebar-subitem.see-all {
+    color: #667eea;
+    font-weight: 500;
+    font-size: 0.97em;
+}
+.sidebar-subitem.see-all:hover {
+    text-decoration: underline;
+}
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('.sidebar-accordion-toggle').on('click', function(e) {
+        e.preventDefault();
+        var $block = $(this).closest('.sidebar-accordion-block');
+        var $submenu = $block.find('.sidebar-submenu').first();
+        $(this).toggleClass('active');
+        $submenu.stop().slideToggle(220);
+    });
+});
+</script>
 </html>

@@ -9,148 +9,673 @@
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/client/css/ModernUI.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/ModernPost.css}" rel="stylesheet" />
     <link th:href="@{/client/css/Profile.css}" rel="stylesheet" />
     <link th:href="@{/client/css/Header.css}" rel="stylesheet" />
     <link th:href="@{/client/css/LeftSidebar.css}" rel="stylesheet" />
     <link th:href="@{/client/css/Home.css}" rel="stylesheet" />
-    <script th:src="@{/client/js/TimeUtils.js}"></script>
-    <script th:src="@{/client/js/Header.js}"></script>
-    <script th:src="@{/client/js/LeftSidebar.js}"></script>
+    <link th:href="@{/client/css/Notifications.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/PostInteractions.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/RedditPost.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/DarkMode.css}" rel="stylesheet" />
 </head>
 
 <body>
 
+    <script th:src="@{/client/js/TimeUtils.js}"></script>
+    <script th:src="@{/client/js/Header.js}"></script>
+    <script th:src="@{/client/js/LeftSidebar.js}"></script>
+    <script th:src="@{/client/js/Notifications.js}"></script>
+    <script th:src="@{/client/js/RedditInteractions.js}"></script>
+    <script th:src="@{/client/js/PostInteractions.js}"></script>
+
     <!-- Include header fragment -->
-    <div th:replace="~{fragments/header :: user-header}"></div>
+    <div th:replace="~{fragments/Header :: user-header}"></div>
 
     <div class="home-container">
 
         <!-- Include left sidebar fragment -->
-        <div th:replace="~{fragments/left-sidebar :: left-sidebar}"></div>
+        <div th:replace="~{fragments/Left-Sidebar :: left-sidebar}"></div>
 
         <main class="main-feed">
-            <div class="post-form-card">
-                <div class="post-input-wrapper">
-                    <div class="avatar-circle" style="width: 40px; height: 40px;"></div>
-                    <input type="text" placeholder="Huỳnh Nguyên ơi, bạn đang nghĩ gì thế?">
+            <!-- Stories Section -->
+            <div class="stories-section">
+                <div class="story-card create-story">
+                    <div class="create-story-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
+                    </div>
+                    <div class="story-name">Tạo story</div>
                 </div>
-                <hr>
-                <div class="d-flex justify-content-between">
-                    <button class="btn btn-light text-secondary fw-bold">Video trực tiếp</button>
-                    <button class="btn btn-light text-secondary fw-bold">Ảnh/Video</button>
-                    <button class="btn btn-primary px-4 fw-bold">Đăng</button>
+                <div class="story-card" onclick="window.location.href='/stories'">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User1" alt="Story" class="story-image">
+                    <div class="story-avatar-wrapper">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User1" alt="Avatar" class="story-avatar">
+                    </div>
+                    <div class="story-name">Minh Anh</div>
+                </div>
+                <div class="story-card" onclick="window.location.href='/stories'">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User2" alt="Story" class="story-image">
+                    <div class="story-avatar-wrapper">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User2" alt="Avatar" class="story-avatar">
+                    </div>
+                    <div class="story-name">Hoàng Long</div>
+                </div>
+                <div class="story-card" onclick="window.location.href='/stories'">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User3" alt="Story" class="story-image">
+                    <div class="story-avatar-wrapper">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User3" alt="Avatar" class="story-avatar">
+                    </div>
+                    <div class="story-name">Thu Hà</div>
+                </div>
+                <div class="story-card" onclick="window.location.href='/stories'">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User4" alt="Story" class="story-image">
+                    <div class="story-avatar-wrapper">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User4" alt="Avatar" class="story-avatar">
+                    </div>
+                    <div class="story-name">Đức Anh</div>
                 </div>
             </div>
 
-            <div class="feed-card">
-                <div class="feed-header">
-                    <img src="https://www.redditstatic.com/avatars/defaults/v2/avatar_default_2.png"
-                        class="feed-avatar">
-                    <div>
-                        <h6 class="mb-0 fw-bold">Admin Hệ Thống</h6>
-                        <small class="text-muted">1 giờ trước •</small>
+            <!-- Create Post Box -->
+            <div class="create-post-box">
+                <div class="create-post-top">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=User" alt="Avatar" class="create-post-avatar">
+                    <input type="text" class="create-post-input" placeholder="Bạn đang nghĩ gì?" readonly onclick="alert('Chức năng tạo bài viết')">
+                </div>
+                <div class="create-post-actions">
+                    <button class="create-action-btn">
+                        <svg viewBox="0 0 24 24" fill="#45bd62" width="24" height="24">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5.04-6.71l-2.75 3.54-1.96-2.36L6.5 17h11l-3.54-4.71z"/>
+                        </svg>
+                        <span>Ảnh/Video</span>
+                    </button>
+                    <button class="create-action-btn">
+                        <svg viewBox="0 0 24 24" fill="#f7b928" width="24" height="24">
+                            <circle cx="15.5" cy="9.5" r="1.5"/><circle cx="8.5" cy="9.5" r="1.5"/>
+                            <path d="M12 14c-2.33 0-4.32 1.45-5.12 3.5h1.67c.69-1.19 1.97-2 3.45-2s2.75.81 3.45 2h1.67c-.8-2.05-2.79-3.5-5.12-3.5zm-.01-12C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+                        </svg>
+                        <span>Cảm xúc</span>
+                    </button>
+                    <button class="create-action-btn">
+                        <svg viewBox="0 0 24 24" fill="#f5533d" width="24" height="24">
+                            <path d="M17.34 5.46a1.2 1.2 0 1 0 1.73 1.66l.03-.03c.9-.9 2.18-1.21 3.34-1.04.62.09 1.14.41 1.55.86.41.45.64 1.01.64 1.59 0 .97-.39 1.86-1.02 2.53l-9.01 9.02c-.41.41-.96.61-1.51.61s-1.1-.2-1.51-.61L2.46 11.92c-1.31-1.31-1.31-3.44 0-4.75.63-.63 1.46-.98 2.34-.98.88 0 1.71.35 2.34.98l2.83 2.83 6.03-6.03a3.56 3.56 0 0 1 1.34-.51z"/>
+                        </svg>
+                        <span>Sự kiện</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs-unified">
+                <button class="filter-tab-btn active" data-filter="all">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    Tất cả
+                </button>
+                <button class="filter-tab-btn" data-filter="friends">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                    </svg>
+                    Bạn bè
+                </button>
+                <button class="filter-tab-btn" data-filter="popular">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                        <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                    </svg>
+                    Phổ biến
+                </button>
+                <button class="filter-tab-btn" data-filter="new">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    Mới nhất
+                </button>
+            </div>
+
+            <!-- Social Media Post Card Example 1 -->
+            <div class="reddit-post-card" data-post-id="1">
+                <!-- Post Header with User Info -->
+                <div class="post-header">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Admin" alt="Admin" class="post-user-avatar">
+                    <div class="post-user-info">
+                        <div class="post-user-name-row">
+                            <a href="#" class="post-user-name">Nguyễn Văn Admin</a>
+                            <button class="post-follow-btn">• Theo dõi</button>
+                        </div>
+                        <div class="post-time-privacy">
+                            <span class="post-time">2 giờ trước</span>
+                            <span>•</span>
+                            <svg class="post-privacy-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                            </svg>
+                            <span>Công khai</span>
+                        </div>
+                    </div>
+                    <div class="post-header-actions">
+                        <button class="post-menu-btn" onclick="togglePostMenu(event, 1)">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
-                <div class="feed-content">
-                    Chào mừng các bạn đã tham gia mạng xã hội TFT!
-                </div>
-                <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97" class="feed-image">
-                <hr>
-                <div class="d-flex text-center">
-                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Thích</button>
-                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Bình luận</button>
-                </div>
-            </div>
-        </main>
 
-        <aside class="right-sidebar">
-            <div class="contacts-widget">
-                <div class="contacts-header">
-                    <h6 class="contacts-title">Người liên hệ</h6>
-                    <div class="contacts-actions">
-                        <button class="icon-btn" title="Tìm kiếm">
-                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                            </svg>
-                        </button>
-                        <button class="icon-btn" title="Tùy chọn">
-                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
-                            </svg>
-                        </button>
+                <!-- Post Content -->
+                <div class="post-main-content">
+                    <span class="post-category-tag">🎉 Công nghệ</span>
+                    <div class="post-title-text">Chào mừng bạn đến với hệ thống mạng xã hội mới!</div>
+                    <div class="post-body-text">
+                        Thử các tính năng mới: Nhấn giữ nút thích để xem emoji reactions, bình luận, chia sẻ và lưu bài viết. Thiết kế hiện đại theo phong cách các mạng xã hội phổ biến!
                     </div>
                 </div>
                 
-                <div class="contacts-list">
-                    <!-- Online contacts -->
-                    <div class="contact-item">
-                        <div class="contact-avatar-wrapper">
-                            <div class="avatar-circle" style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-                            <span class="online-status"></span>
+                <img src="https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800" alt="Post image" class="post-full-image">
+                
+                <!-- Post Stats -->
+                <div class="post-stats-bar">
+                    <div class="post-stats-left">
+                        <div class="post-reactions-preview">
+                            <span class="reaction-icon-small">❤️</span>
+                            <span class="reaction-icon-small">👍</span>
+                            <span class="reaction-icon-small">😂</span>
                         </div>
-                        <span class="contact-name">Nguyễn Văn A</span>
+                        <span class="post-likes-count">Bạn và 141 người khác</span>
                     </div>
-                    
-                    <div class="contact-item">
-                        <div class="contact-avatar-wrapper">
-                            <div class="avatar-circle" style="width: 36px; height: 36px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
-                            <span class="online-status"></span>
-                        </div>
-                        <span class="contact-name">Trần Thị B</span>
+                    <div class="post-stats-right">
+                        <span class="post-stat-item">42 bình luận</span>
+                        <span class="post-stat-item">28 chia sẻ</span>
                     </div>
-                    
-                    <div class="contact-item">
-                        <div class="contact-avatar-wrapper">
-                            <div class="avatar-circle" style="width: 36px; height: 36px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
-                            <span class="online-status"></span>
+                </div>
+
+                <!-- Post Actions -->
+                <div class="post-action-buttons">
+                    <button class="action-btn post-like-btn" data-post-id="1" onmouseenter="showReactions(event)" onmouseleave="hideReactions(event)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        <span>Thích</span>
+                        <div class="reactions-popup">
+                            <span class="reaction-emoji" onclick="selectReaction(event, 1, '❤️')">❤️</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 1, '👍')">👍</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 1, '😂')">😂</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 1, '😮')">😮</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 1, '😢')">😢</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 1, '😠')">😠</span>
                         </div>
-                        <span class="contact-name">Lê Văn C</span>
+                    </button>
+                    <button class="action-btn">
+                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <span>Bình luận</span>
+                    </button>
+                    <button class="action-btn">
+                        <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                        <span>Chia sẻ</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Social Media Post Card Example 2 -->
+            <div class="reddit-post-card" data-post-id="2">
+                <div class="post-header">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=User123" alt="User" class="post-user-avatar">
+                    <div class="post-user-info">
+                        <div class="post-user-name-row">
+                            <a href="#" class="post-user-name">Trần Thị Hương</a>
+                            <button class="post-follow-btn following">• Đang theo dõi</button>
+                        </div>
+                        <div class="post-time-privacy">
+                            <span class="post-time">5 giờ trước</span>
+                            <span>•</span>
+                            <svg class="post-privacy-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                            </svg>
+                            <span>Bạn bè</span>
+                        </div>
                     </div>
-                    
-                    <div class="contact-item">
-                        <div class="contact-avatar-wrapper">
-                            <div class="avatar-circle" style="width: 36px; height: 36px; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);"></div>
-                            <span class="online-status"></span>
-                        </div>
-                        <span class="contact-name">Phạm Thị D</span>
+                    <div class="post-header-actions">
+                        <button class="post-menu-btn" onclick="togglePostMenu(event, 2)">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
                     </div>
-                    
-                    <div class="contact-item">
-                        <div class="contact-avatar-wrapper">
-                            <div class="avatar-circle" style="width: 36px; height: 36px; background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);"></div>
-                            <span class="online-status"></span>
-                        </div>
-                        <span class="contact-name">Hoàng Văn E</span>
+                </div>
+
+                <div class="post-main-content">
+                    <span class="post-category-tag">💡 Hỏi đáp</span>
+                    <div class="post-title-text">Tips học lập trình hiệu quả cho người mới bắt đầu</div>
+                    <div class="post-body-text">
+                        Sau 2 năm làm developer, tôi muốn chia sẻ một số tips giúp bạn học code hiệu quả hơn. Đầu tiên, hãy làm dự án thực tế thay vì chỉ xem tutorials. Thứ hai, đọc code của người khác và tham gia open source. Thứ ba, đừng ngại hỏi và chia sẻ kiến thức với cộng đồng!
                     </div>
-                    
-                    <!-- Offline contacts -->
-                    <div class="contact-item offline">
-                        <div class="contact-avatar-wrapper">
-                            <div class="avatar-circle" style="width: 36px; height: 36px; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);"></div>
+                </div>
+
+                <div class="post-stats-bar">
+                    <div class="post-stats-left">
+                        <div class="post-reactions-preview">
+                            <span class="reaction-icon-small">👍</span>
+                            <span class="reaction-icon-small">❤️</span>
                         </div>
-                        <span class="contact-name">Vũ Thị F</span>
+                        <span class="post-likes-count">89 lượt thích</span>
                     </div>
-                    
-                    <div class="contact-item offline">
-                        <div class="contact-avatar-wrapper">
-                            <div class="avatar-circle" style="width: 36px; height: 36px; background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);"></div>
-                        </div>
-                        <span class="contact-name">Đỗ Văn G</span>
+                    <div class="post-stats-right">
+                        <span class="post-stat-item">28 bình luận</span>
+                        <span class="post-stat-item">12 chia sẻ</span>
                     </div>
-                    
-                    <div class="contact-item offline">
-                        <div class="contact-avatar-wrapper">
-                            <div class="avatar-circle" style="width: 36px; height: 36px; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);"></div>
+                </div>
+
+                <div class="post-action-buttons">
+                    <button class="action-btn post-like-btn" data-post-id="2" onmouseenter="showReactions(event)" onmouseleave="hideReactions(event)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        <span>Thích</span>
+                        <div class="reactions-popup">
+                            <span class="reaction-emoji" onclick="selectReaction(event, 2, '❤️')">❤️</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 2, '👍')">👍</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 2, '😂')">😂</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 2, '😮')">😮</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 2, '😢')">😢</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 2, '😠')">😠</span>
                         </div>
-                        <span class="contact-name">Bùi Thị H</span>
+                    </button>
+                    <button class="action-btn">
+                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <span>Bình luận</span>
+                    </button>
+                    <button class="action-btn">
+                        <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                        <span>Chia sẻ</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Social Media Post Card Example 3 -->
+            <div class="reddit-post-card" data-post-id="3">
+                <div class="post-header">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=DevMaster" alt="Dev" class="post-user-avatar">
+                    <div class="post-user-info">
+                        <div class="post-user-name-row">
+                            <a href="#" class="post-user-name">Lê Minh Đức</a>
+                        </div>
+                        <div class="post-time-privacy">
+                            <span class="post-time">1 ngày trước</span>
+                            <span>•</span>
+                            <svg class="post-privacy-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                            </svg>
+                            <span>Công khai</span>
+                        </div>
+                    </div>
+                    <div class="post-header-actions">
+                        <button class="post-menu-btn" onclick="togglePostMenu(event, 3)">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="post-main-content">
+                    <span class="post-category-tag">🚀 Chia sẻ</span>
+                    <div class="post-title-text">Tôi vừa hoàn thành dự án mạng xã hội đầu tiên!</div>
+                    <div class="post-body-text">
+                        Sau 3 tháng cày cuốc, cuối cùng tôi cũng hoàn thành dự án TFT - một mạng xã hội với đầy đủ tính năng: đăng bài, kết bạn, chat, notifications, v.v. Rất vui được chia sẻ với cộng đồng!
+                    </div>
+                </div>
+                
+                <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800" alt="Project screenshot" class="post-full-image">
+
+                <div class="post-stats-bar">
+                    <div class="post-stats-left">
+                        <div class="post-reactions-preview">
+                            <span class="reaction-icon-small">👍</span>
+                            <span class="reaction-icon-small">❤️</span>
+                            <span class="reaction-icon-small">😮</span>
+                        </div>
+                        <span class="post-likes-count">Bạn, Mai và 254 người khác</span>
+                    </div>
+                    <div class="post-stats-right">
+                        <span class="post-stat-item">67 bình luận</span>
+                        <span class="post-stat-item">45 chia sẻ</span>
+                    </div>
+                </div>
+
+                <div class="post-action-buttons">
+                    <button class="action-btn post-like-btn liked" data-post-id="3" onmouseenter="showReactions(event)" onmouseleave="hideReactions(event)">
+                        <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        <span>❤️ Yêu thích</span>
+                        <div class="reactions-popup">
+                            <span class="reaction-emoji" onclick="selectReaction(event, 3, '❤️')">❤️</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 3, '👍')">👍</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 3, '😂')">😂</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 3, '😮')">😮</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 3, '😢')">😢</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 3, '😠')">😠</span>
+                        </div>
+                    </button>
+                    <button class="action-btn">
+                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <span>Bình luận</span>
+                    </button>
+                    <button class="action-btn">
+                        <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                        <span>Chia sẻ</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Load More -->
+            <div class="load-more-section">
+                <button class="load-more-btn">Xem thêm bài viết</button>
+            </div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <!-- Trending Topics Widget -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title-text">Xu hướng cho bạn</h3>
+                    <a href="#" class="widget-more">Xem tất cả</a>
+                </div>
+                <div class="trending-item">
+                    <span class="trending-rank">1</span>
+                    <div>
+                        <div class="trending-topic">#AITrends2024</div>
+                        <div class="trending-stats">45.2K bài viết • Đang thịnh hành</div>
+                    </div>
+                </div>
+                <div class="trending-item">
+                    <span class="trending-rank">2</span>
+                    <div>
+                        <div class="trending-topic">#WebDevelopment</div>
+                        <div class="trending-stats">32.8K bài viết • Công nghệ</div>
+                    </div>
+                </div>
+                <div class="trending-item">
+                    <span class="trending-rank">3</span>
+                    <div>
+                        <div class="trending-topic">#HealthyLifestyle</div>
+                        <div class="trending-stats">28.5K bài viết • Sức khỏe</div>
+                    </div>
+                </div>
+                <div class="trending-item">
+                    <span class="trending-rank">4</span>
+                    <div>
+                        <div class="trending-topic">#TravelVietnam</div>
+                        <div class="trending-stats">21.3K bài viết • Du lịch</div>
+                    </div>
+                </div>
+                <div class="trending-item">
+                    <span class="trending-rank">5</span>
+                    <div>
+                        <div class="trending-topic">#FoodieLife</div>
+                        <div class="trending-stats">18.7K bài viết • Ẩm thực</div>
                     </div>
                 </div>
             </div>
-        </aside>
+
+            <!-- Suggested Users Widget -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title-text">Gợi ý kết bạn</h3>
+                    <a href="#" class="widget-more">Xem tất cả</a>
+                </div>
+                <div class="suggested-user">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" alt="Avatar" class="suggested-avatar">
+                    <div class="suggested-info">
+                        <div class="suggested-name">
+                            Sarah Johnson
+                            <svg viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                            </svg>
+                        </div>
+                        <div class="suggested-mutual">12 bạn chung</div>
+                    </div>
+                    <button class="suggested-follow-btn">Theo dõi</button>
+                </div>
+                <div class="suggested-user">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Michael" alt="Avatar" class="suggested-avatar">
+                    <div class="suggested-info">
+                        <div class="suggested-name">Michael Chen</div>
+                        <div class="suggested-mutual">8 bạn chung</div>
+                    </div>
+                    <button class="suggested-follow-btn">Theo dõi</button>
+                </div>
+                <div class="suggested-user">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Emma" alt="Avatar" class="suggested-avatar">
+                    <div class="suggested-info">
+                        <div class="suggested-name">Emma Wilson</div>
+                        <div class="suggested-mutual">5 bạn chung</div>
+                    </div>
+                    <button class="suggested-follow-btn">Theo dõi</button>
+                </div>
+            </div>
+
+            <!-- Events Widget -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title-text">Sự kiện sắp diễn ra</h3>
+                    <a href="#" class="widget-more">Xem tất cả</a>
+                </div>
+                <div class="event-item">
+                    <div class="event-date">
+                        <div class="event-month">THG 6</div>
+                        <div class="event-day">15</div>
+                    </div>
+                    <div class="event-details">
+                        <div class="event-title">Tech Conference 2024</div>
+                        <div class="event-meta">10:00 AM • Online • 234 quan tâm</div>
+                    </div>
+                </div>
+                <div class="event-item">
+                    <div class="event-date">
+                        <div class="event-month">THG 6</div>
+                        <div class="event-day">20</div>
+                    </div>
+                    <div class="event-details">
+                        <div class="event-title">Community Meetup HN</div>
+                        <div class="event-meta">6:00 PM • Hà Nội • 89 quan tâm</div>
+                    </div>
+                </div>
+                <div class="event-item">
+                    <div class="event-date">
+                        <div class="event-month">THG 6</div>
+                        <div class="event-day">25</div>
+                    </div>
+                    <div class="event-details">
+                        <div class="event-title">Startup Workshop</div>
+                        <div class="event-meta">2:00 PM • TP.HCM • 156 quan tâm</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Online Friends Widget -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title-text">Bạn bè đang online</h3>
+                </div>
+                <div class="online-friend">
+                    <div class="online-avatar-wrapper">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="Avatar" class="online-avatar">
+                        <span class="online-indicator"></span>
+                    </div>
+                    <div class="online-name">Alex Thompson</div>
+                </div>
+                <div class="online-friend">
+                    <div class="online-avatar-wrapper">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Lisa" alt="Avatar" class="online-avatar">
+                        <span class="online-indicator"></span>
+                    </div>
+                    <div class="online-name">Lisa Park</div>
+                </div>
+                <div class="online-friend">
+                    <div class="online-avatar-wrapper">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=David" alt="Avatar" class="online-avatar">
+                        <span class="online-indicator"></span>
+                    </div>
+                    <div class="online-name">David Martinez</div>
+                </div>
+                <div class="online-friend">
+                    <div class="online-avatar-wrapper">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sophie" alt="Avatar" class="online-avatar">
+                        <span class="online-indicator"></span>
+                    </div>
+                    <div class="online-name">Sophie Anderson</div>
+                </div>
+            </div>
+
+            <!-- Sponsored Content Widget -->
+            <div class="widget-card sponsored-card">
+                <div class="sponsored-label">Được tài trợ</div>
+                <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400" alt="Sponsored" class="sponsored-image">
+                <div class="sponsored-title">Khám phá khóa học lập trình miễn phí</div>
+                <div class="sponsored-description">Học từ cơ bản đến nâng cao với các chuyên gia hàng đầu</div>
+                <a href="#" class="sponsored-link">edutech.vn</a>
+            </div>
+        </div><!-- End right-sidebar -->
 
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Mock localStorage for demo
+        if (!localStorage.getItem('currentUserId')) {
+            localStorage.setItem('currentUserId', '1');
+            localStorage.setItem('currentUsername', 'Demo User');
+            localStorage.setItem('currentUserAvatar', 'https://api.dicebear.com/9.x/avataaars/svg?seed=User');
+        }
+        
+        // Filter tabs functionality
+        document.querySelectorAll('.filter-tab-btn').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.filter-tab-btn').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                console.log('Filter changed to:', this.textContent);
+            });
+        });
+
+        // Reactions popup
+        let reactionTimer;
+        function showReactions(event) {
+            const btn = event.currentTarget;
+            const popup = btn.querySelector('.reactions-popup');
+            if (popup) {
+                clearTimeout(reactionTimer);
+                reactionTimer = setTimeout(() => {
+                    popup.classList.add('active');
+                }, 500);
+            }
+        }
+
+        function hideReactions(event) {
+            clearTimeout(reactionTimer);
+            const btn = event.currentTarget;
+            const popup = btn.querySelector('.reactions-popup');
+            if (popup) {
+                setTimeout(() => {
+                    popup.classList.remove('active');
+                }, 200);
+            }
+        }
+
+        function selectReaction(event, postId, emoji) {
+            event.stopPropagation();
+            const btn = event.target.closest('.post-like-btn');
+            const span = btn.querySelector('span');
+            
+            btn.classList.add('liked');
+            span.textContent = emoji + ' ' + getReactionName(emoji);
+            
+            const popup = btn.querySelector('.reactions-popup');
+            if (popup) popup.classList.remove('active');
+            
+            console.log('Reacted to post', postId, 'with', emoji);
+        }
+
+        function getReactionName(emoji) {
+            const names = {
+                '❤️': 'Yêu thích',
+                '👍': 'Thích',
+                '😂': 'Haha',
+                '😮': 'Wow',
+                '😢': 'Buồn',
+                '😠': 'Phẫn nộ'
+            };
+            return names[emoji] || 'Thích';
+        }
+
+        // Post menu
+        function togglePostMenu(event, postId) {
+            event.stopPropagation();
+            const btn = event.currentTarget;
+            
+            // Remove existing menus
+            document.querySelectorAll('.post-menu-dropdown').forEach(menu => menu.remove());
+            
+            // Create menu
+            const menu = document.createElement('div');
+            menu.className = 'post-menu-dropdown active';
+            menu.innerHTML = `
+                <div class="menu-item" onclick="savePost(${postId})">
+                    <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    Lưu bài viết
+                </div>
+                <div class="menu-item" onclick="hidePost(${postId})">
+                    <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Ẩn bài viết
+                </div>
+                <div class="menu-item" onclick="unfollowUser(${postId})">
+                    <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    Bỏ theo dõi
+                </div>
+                <div class="menu-divider"></div>
+                <div class="menu-item danger" onclick="reportPost(${postId})">
+                    <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Báo cáo bài viết
+                </div>
+            `;
+            
+            btn.parentElement.style.position = 'relative';
+            btn.parentElement.appendChild(menu);
+            
+            // Close on outside click
+            setTimeout(() => {
+                document.addEventListener('click', function closeMenu(e) {
+                    if (!menu.contains(e.target)) {
+                        menu.remove();
+                        document.removeEventListener('click', closeMenu);
+                    }
+                });
+            }, 10);
+        }
+
+        function savePost(postId) {
+            console.log('Saved post', postId);
+            alert('Đã lưu bài viết!');
+        }
+
+        function hidePost(postId) {
+            console.log('Hide post', postId);
+            const card = document.querySelector(`[data-post-id="${postId}"]`);
+            if (card) card.style.display = 'none';
+        }
+
+        function unfollowUser(postId) {
+            console.log('Unfollow user from post', postId);
+            alert('Đã bỏ theo dõi người dùng');
+        }
+
+        function reportPost(postId) {
+            console.log('Report post', postId);
+            alert('Cảm ơn bạn đã báo cáo. Chúng tôi sẽ xem xét.');
+        }
+    </script>
 </body>
 
 </html>

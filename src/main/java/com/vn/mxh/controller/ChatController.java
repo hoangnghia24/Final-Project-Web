@@ -7,6 +7,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -79,6 +80,7 @@ public class ChatController {
      */
     @GetMapping("/api/messages/conversation")
     @ResponseBody
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> getConversation(
             @RequestParam Long userId1,
             @RequestParam Long userId2) {
@@ -104,6 +106,7 @@ public class ChatController {
      */
     @GetMapping("/api/messages/conversations")
     @ResponseBody
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> getConversations(@RequestParam Long userId) {
         List<User> partners = messageService.getConversationPartners(userId);
         

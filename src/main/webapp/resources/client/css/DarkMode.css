@@ -1,0 +1,380 @@
+/* ============================================
+   DARK MODE COMPREHENSIVE OVERRIDE
+   Ensures all white backgrounds are converted
+   ============================================ */
+
+/* Force all white backgrounds to dark in dark mode */
+body.dark-mode {
+    background: #030303 !important;
+    color: #d7dadc !important;
+}
+
+/* Override any remaining white backgrounds */
+body.dark-mode *[style*="background: white"],
+body.dark-mode *[style*="background: #fff"],
+body.dark-mode *[style*="background: #ffffff"],
+body.dark-mode *[style*="background-color: white"],
+body.dark-mode *[style*="background-color: #fff"],
+body.dark-mode *[style*="background-color: #ffffff"] {
+    background: #1a1a1b !important;
+}
+
+/* Common white background classes */
+body.dark-mode .bg-white,
+body.dark-mode .background-white {
+    background: #1a1a1b !important;
+}
+
+/* Cards and containers */
+body.dark-mode .card,
+body.dark-mode .widget-card,
+body.dark-mode .sidebar-card,
+body.dark-mode .post-card,
+body.dark-mode .feed-card,
+body.dark-mode .story-card,
+body.dark-mode .comment-card,
+body.dark-mode .user-card,
+body.dark-mode .friend-card {
+    background: #1a1a1b !important;
+    border-color: #343536 !important;
+}
+
+/* Modals and popups */
+body.dark-mode .modal,
+body.dark-mode .popup,
+body.dark-mode .dropdown,
+body.dark-mode .menu,
+body.dark-mode .tooltip {
+    background: #1a1a1b !important;
+    border-color: #343536 !important;
+    color: #d7dadc !important;
+}
+
+/* Input fields */
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+    background: #272729 !important;
+    border-color: #343536 !important;
+    color: #d7dadc !important;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+    color: #818384 !important;
+}
+
+/* Buttons with white background */
+body.dark-mode button[style*="background: white"],
+body.dark-mode button[style*="background: #fff"],
+body.dark-mode .btn-white,
+body.dark-mode .btn-light {
+    background: #272729 !important;
+    border-color: #343536 !important;
+    color: #d7dadc !important;
+}
+
+/* Text colors */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6,
+body.dark-mode p,
+body.dark-mode span,
+body.dark-mode div,
+body.dark-mode label {
+    color: inherit;
+}
+
+/* Specific overrides for common elements */
+body.dark-mode .post-body-text,
+body.dark-mode .comment-text,
+body.dark-mode .user-name,
+body.dark-mode .title,
+body.dark-mode .description {
+    color: #d7dadc !important;
+}
+
+body.dark-mode .secondary-text,
+body.dark-mode .muted-text,
+body.dark-mode .time-text,
+body.dark-mode .meta-text {
+    color: #818384 !important;
+}
+
+/* Borders */
+body.dark-mode hr,
+body.dark-mode .divider,
+body.dark-mode .separator {
+    border-color: #343536 !important;
+}
+
+/* Shadows */
+body.dark-mode .shadow,
+body.dark-mode .shadow-sm,
+body.dark-mode .shadow-md,
+body.dark-mode .shadow-lg {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Hover states */
+body.dark-mode .hover-bg:hover,
+body.dark-mode *:hover[class*="hover"] {
+    background: #272729 !important;
+}
+
+/* Active states */
+body.dark-mode .active,
+body.dark-mode .selected {
+    background: #272729 !important;
+}
+
+/* Links */
+body.dark-mode a {
+    color: #66b3ff;
+}
+
+body.dark-mode a:hover {
+    color: #3d9fff;
+}
+
+/* Scrollbars */
+body.dark-mode ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background: #1a1a1b;
+}
+
+body.dark-mode ::-webkit-scrollbar-track {
+    background: #1a1a1b;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background: #343536;
+    border-radius: 4px;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: #4a4a4b;
+}
+
+/* Specific component overrides */
+
+/* Header */
+body.dark-mode header,
+body.dark-mode .header {
+    background: #1a1a1b !important;
+    border-bottom-color: #343536 !important;
+}
+
+/* Sidebar */
+body.dark-mode .sidebar,
+body.dark-mode .left-sidebar,
+body.dark-mode .right-sidebar,
+body.dark-mode aside {
+    background: #1a1a1b !important;
+    border-color: #343536 !important;
+}
+
+/* Main content areas */
+body.dark-mode main,
+body.dark-mode .main-content,
+body.dark-mode .content-area {
+    background: #030303 !important;
+}
+
+/* Navigation */
+body.dark-mode nav,
+body.dark-mode .nav,
+body.dark-mode .navigation {
+    background: #1a1a1b !important;
+}
+
+body.dark-mode .nav-item:hover,
+body.dark-mode .menu-item:hover {
+    background: #272729 !important;
+}
+
+/* Tables */
+body.dark-mode table {
+    background: #1a1a1b !important;
+    color: #d7dadc !important;
+}
+
+body.dark-mode th {
+    background: #272729 !important;
+    color: #d7dadc !important;
+    border-color: #343536 !important;
+}
+
+body.dark-mode td {
+    border-color: #343536 !important;
+}
+
+body.dark-mode tr:hover {
+    background: #272729 !important;
+}
+
+/* Forms */
+body.dark-mode form {
+    background: #1a1a1b !important;
+}
+
+body.dark-mode .form-group,
+body.dark-mode .form-control {
+    background: #272729 !important;
+    border-color: #343536 !important;
+    color: #d7dadc !important;
+}
+
+/* Badges and tags */
+body.dark-mode .badge,
+body.dark-mode .tag,
+body.dark-mode .chip {
+    background: #272729 !important;
+    border-color: #343536 !important;
+    color: #d7dadc !important;
+}
+
+/* Alerts and notifications */
+body.dark-mode .alert,
+body.dark-mode .notification {
+    background: #1a1a1b !important;
+    border-color: #343536 !important;
+    color: #d7dadc !important;
+}
+
+/* Code blocks */
+body.dark-mode code,
+body.dark-mode pre {
+    background: #272729 !important;
+    color: #d7dadc !important;
+}
+
+/* Images - ensure they don't have white backgrounds */
+body.dark-mode img {
+    background: transparent !important;
+}
+
+/* SVG icons */
+body.dark-mode svg {
+    fill: currentColor;
+}
+
+/* Loading states */
+body.dark-mode .loading,
+body.dark-mode .skeleton {
+    background: linear-gradient(90deg, #1a1a1b 0%, #272729 50%, #1a1a1b 100%) !important;
+}
+
+/* Empty states */
+body.dark-mode .empty-state {
+    background: #1a1a1b !important;
+    color: #818384 !important;
+}
+
+/* Footer */
+body.dark-mode footer,
+body.dark-mode .footer {
+    background: #1a1a1b !important;
+    border-top-color: #343536 !important;
+}
+
+/* Specific Reddit-style components */
+body.dark-mode .reddit-post-card,
+body.dark-mode .post-detail-card,
+body.dark-mode .comment-wrapper {
+    background: #1a1a1b !important;
+    border-color: #343536 !important;
+}
+
+/* Modern Post components */
+body.dark-mode .modern-post,
+body.dark-mode .post-container,
+body.dark-mode .post-wrapper {
+    background: #1a1a1b !important;
+    border-color: #343536 !important;
+}
+
+/* Stories */
+body.dark-mode .stories-section,
+body.dark-mode .story-viewer {
+    background: #000000 !important;
+}
+
+body.dark-mode .story-card.create-story {
+    background: #1a1a1b !important;
+    border-color: #343536 !important;
+}
+
+/* Messages and Chat */
+body.dark-mode .conversation-item,
+body.dark-mode .message-bubble,
+body.dark-mode .chat-window {
+    background: #1a1a1b !important;
+    border-color: #343536 !important;
+}
+
+body.dark-mode .message-input {
+    background: #272729 !important;
+    border-color: #343536 !important;
+}
+
+/* Profile sections */
+body.dark-mode .profile-header,
+body.dark-mode .profile-card,
+body.dark-mode .user-info {
+    background: #1a1a1b !important;
+    border-color: #343536 !important;
+}
+
+/* Explore page */
+body.dark-mode .explore-hero,
+body.dark-mode .category-card,
+body.dark-mode .topic-card {
+    background: #1a1a1b !important;
+    border-color: #343536 !important;
+}
+
+/* Friends page */
+body.dark-mode .friend-request-card,
+body.dark-mode .friend-suggestion-card {
+    background: #1a1a1b !important;
+    border-color: #343536 !important;
+}
+
+/* Quick stats */
+body.dark-mode .quick-stat-card,
+body.dark-mode .stat-widget {
+    background: #1a1a1b !important;
+    border-color: #343536 !important;
+}
+
+/* Reactions and interactions */
+body.dark-mode .reactions-popup,
+body.dark-mode .share-modal,
+body.dark-mode .likes-modal {
+    background: #1a1a1b !important;
+    border-color: #343536 !important;
+}
+
+/* Ensure smooth transition */
+body.dark-mode * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* Print mode - revert to light */
+@media print {
+    body.dark-mode {
+        background: white !important;
+        color: black !important;
+    }
+    
+    body.dark-mode * {
+        background: white !important;
+        color: black !important;
+        border-color: #ccc !important;
+    }
+}

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Interactions Demo - TFT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .demo-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            background: linear-gradient(135deg, #ff6b9d 0%, #c73866 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .demo-header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .demo-header p {
+            opacity: 0.9;
+        }
+    </style>
+    <link rel="stylesheet" href="/resources/client/css/PostInteractions.css">
+</head>
+
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>❤️ Post Interactions Demo</h1>
+            <p>Test all features: Like, Comment, Share, Save, Emoji Reactions</p>
+        </div>
+
+        <!-- EXAMPLE POST CARD -->
+        <div class="post-card" data-post-id="1">
+            <!-- Post Header -->
+            <div class="post-header">
+                <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Admin" alt="Admin" class="post-avatar">
+                <div class="post-author-info">
+                    <div class="post-author-name">Admin Hệ Thống</div>
+                    <div class="post-timestamp">2 giờ trước • 🌍</div>
+                </div>
+                <button class="post-more-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="12" cy="5" r="2"></circle>
+                        <circle cx="12" cy="12" r="2"></circle>
+                        <circle cx="12" cy="19" r="2"></circle>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Post Content -->
+            <div class="post-content">
+                Chào mừng bạn đến với hệ thống tương tác bài viết! 🎉<br><br>
+                
+                <strong>Thử các tính năng:</strong><br>
+                ❤️ Click "Thích" để like (hoặc long-press để chọn emoji)<br>
+                💬 Click "Bình luận" để comment<br>
+                📤 Click "Chia sẻ" để share<br>
+                🔖 Click nút Save ở góc trên<br>
+                👁️ Click số lượt thích để xem danh sách
+            </div>
+
+            <!-- Post Image -->
+            <img src="https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800" alt="Post image" class="post-image">
+
+            <!-- Post Stats -->
+            <div class="post-stats">
+                <div class="post-stats-left">
+                    <div class="post-reaction-icons">
+                        <div class="post-reaction-icon reaction-like">👍</div>
+                        <div class="post-reaction-icon reaction-love">❤️</div>
+                        <div class="post-reaction-icon reaction-haha">😂</div>
+                    </div>
+                    <span class="post-likes-count">42</span>
+                </div>
+                <div class="post-stats-right">
+                    <span class="post-stat-item"><span class="post-comments-count">12</span> bình luận</span>
+                    <span class="post-stat-item"><span class="post-shares-count">5</span> chia sẻ</span>
+                </div>
+            </div>
+
+            <!-- Post Actions -->
+            <div class="post-actions">
+                <button class="post-action-btn post-like-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    <span>Thích</span>
+                </button>
+                <button class="post-action-btn post-comment-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Bình luận</span>
+                </button>
+                <button class="post-action-btn post-share-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="18" cy="5" r="3"></circle>
+                        <circle cx="6" cy="12" r="3"></circle>
+                        <circle cx="18" cy="19" r="3"></circle>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                    </svg>
+                    <span>Chia sẻ</span>
+                </button>
+                <button class="post-action-btn post-save-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Lưu</span>
+                </button>
+            </div>
+
+            <!-- Save Indicator -->
+            <div class="post-saved-indicator">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="post-comments-section">
+                <!-- Comment Input -->
+                <div class="comment-input-wrapper">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=User" alt="You" class="comment-avatar">
+                    <div class="comment-input-box">
+                        <input type="text" class="comment-input" placeholder="Viết bình luận...">
+                        <button class="comment-emoji-btn" title="Emoji">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="white" stroke-width="2" fill="none"></path>
+                                <line x1="9" y1="9" x2="9.01" y2="9" stroke="white" stroke-width="2"></line>
+                                <line x1="15" y1="9" x2="15.01" y2="9" stroke="white" stroke-width="2"></line>
+                            </svg>
+                        </button>
+                        <button class="comment-send-btn">Gửi</button>
+                    </div>
+                </div>
+
+                <!-- Comments List -->
+                <div class="comments-list">
+                    <!-- Comment 1 -->
+                    <div class="comment-item" data-comment-id="1">
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=User1" alt="User 1" class="comment-avatar">
+                        <div class="comment-content-wrapper">
+                            <div class="comment-bubble">
+                                <div class="comment-author">Nguyễn Văn A</div>
+                                <div class="comment-text">Tính năng này thật tuyệt vời! 🎉</div>
+                            </div>
+                            <div class="comment-actions">
+                                <span class="comment-action comment-like-action">Thích</span>
+                                <span class="comment-action comment-reply-action">Trả lời</span>
+                                <span class="comment-timestamp">5 phút</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comment 2 with replies -->
+                    <div class="comment-item" data-comment-id="2">
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=User2" alt="User 2" class="comment-avatar">
+                        <div class="comment-content-wrapper">
+                            <div class="comment-bubble">
+                                <div class="comment-author">Trần Thị B</div>
+                                <div class="comment-text">Mình rất thích emoji reactions! ❤️😂</div>
+                            </div>
+                            <div class="comment-actions">
+                                <span class="comment-action comment-like-action liked">Đã thích</span>
+                                <span class="comment-action comment-reply-action">Trả lời</span>
+                                <span class="comment-timestamp">10 phút</span>
+                            </div>
+
+                            <!-- Nested Reply -->
+                            <div class="comment-replies">
+                                <div class="comment-item" data-comment-id="3">
+                                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Admin" alt="Admin" class="comment-avatar">
+                                    <div class="comment-content-wrapper">
+                                        <div class="comment-bubble">
+                                            <div class="comment-author">Admin Hệ Thống</div>
+                                            <div class="comment-text">Cảm ơn bạn! 🙏</div>
+                                        </div>
+                                        <div class="comment-actions">
+                                            <span class="comment-action comment-like-action">Thích</span>
+                                            <span class="comment-action comment-reply-action">Trả lời</span>
+                                            <span class="comment-timestamp">8 phút</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comment 3 -->
+                    <div class="comment-item" data-comment-id="4">
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=User3" alt="User 3" class="comment-avatar">
+                        <div class="comment-content-wrapper">
+                            <div class="comment-bubble">
+                                <div class="comment-author">Lê Văn C</div>
+                                <div class="comment-text">Animation rất mượt mà! 👏</div>
+                            </div>
+                            <div class="comment-actions">
+                                <span class="comment-action comment-like-action">Thích</span>
+                                <span class="comment-action comment-reply-action">Trả lời</span>
+                                <span class="comment-timestamp">15 phút</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions Card -->
+        <div class="post-card" style="margin-top: 20px; padding: 24px;">
+            <h3 style="margin-bottom: 16px; color: #1c1e21;">📖 Hướng dẫn sử dụng</h3>
+            
+            <div style="line-height: 1.8; color: #65676b;">
+                <p><strong>❤️ Like với Emoji Reactions:</strong></p>
+                <ul style="margin: 8px 0 16px 20px;">
+                    <li>Click nhanh "Thích" → like thông thường</li>
+                    <li>Long-press "Thích" → hiện bảng chọn emoji</li>
+                    <li>Có 6 emoji: 👍 ❤️ 😂 😮 😢 😠</li>
+                    <li>Flying hearts animation khi like</li>
+                </ul>
+
+                <p><strong>💬 Comments:</strong></p>
+                <ul style="margin: 8px 0 16px 20px;">
+                    <li>Nhập text và nhấn Enter hoặc nút "Gửi"</li>
+                    <li>Click "Thích" trên comment</li>
+                    <li>Click "Trả lời" để reply (nested comments)</li>
+                    <li>Real-time update số lượng comments</li>
+                </ul>
+
+                <p><strong>📤 Share:</strong></p>
+                <ul style="margin: 8px 0 16px 20px;">
+                    <li>Chia sẻ ngay lên newsfeed</li>
+                    <li>Chia sẻ lên Story</li>
+                    <li>Gửi qua tin nhắn</li>
+                    <li>Sao chép link</li>
+                </ul>
+
+                <p><strong>🔖 Save/Bookmark:</strong></p>
+                <ul style="margin: 8px 0 16px 20px;">
+                    <li>Click nút "Lưu" để save bài viết</li>
+                    <li>Icon bookmark xuất hiện ở góc phải</li>
+                    <li>Click lại để unsave</li>
+                </ul>
+
+                <p><strong>👁️ View Likes:</strong></p>
+                <ul style="margin: 8px 0 16px 20px;">
+                    <li>Click vào số lượt thích</li>
+                    <li>Xem danh sách người đã thích</li>
+                    <li>Filter theo emoji reaction</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock localStorage for demo
+        localStorage.setItem('currentUserId', '1');
+        localStorage.setItem('currentUsername', 'Demo User');
+        localStorage.setItem('currentUserAvatar', 'https://api.dicebear.com/9.x/avataaars/svg?seed=User');
+    </script>
+    <script src="/resources/client/js/PostInteractions.js"></script>
+</body>
+
+</html>

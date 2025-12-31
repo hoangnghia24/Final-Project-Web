@@ -41,8 +41,10 @@ $(document).ready(function() {
      */
     function connectWebSocket() {
         const currentUserId = localStorage.getItem('currentUserId');
+        console.log('🔌 Attempting to connect WebSocket for user:', currentUserId);
+        
         if (!currentUserId) {
-            console.warn('No user ID, skipping WebSocket connection');
+            console.warn('⚠️ No user ID, skipping WebSocket connection');
             return;
         }
 
@@ -51,16 +53,19 @@ $(document).ready(function() {
         stompClient.debug = null; // Tắt debug log
 
         stompClient.connect({}, function(frame) {
-            console.log('WebSocket connected for user:', currentUserId);
+            console.log('✅ WebSocket connected successfully for user:', currentUserId);
+            console.log('Subscribing to: /user/' + currentUserId + '/queue/messages');
             
             // Subscribe để nhận tin nhắn
             stompClient.subscribe('/user/' + currentUserId + '/queue/messages', function(message) {
                 const data = JSON.parse(message.body);
-                console.log('Received real-time message:', data);
+                console.log('📬 Received real-time message from WebSocket:', data);
                 handleIncomingMessage(data);
             });
+            
+            console.log('✅ Subscribed to message queue');
         }, function(error) {
-            console.error('WebSocket connection error:', error);
+            console.error('❌ WebSocket connection error:', error);
         });
     }
 
@@ -68,22 +73,39 @@ $(document).ready(function() {
      * Handle incoming message from WebSocket
      */
     function handleIncomingMessage(messageData) {
-        const currentUserId = localStorage.getItem('currentUserId');
+        const currentUserId = parseInt(localStorage.getItem('currentUserId'));
+        console.log('📨 Received message from WebSocket:', messageData);
+        console.log('Current user ID:', currentUserId, 'Type:', typeof currentUserId);
+        console.log('Message senderId:', messageData.senderId, 'Type:', typeof messageData.senderId);
+        console.log('Message receiverId:', messageData.receiverId, 'Type:', typeof messageData.receiverId);
 
         // Nếu đang chat với người gửi/người nhận, hiển thị ngay
-        const otherUserId = messageData.senderId == currentUserId ? messageData.receiverId : messageData.senderId;
-        if (currentChatUserId == otherUserId) {
+        const otherUserId = parseInt(messageData.senderId) === currentUserId 
+            ? parseInt(messageData.receiverId) 
+            : parseInt(messageData.senderId);
+        
+        console.log('Current chat user ID:', currentChatUserId, 'Type:', typeof currentChatUserId);
+        console.log('Other user ID:', otherUserId, 'Type:', typeof otherUserId);
+        
+        if (parseInt(currentChatUserId) === parseInt(otherUserId)) {
+            console.log('✅ Displaying message in current chat');
             appendMessage(messageData, currentUserId);
+        } else {
+            console.log('ℹ️ Message from different user, not displaying. Current:', currentChatUserId, 'Other:', otherUserId);
         }
 
-        // Cập nhật danh sách conversations
-        loadConversations();
+        // Cập nhật danh sách conversations sau một chút để tránh conflict
+        setTimeout(() => {
+            loadConversations();
+        }, 300);
     }
 
     /**
      * Append a single message to messages area
      */
     function appendMessage(msg, currentUserId) {
+        console.log('📩 Appending message:', msg);
+        
         const isSent = msg.senderId == currentUserId;
         const messageClass = isSent ? 'sent' : 'received';
         const time = formatTime(msg.sentAt || msg.timestamp);
@@ -106,8 +128,13 @@ $(document).ready(function() {
         
         messageHtml += '</div></div>';
         
-        messagesArea.prepend(messageHtml);
-        scrollToBottom();
+        messagesArea.append(messageHtml);
+        console.log('✅ Message appended, scrolling to bottom...');
+        
+        // Đảm bảo scroll sau khi DOM được render
+        setTimeout(() => {
+            scrollToBottom();
+        }, 50);
     }
 
     /**
@@ -118,7 +145,13 @@ $(document).ready(function() {
         conversationsList.on('click', '.conversation-item', function() {
             const userId = $(this).data('user-id');
             const userName = $(this).find('.conversation-name').text();
-            openChat(userId, userName);
+            
+            // Chỉ mở chat nếu khác chat hiện tại
+            if (currentChatUserId != userId) {
+                openChat(userId, userName);
+            } else {
+                console.log('ℹ️ Already in this chat');
+            }
             
             // Update active state
             $('.conversation-item').removeClass('active');
@@ -217,7 +250,9 @@ $(document).ready(function() {
                         content: messageData.content,
                         sentAt: messageData.timestamp
                     }, messageData.senderId);
-                    loadConversations();
+                    setTimeout(() => {
+                        loadConversations();
+                    }, 300);
                 } else {
                     alert('Tải ảnh thất bại');
                 }
@@ -249,36 +284,60 @@ $(document).ready(function() {
         // Lấy userId hiện tại từ localStorage (đã set khi login)
         const currentUserId = localStorage.getItem('currentUserId');
         
+        console.log('=== Loading Conversations ===');
         console.log('Current User ID:', currentUserId);
+        console.log('localStorage keys:', Object.keys(localStorage));
         
-        if (!currentUserId) {
+        if (!currentUserId || currentUserId === 'null' || currentUserId === 'undefined') {
             console.warn('No current user ID found in localStorage');
             conversationsList.html(`
                 <div style="text-align: center; padding: 40px 20px; color: #e74c3c;">
                     <p><strong>⚠️ Lỗi:</strong> Không tìm thấy thông tin đăng nhập.</p>
-                    <p>Vui lòng <a href="/login">đăng nhập lại</a></p>
+                    <p>localStorage không có currentUserId</p>
+                    <p>Vui lòng <a href="/login" style="color: #3b82f6; text-decoration: underline;">đăng nhập lại</a></p>
                 </div>
             `);
+            emptyState.show();
+            chatActive.hide();
             return;
         }
 
         // Gọi API để lấy danh sách người đã chat
+        console.log('Fetching conversations from API...');
         $.ajax({
             url: '/api/messages/conversations',
             method: 'GET',
             data: { userId: currentUserId },
             success: function(data) {
+                console.log('✅ Conversations loaded successfully:', data.length, 'conversations');
+                console.log('Data:', data);
                 conversations = data;
                 renderConversations(data);
-                console.log('Loaded conversations:', data.length, data);
             },
             error: function(xhr, status, error) {
-                console.error('Error loading conversations:', xhr.status, error);
-                console.error('Response:', xhr.responseText);
+                console.error('❌ Error loading conversations');
+                console.error('Status:', xhr.status);
+                console.error('Error:', error);
+                console.error('Response Text:', xhr.responseText);
+                
+                let errorMsg = `Lỗi ${xhr.status}`;
+                if (xhr.status === 404) {
+                    errorMsg = 'API endpoint không tìm thấy';
+                } else if (xhr.status === 500) {
+                    errorMsg = 'Lỗi server - Kiểm tra database';
+                } else if (xhr.status === 0) {
+                    errorMsg = 'Không thể kết nối server';
+                }
+                
                 conversationsList.html(`
                     <div style="text-align: center; padding: 40px 20px; color: #e74c3c;">
-                        <p><strong>⚠️ Lỗi tải danh sách:</strong> ${xhr.status} - ${error}</p>
-                        <p>Vui lòng thử lại sau</p>
+                        <p><strong>⚠️ ${errorMsg}</strong></p>
+                        <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                            ${xhr.responseText || error}
+                        </p>
+                        <button onclick="location.reload()" style="margin-top: 15px; padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            Thử lại
+                        </button>
                     </div>
                 `);
             }
@@ -344,8 +403,15 @@ $(document).ready(function() {
      * Open chat with specific user
      */
     function openChat(userId, userName) {
+        // Đảm bảo userId là number
+        userId = parseInt(userId);
+        
+        const wasAlreadyOpen = (currentChatUserId === userId);
+        
         currentChatUserId = userId;
         currentChatUserName = userName;
+
+        console.log('📂 Opening chat - User ID:', userId, 'Type:', typeof userId, 'Name:', userName);
 
         // Hide empty state and new message form
         emptyState.hide();
@@ -357,8 +423,14 @@ $(document).ready(function() {
         // Update chat header
         $('#chatUserName').text(userName);
         
-        // Load messages for this user
-        loadMessages(userId);
+        // Chỉ load messages nếu chưa mở chat này, hoặc cần refresh
+        if (!wasAlreadyOpen) {
+            console.log('🔄 Loading messages for new chat:', userName, 'ID:', userId);
+            loadMessages(userId);
+        } else {
+            console.log('ℹ️ Chat already open, not reloading');
+        }
+        
         // Mark unread as read on open
         markConversationAsRead(userId);
 
@@ -413,7 +485,7 @@ $(document).ready(function() {
         const sorted = messages.slice().sort((a, b) => {
             const da = parseDate(a.sentAt || a.timestamp) || new Date(0);
             const db = parseDate(b.sentAt || b.timestamp) || new Date(0);
-            return db - da; // newest first
+            return da - db; // oldest first, newest last (at bottom)
         });
         const html = sorted.map(msg => {
             const isSent = msg.senderId == currentUserId;
@@ -530,12 +602,13 @@ $(document).ready(function() {
             sentAt: messageData.timestamp
         }, messageData.senderId);
 
-        // Clear input và scroll
+        // Clear input
         messageInput.val('');
-        scrollToBottom();
 
-        // Refresh conversations to update preview/last time
-        loadConversations();
+        // Refresh conversations sau một chút để cập nhật danh sách bên trái
+        setTimeout(() => {
+            loadConversations();
+        }, 300);
     }
 
     /**
@@ -677,7 +750,9 @@ $(document).ready(function() {
      */
     function scrollToBottom() {
         if (messagesArea.length) {
-            messagesArea[0].scrollTop = 0; // newest-first view keeps top visible
+            const element = messagesArea[0];
+            element.scrollTop = element.scrollHeight;
+            console.log('📜 Scrolled to bottom - scrollHeight:', element.scrollHeight, 'scrollTop:', element.scrollTop);
         }
     }
 

@@ -207,7 +207,8 @@ $(document).ready(function() {
         
         // Load chat function
         function loadChat(userId, userName, avatarUrl) {
-            currentChatUserId = userId;
+            currentChatUserId = parseInt(userId);
+            console.log('📂 Opening chat in header popup - User ID:', currentChatUserId, 'Type:', typeof currentChatUserId);
             
             // Hide empty state, show chat view
             document.getElementById('messages-popup-empty').style.display = 'none';
@@ -308,14 +309,22 @@ $(document).ready(function() {
         }
         
         function handleIncomingMessageInHeader(messageData) {
-            console.log('New message received:', messageData);
+            console.log('📬 New message received in header popup:', messageData);
             
-            const currentUserId = localStorage.getItem('currentUserId');
-            const otherUserId = messageData.senderId == currentUserId ? messageData.receiverId : messageData.senderId;
+            const currentUserId = parseInt(localStorage.getItem('currentUserId'));
+            const otherUserId = parseInt(messageData.senderId) === currentUserId 
+                ? parseInt(messageData.receiverId) 
+                : parseInt(messageData.senderId);
+            
+            console.log('Current chat user ID:', currentChatUserId, 'Type:', typeof currentChatUserId);
+            console.log('Other user ID:', otherUserId, 'Type:', typeof otherUserId);
             
             // If chat is open with this user, display message
-            if (currentChatUserId == otherUserId) {
+            if (parseInt(currentChatUserId) === parseInt(otherUserId)) {
+                console.log('✅ Displaying message in header popup');
                 displayMessageInPopup(messageData, false);
+            } else {
+                console.log('ℹ️ Message from different user, not displaying in popup');
             }
             
             // Update conversation list
@@ -346,13 +355,13 @@ $(document).ready(function() {
                 </div>
             `;
             
-            // Prepend newest on top
-            if (messagesContainer.firstChild) {
-                messagesContainer.insertBefore(messageDiv, messagesContainer.firstChild);
-            } else {
-                messagesContainer.appendChild(messageDiv);
-            }
-            messagesContainer.scrollTop = 0;
+            // Append newest at bottom (like Messages page)
+            messagesContainer.appendChild(messageDiv);
+            
+            // Scroll to bottom to show newest message
+            setTimeout(() => {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 50);
         }
         
         function loadConversationPartners() {
@@ -580,7 +589,7 @@ $(document).ready(function() {
                     if (Array.isArray(b.sentAt)) return new Date(b.sentAt[0], b.sentAt[1]-1, b.sentAt[2], b.sentAt[3]||0, b.sentAt[4]||0, b.sentAt[5]||0);
                     return new Date(b.sentAt);
                 })();
-                return db - da;
+                return da - db; // oldest first, newest last (at bottom)
             });
             sorted.forEach(msg => {
                 const isSent = msg.senderId == currentUserId;
@@ -626,8 +635,10 @@ $(document).ready(function() {
                 messagesContainer.appendChild(messageDiv);
             });
             
-            // Keep top (newest-first)
-            messagesContainer.scrollTop = 0;
+            // Scroll to bottom to show newest message (oldest first, newest at bottom)
+            setTimeout(() => {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 50);
         }
     } else {
         console.log('Messages popup elements not found');
@@ -668,6 +679,11 @@ $(document).ready(function() {
         }
     });
 
+    // ============================================
+    // NOTIFICATION SYSTEM - NOW HANDLED BY Notifications.js
+    // This section is commented out to prevent conflicts
+    // ============================================
+    /*
     // Notification Popup Toggle
     const notificationIcon = document.getElementById('notification-icon');
     const notificationMenu = document.querySelector('.notification-menu');
@@ -813,6 +829,7 @@ $(document).ready(function() {
     } else {
         console.log('Notification elements not found');
     }
+    */
 
     // Dark Mode Toggle
     const darkModeCheckbox = document.getElementById('dark-mode-checkbox');

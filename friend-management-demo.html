@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friend Management Demo - TFT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .demo-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .demo-header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .demo-header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .demo-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .demo-section h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #1c1e21;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #6200ea;
+        }
+
+        .feature-card h3 {
+            font-size: 18px;
+            color: #6200ea;
+            margin-bottom: 10px;
+        }
+
+        .feature-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-card li {
+            padding: 5px 0;
+            color: #65676b;
+            font-size: 14px;
+        }
+
+        .feature-card li:before {
+            content: '✓ ';
+            color: #00c853;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .demo-button {
+            display: inline-block;
+            background: #6200ea;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .demo-button:hover {
+            background: #5200c6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(98, 0, 234, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .code-block {
+            background: #1c1e21;
+            color: #f0f2f5;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+
+        .animation-demo {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .animation-card {
+            width: 200px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .animation-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .animation-card-cover {
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .animation-card-body {
+            padding: 40px 15px 15px;
+            text-align: center;
+            position: relative;
+        }
+
+        .animation-card-avatar {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .animation-card-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .animation-card-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-accept {
+            background: #00c853;
+            color: white;
+        }
+
+        .btn-accept:hover {
+            background: #00a843;
+            transform: scale(1.05);
+        }
+
+        @keyframes acceptAnimation {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                background: #e8f5e9;
+            }
+            100% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        .accepting {
+            animation: acceptAnimation 0.6s ease forwards;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="demo-header">
+        <h1>👥 Friend Management System</h1>
+        <p>Hệ thống quản lý bạn bè đầy đủ tính năng với UI/UX đẹp mắt</p>
+    </div>
+
+    <div class="demo-section">
+        <h2>📊 Thống kê</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">700+</div>
+                <div class="stat-label">Lines CSS</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">1100+</div>
+                <div class="stat-label">Lines JavaScript</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Main Tabs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">5+</div>
+                <div class="stat-label">Animations</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>✨ Tính năng chính</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>🎯 Danh sách bạn bè</h3>
+                <ul>
+                    <li>Grid layout responsive</li>
+                    <li>Avatar với cover gradient</li>
+                    <li>Online status indicator</li>
+                    <li>Search & filter functionality</li>
+                    <li>Mutual friends count</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3>📬 Lời mời kết bạn</h3>
+                <ul>
+                    <li>Accept/Reject với animation</li>
+                    <li>Real-time timestamp</li>
+                    <li>Badge count notification</li>
+                    <li>Sidebar quick view</li>
+                    <li>Auto-update UI</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3>💡 Gợi ý kết bạn</h3>
+                <ul>
+                    <li>Mutual friends based</li>
+                    <li>Same school/city</li>
+                    <li>Send request button</li>
+                    <li>Remove suggestion</li>
+                    <li>Auto-hide after send</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3>🎨 Animations</h3>
+                <ul>
+                    <li>Accept: Scale + Green fade</li>
+                    <li>Reject: Slide right + fade</li>
+                    <li>Hover: Shadow + lift</li>
+                    <li>Loading: Spinner rotation</li>
+                    <li>Fade in: All cards</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>🎬 Animation Demo</h2>
+        <p style="color: #65676b; margin-bottom: 15px;">Click button "Xác nhận" để xem animation accept</p>
+        <div class="animation-demo">
+            <div class="animation-card" id="demo-card-1">
+                <div class="animation-card-cover"></div>
+                <div class="animation-card-body">
+                    <div class="animation-card-avatar">👤</div>
+                    <div class="animation-card-name">Nguyễn Văn A</div>
+                    <button class="animation-card-btn btn-accept" onclick="acceptDemo('demo-card-1')">
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+
+            <div class="animation-card" id="demo-card-2">
+                <div class="animation-card-cover" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                <div class="animation-card-body">
+                    <div class="animation-card-avatar">👨</div>
+                    <div class="animation-card-name">Trần Văn B</div>
+                    <button class="animation-card-btn btn-accept" onclick="acceptDemo('demo-card-2')">
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+
+            <div class="animation-card" id="demo-card-3">
+                <div class="animation-card-cover" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                <div class="animation-card-body">
+                    <div class="animation-card-avatar">👩</div>
+                    <div class="animation-card-name">Lê Thị C</div>
+                    <button class="animation-card-btn btn-accept" onclick="acceptDemo('demo-card-3')">
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+        <button class="demo-button" onclick="resetDemo()" style="margin-top: 20px;">
+            🔄 Reset Demo
+        </button>
+    </div>
+
+    <div class="demo-section">
+        <h2>💻 Code Example</h2>
+        <p style="color: #65676b; margin-bottom: 10px;">Accept friend request với animation:</p>
+        <div class="code-block">
+function acceptFriendRequest(requestId) {
+    const card = document.querySelector(`[data-request-id="${requestId}"]`);
+    
+    // Add animation class
+    card.classList.add('accepting');
+    
+    // Simulate API call
+    setTimeout(() => {
+        // Remove from array
+        friendRequests = friendRequests.filter(r => r.id !== requestId);
+        
+        // Re-render UI
+        renderFriendRequests(friendRequests);
+        updateRequestsCount(friendRequests.length);
+        
+        console.log('✅ Friend request accepted!');
+    }, 600);
+}
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>📁 File Structure</h2>
+        <div class="code-block">
+src/main/webapp/
+├── WEB-INF/view/client/
+│   └── Friends.html              # Main page
+├── resources/client/
+│   ├── css/
+│   │   └── FriendRequests.css   # Styling (~700 lines)
+│   └── js/
+│       └── FriendRequests.js    # Logic (~1100 lines)
+
+src/main/java/com/vn/mxh/controller/
+└── ClientController.java         # Backend route
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>🚀 Quick Start</h2>
+        <ol style="line-height: 2; color: #65676b;">
+            <li>Start Spring Boot server: <code>mvn spring-boot:run</code></li>
+            <li>Navigate to: <code>http://localhost:8080/friends</code></li>
+            <li>Click tabs to switch between views</li>
+            <li>Try search, filter, accept/reject actions</li>
+            <li>Watch animations in action!</li>
+        </ol>
+        <a href="/friends" class="demo-button">
+            ➡️ Go to Friend Management Page
+        </a>
+    </div>
+
+    <div class="demo-section">
+        <h2>📖 Documentation</h2>
+        <p style="color: #65676b; margin-bottom: 15px;">
+            Xem file <code>FRIEND_MANAGEMENT_README.md</code> để biết thêm chi tiết về:
+        </p>
+        <ul style="line-height: 2; color: #65676b; padding-left: 20px;">
+            <li>API endpoints (planned)</li>
+            <li>WebSocket integration</li>
+            <li>Mock data structure</li>
+            <li>Customization options</li>
+            <li>Known issues & roadmap</li>
+        </ul>
+    </div>
+
+    <script>
+        function acceptDemo(cardId) {
+            const card = document.getElementById(cardId);
+            card.classList.add('accepting');
+            
+            setTimeout(() => {
+                card.style.display = 'none';
+            }, 600);
+        }
+
+        function resetDemo() {
+            ['demo-card-1', 'demo-card-2', 'demo-card-3'].forEach(id => {
+                const card = document.getElementById(id);
+                card.classList.remove('accepting');
+                card.style.display = 'block';
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Nhóm của bạn | Social App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <th:block th:replace="fragments/Head :: head-resources"></th:block>
+    
+    <link rel="stylesheet" th:href="@{/resources/client/css/GroupsEvents.css}">
+</head>
+<body>
+
+    <div th:replace="fragments/Header :: user-header"></div>
+
+    <div class="page-layout">
+        
+        <div th:replace="fragments/Left-Sidebar :: left-sidebar"></div>
+
+        <main class="profile-main">
+            
+            <div class="groups-page-container">
+    
+                <div class="page-hero">
+                    <h1 class="hero-title">Khám Phá Cộng Đồng</h1>
+                    <p class="hero-desc">Tìm kiếm bộ lạc của bạn, kết nối đam mê và cùng nhau phát triển.</p>
+                </div>
+            
+                <div class="groups-grid">
+                    
+                    <div class="group-card">
+                        <div class="group-cover" style="background-image: url('https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=600&q=80');"></div>
+                        <div class="group-content">
+                            <img src="https://ui-avatars.com/api/?name=React+Dev&background=61dafb&color=fff&size=128" class="group-avatar">
+                            <h3 class="group-name">Cộng Đồng ReactJS VN</h3>
+                            <div class="group-stats">
+                                <span>👥 15k Member</span>
+                                <span>🔥 Active</span>
+                            </div>
+                            <button class="btn-join">Tham gia ngay</button>
+                        </div>
+                    </div>
+            
+                    <div class="group-card">
+                        <div class="group-cover" style="background-image: url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=600&q=80');"></div>
+                        <div class="group-content">
+                            <img src="https://ui-avatars.com/api/?name=Event+VN&background=ff4757&color=fff&size=128" class="group-avatar">
+                            <h3 class="group-name">Hội Tổ Chức Sự Kiện</h3>
+                            <div class="group-stats">
+                                <span>👥 8.2k Member</span>
+                                <span>📍 HCM</span>
+                            </div>
+                            <button class="btn-join">Tham gia ngay</button>
+                        </div>
+                    </div>
+            
+                    <div class="group-card">
+                        <div class="group-cover" style="background-image: url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80');"></div>
+                        <div class="group-content">
+                            <img src="https://ui-avatars.com/api/?name=Gamers&background=764ba2&color=fff&size=128" class="group-avatar">
+                            <h3 class="group-name">Góc Game Thủ Việt</h3>
+                            <div class="group-stats">
+                                <span>👥 120k Member</span>
+                                <span>🎮 24/7</span>
+                            </div>
+                            <button class="btn-join">Tham gia ngay</button>
+                        </div>
+                    </div>
+
+                    <div class="group-card">
+                        <div class="group-cover" style="background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=600&q=80');"></div>
+                        <div class="group-content">
+                            <img src="https://ui-avatars.com/api/?name=Start+Up&background=2ecc71&color=fff&size=128" class="group-avatar">
+                            <h3 class="group-name">Khởi Nghiệp 4.0</h3>
+                            <div class="group-stats">
+                                <span>👥 5.4k Member</span>
+                                <span>🚀 Business</span>
+                            </div>
+                            <button class="btn-join">Tham gia ngay</button>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+</body>
+</html>

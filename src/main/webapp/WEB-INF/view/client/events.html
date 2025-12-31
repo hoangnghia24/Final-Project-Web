@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Sự kiện | Social App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <th:block th:replace="fragments/Head :: head-resources"></th:block>
+    <link rel="stylesheet" th:href="@{/resources/client/css/GroupsEvents.css}">
+</head>
+<body>
+
+    <div th:replace="fragments/Header :: user-header"></div>
+
+    <div class="page-layout">
+        
+        <div th:replace="fragments/Left-Sidebar :: left-sidebar"></div>
+
+        <main class="profile-main">
+            
+            <div class="events-page-container">
+
+                <div class="page-hero" style="background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);">
+                    <h1 class="hero-title" style="background: none; -webkit-text-fill-color: white; color: white;">Sự Kiện Sắp Tới</h1>
+                    <p class="hero-desc" style="color: rgba(255,255,255,0.9);">Đừng bỏ lỡ những khoảnh khắc tuyệt vời đang chờ đón bạn.</p>
+                </div>
+            
+                <div class="events-list">
+                    
+                    <div class="event-ticket">
+                        <div class="date-badge">
+                            <span class="date-month">Tháng 12</span>
+                            <span class="date-day">31</span>
+                        </div>
+                        
+                        <div class="event-details">
+                            <h3>Đại Tiệc Countdown 2026</h3>
+                            <div class="event-meta">
+                                <span>🕒 20:00 - 00:30</span>
+                                <span>📍 Phố đi bộ Nguyễn Huệ</span>
+                            </div>
+                            <div style="margin-top: 8px; font-size: 0.85rem; color: #718096;">
+                                +1,2k người sẽ tham gia
+                            </div>
+                        </div>
+            
+                        <button class="btn-event">Quan tâm</button>
+                    </div>
+            
+                    <div class="event-ticket">
+                        <div class="date-badge">
+                            <span class="date-month">Tháng 1</span>
+                            <span class="date-day">15</span>
+                        </div>
+                        
+                        <div class="event-details">
+                            <h3>Workshop: AI & Tương Lai Lập Trình</h3>
+                            <div class="event-meta">
+                                <span>🕒 08:30 - 11:30</span>
+                                <span>📍 Đại học Bách Khoa</span>
+                            </div>
+                            <div style="margin-top: 8px; font-size: 0.85rem; color: #718096;">
+                                Diễn giả: Google Developer Expert
+                            </div>
+                        </div>
+            
+                        <button class="btn-event">Mua vé ngay</button>
+                    </div>
+
+                    <div class="event-ticket">
+                        <div class="date-badge">
+                            <span class="date-month">Tháng 2</span>
+                            <span class="date-day">14</span>
+                        </div>
+                        
+                        <div class="event-details">
+                            <h3>Lễ hội Valentine: Kết đôi</h3>
+                            <div class="event-meta">
+                                <span>🕒 18:00 - 22:00</span>
+                                <span>📍 Landmark 81</span>
+                            </div>
+                            <div style="margin-top: 8px; font-size: 0.85rem; color: #718096;">
+                                Dành cho các cặp đôi và người độc thân
+                            </div>
+                        </div>
+            
+                        <button class="btn-event">Tham gia</button>
+                    </div>
+            
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+</body>
+</html>

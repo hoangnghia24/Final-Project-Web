@@ -1,0 +1,1136 @@
+/**
+ * FriendRequests.css - Friend Management System Styling
+ * TFT Social Network
+ */
+
+/* ============================================
+   FRIENDS PAGE LAYOUT
+   ============================================ */
+
+.friends-main {
+    max-width: 100%;
+    padding: 0;
+    position: relative;
+}
+
+/* Sticky Container for Header + Tabs */
+.friends-sticky-container {
+    position: sticky;
+    top: 60px; /* Below main header */
+    z-index: 100;
+    background: transparent;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}
+
+.friends-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2), 
+                0 2px 6px rgba(118, 75, 162, 0.12);
+    position: relative;
+    overflow: hidden;
+}
+
+.friends-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: headerShine 8s linear infinite;
+}
+
+@keyframes headerShine {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.friends-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.3px;
+}
+
+.friends-search-bar {
+    position: relative;
+    width: 360px;
+    z-index: 1;
+}
+
+.friends-search-bar svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.2s ease;
+    width: 18px;
+    height: 18px;
+}
+
+.friends-search-bar input {
+    width: 100%;
+    padding: 10px 14px 10px 42px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(10px);
+    font-size: 14px;
+    color: #ffffff;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.friends-search-bar input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.friends-search-bar input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 
+                0 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+.friends-search-bar input:focus + svg,
+.friends-search-bar:hover svg {
+    color: #ffffff;
+}
+
+/* ============================================
+   2-COLUMN GRID LAYOUT
+   ============================================ */
+
+.friends-grid,
+.friend-requests-grid,
+.friends-suggestions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    animation: gridFadeIn 0.6s ease-out;
+}
+
+@keyframes gridFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stagger animation for cards */
+.friends-grid > *:nth-child(1),
+.friend-requests-grid > *:nth-child(1),
+.friends-suggestions-grid > *:nth-child(1) {
+    animation: cardSlideIn 0.5s ease-out 0.1s backwards;
+}
+
+.friends-grid > *:nth-child(2),
+.friend-requests-grid > *:nth-child(2),
+.friends-suggestions-grid > *:nth-child(2) {
+    animation: cardSlideIn 0.5s ease-out 0.15s backwards;
+}
+
+.friends-grid > *:nth-child(3),
+.friend-requests-grid > *:nth-child(3),
+.friends-suggestions-grid > *:nth-child(3) {
+    animation: cardSlideIn 0.5s ease-out 0.2s backwards;
+}
+
+.friends-grid > *:nth-child(4),
+.friend-requests-grid > *:nth-child(4),
+.friends-suggestions-grid > *:nth-child(4) {
+    animation: cardSlideIn 0.5s ease-out 0.25s backwards;
+}
+
+.friends-grid > *:nth-child(n+5),
+.friend-requests-grid > *:nth-child(n+5),
+.friends-suggestions-grid > *:nth-child(n+5) {
+    animation: cardSlideIn 0.5s ease-out 0.3s backwards;
+}
+
+@keyframes cardSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.friends-tabs {
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06),
+                0 1px 3px rgba(0, 0, 0, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.friends-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #65676b;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.friends-tab::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(102, 126, 234, 0.05));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.friends-tab svg {
+    width: 22px;
+    height: 22px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.friends-tab:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.friends-tab:hover::before {
+    opacity: 1;
+}
+
+.friends-tab:hover svg {
+    transform: scale(1.15) rotate(-8deg);
+}
+
+.friends-tab.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3),
+                0 2px 8px rgba(118, 75, 162, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: scale(1.02);
+}
+
+.friends-tab.active::before {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+    opacity: 1;
+}
+
+.friends-tab.active svg {
+    color: #ffffff;
+    transform: scale(1.1);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 12px;
+    background: rgba(102, 126, 234, 0.12);
+    color: #667eea;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.friends-tab.active .tab-count {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.badge-count {
+    background: linear-gradient(135deg, #ff4757 0%, #ff6348 100%);
+    color: #ffffff;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.friends-tab.active .tab-count {
+    background: #6200ea;
+    color: #ffffff;
+}
+
+.tab-count.badge-count {
+    background: #ff4757;
+    color: #ffffff;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* ============================================
+   CONTENT SECTIONS
+   ============================================ */
+
+.friends-content-section {
+    display: none;
+}
+
+.friends-content-section.active {
+    display: block;
+}
+
+.section-header {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.section-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1c1e21;
+    margin: 0 0 4px 0;
+}
+
+.section-subtitle {
+    font-size: 14px;
+    color: #65676b;
+}
+
+/* ============================================
+   FRIENDS FILTER
+   ============================================ */
+
+.friends-filter {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    background: #ffffff;
+    color: #65676b;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    background: #f0f2f5;
+    border-color: #6200ea;
+}
+
+.filter-btn.active {
+    background: #6200ea;
+    color: #ffffff;
+    border-color: #6200ea;
+}
+
+/* ============================================
+   FRIENDS GRID
+   ============================================ */
+
+.friends-grid,
+.friend-requests-grid,
+.friends-suggestions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+/* ============================================
+   2-COLUMN GRID LAYOUT WITH STAGGER ANIMATION
+   ============================================ */
+
+.friends-grid,
+.friend-requests-grid,
+.friends-suggestions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    animation: gridFadeIn 0.6s ease-out;
+}
+
+@keyframes gridFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stagger animation for cards */
+.friends-grid > *:nth-child(odd) {
+    animation: cardSlideInLeft 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+.friends-grid > *:nth-child(even) {
+    animation: cardSlideInRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+@keyframes cardSlideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px) scale(0.9) rotate(-3deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1) rotate(0);
+    }
+}
+
+@keyframes cardSlideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px) scale(0.9) rotate(3deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1) rotate(0);
+    }
+}
+
+/* ============================================
+   FRIEND CARD - CREATIVE GLASSMORPHISM DESIGN
+   ============================================ */
+
+.friend-card,
+.friend-request-card {
+    background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.98), 
+                rgba(255, 255, 255, 0.95));
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    overflow: visible;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.08),
+                0 4px 12px rgba(118, 75, 162, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.friend-card::before,
+.friend-request-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, 
+                transparent 0%, 
+                rgba(102, 126, 234, 0.05) 50%, 
+                transparent 100%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    border-radius: 20px;
+}
+
+.friend-card::after,
+.friend-request-card::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+    border-radius: 20px;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.5s ease;
+}
+
+.friend-card:hover::before,
+.friend-request-card:hover::before {
+    opacity: 1;
+}
+
+.friend-card:hover::after,
+.friend-request-card:hover::after {
+    opacity: 0.3;
+    animation: borderGlow 2s linear infinite;
+}
+
+@keyframes borderGlow {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.2); }
+}
+
+.friend-card:hover,
+.friend-request-card:hover {
+    box-shadow: 0 16px 40px rgba(102, 126, 234, 0.2),
+                0 8px 20px rgba(118, 75, 162, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+    transform: translateY(-12px) scale(1.03) rotate(1deg);
+}
+
+.friend-card-cover {
+    width: 100%;
+    height: 90px;
+    background: linear-gradient(135deg, 
+                #667eea 0%, 
+                #764ba2 50%, 
+                #f093fb 100%);
+    position: relative;
+    overflow: visible;
+    border-radius: 20px 20px 0 0;
+}
+
+.friend-card-cover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255, 255, 255, 0.05) 10px,
+        rgba(255, 255, 255, 0.05) 20px
+    );
+    animation: coverSlide 20s linear infinite;
+    border-radius: 20px 20px 0 0;
+    overflow: hidden;
+}
+
+@keyframes coverSlide {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50%, 50%); }
+}
+
+.friend-card-avatar {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.95);
+    object-fit: cover;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2),
+                0 2px 8px rgba(0, 0, 0, 0.15),
+                inset 0 1px 4px rgba(255, 255, 255, 0.3);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    backdrop-filter: blur(2px);
+    z-index: 2;
+}
+
+.friend-card:hover .friend-card-avatar,
+.friend-request-card:hover .friend-card-avatar {
+    transform: translateX(-50%) scale(1.08) rotate(-3deg);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35),
+                0 4px 12px rgba(118, 75, 162, 0.25),
+                inset 0 1px 4px rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 1);
+}
+
+.friend-card-body {
+    padding: 30px 14px 14px;
+    text-align: center;
+}
+
+.friend-card-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: #1c1e21;
+    margin: 0 0 4px 0;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #1c1e21, #667eea);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.friend-card:hover .friend-card-name,
+.friend-request-card:hover .friend-card-name {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.friend-card-mutual {
+    font-size: 12px;
+    color: #65676b;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.friend-card-mutual svg {
+    width: 16px;
+    height: 16px;
+}
+
+.friend-card-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.friend-card-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.friend-card-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.btn-primary {
+    background: #6200ea;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: #5200c6;
+    transform: scale(1.02);
+}
+
+.btn-secondary {
+    background: #f0f2f5;
+    color: #65676b;
+}
+
+.btn-secondary:hover {
+    background: #e4e6eb;
+}
+
+.btn-accept {
+    background: #00c853;
+    color: #ffffff;
+}
+
+.btn-accept:hover {
+    background: #00a843;
+    transform: scale(1.02);
+}
+
+.btn-reject {
+    background: #ff4757;
+    color: #ffffff;
+}
+
+.btn-reject:hover {
+    background: #ee5a6f;
+    transform: scale(1.02);
+}
+
+.btn-remove {
+    background: #ff4757;
+    color: #ffffff;
+}
+
+.btn-remove:hover {
+    background: #ee5a6f;
+}
+
+/* ============================================
+   FRIEND REQUEST CARD ANIMATIONS
+   ============================================ */
+
+.friend-card.accepting {
+    animation: acceptAnimation 0.6s ease forwards;
+}
+
+.friend-card.rejecting {
+    animation: rejectAnimation 0.6s ease forwards;
+}
+
+@keyframes acceptAnimation {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        background: #e8f5e9;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+}
+
+@keyframes rejectAnimation {
+    0% {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(100%) scale(0.8);
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   LOADING STATE
+   ============================================ */
+
+.friends-loading {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #65676b;
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #f0f2f5;
+    border-top-color: #6200ea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.friends-loading p {
+    font-size: 15px;
+    margin: 0;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+.friends-empty {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #65676b;
+}
+
+.friends-empty svg {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.friends-empty h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1c1e21;
+    margin: 0 0 8px 0;
+}
+
+.friends-empty p {
+    font-size: 15px;
+    margin: 0 0 20px 0;
+}
+
+.friends-empty .btn-primary {
+    padding: 12px 24px;
+}
+
+/* ============================================
+   RIGHT SIDEBAR WIDGETS
+   ============================================ */
+
+.friends-sidebar-widget {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.widget-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1c1e21;
+    margin: 0;
+}
+
+.view-all-link {
+    font-size: 14px;
+    color: #6200ea;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.view-all-link:hover {
+    text-decoration: underline;
+}
+
+/* ============================================
+   SIDEBAR REQUEST ITEM
+   ============================================ */
+
+.sidebar-request-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: background 0.2s ease;
+}
+
+.sidebar-request-item:hover {
+    background: #f0f2f5;
+}
+
+.sidebar-request-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.sidebar-request-info {
+    flex: 1;
+}
+
+.sidebar-request-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1c1e21;
+    margin-bottom: 4px;
+}
+
+.sidebar-request-name:hover {
+    color: #6200ea;
+    cursor: pointer;
+}
+
+.sidebar-request-time {
+    font-size: 12px;
+    color: #65676b;
+    margin-bottom: 8px;
+}
+
+.sidebar-request-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.sidebar-request-btn {
+    flex: 1;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* ============================================
+   SIDEBAR SUGGESTION ITEM
+   ============================================ */
+
+.sidebar-suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: background 0.2s ease;
+}
+
+.sidebar-suggestion-item:hover {
+    background: #f0f2f5;
+}
+
+.sidebar-suggestion-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.sidebar-suggestion-info {
+    flex: 1;
+}
+
+.sidebar-suggestion-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1c1e21;
+    margin-bottom: 2px;
+}
+
+.sidebar-suggestion-name:hover {
+    color: #6200ea;
+    cursor: pointer;
+}
+
+.sidebar-suggestion-mutual {
+    font-size: 12px;
+    color: #65676b;
+}
+
+.sidebar-add-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    background: #6200ea;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sidebar-add-btn:hover {
+    background: #5200c6;
+    transform: scale(1.05);
+}
+
+/* ============================================
+   NO REQUESTS/SUGGESTIONS STATE
+   ============================================ */
+
+.no-requests,
+.no-suggestions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: #65676b;
+}
+
+.no-requests svg,
+.no-suggestions svg {
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.no-requests p,
+.no-suggestions p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* ============================================
+   ONLINE STATUS INDICATOR
+   ============================================ */
+
+.friend-card-avatar-wrapper {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+}
+
+.friend-online-status {
+    position: absolute;
+    bottom: -9px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #00c853;
+    border: 3px solid #ffffff;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 1200px) {
+    .friends-grid,
+    .friend-requests-grid,
+    .friends-suggestions-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .friends-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+    }
+
+    .friends-search-bar {
+        width: 100%;
+    }
+
+    .friends-tabs {
+        flex-direction: column;
+    }
+
+    .friends-grid,
+    .friend-requests-grid,
+    .friends-suggestions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .right-sidebar {
+        display: none;
+    }
+}
+
+/* ============================================
+   DARK MODE SUPPORT
+   ============================================ */
+
+body.dark-mode .friends-header,
+body.dark-mode .friends-tabs,
+body.dark-mode .section-header,
+body.dark-mode .friend-card,
+body.dark-mode .friends-sidebar-widget {
+    background: #1c1c1e;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .friends-title,
+body.dark-mode .section-header h2,
+body.dark-mode .friend-card-name,
+body.dark-mode .widget-title,
+body.dark-mode .sidebar-request-name,
+body.dark-mode .sidebar-suggestion-name {
+    color: #f0f2f5;
+}
+
+body.dark-mode .friends-search-bar input,
+body.dark-mode .filter-btn,
+body.dark-mode .btn-secondary {
+    background: #2c2c2e;
+    color: #f0f2f5;
+    border-color: #3a3a3c;
+}
+
+body.dark-mode .friends-search-bar input:focus {
+    background: #3a3a3c;
+}
+
+body.dark-mode .friends-tab:hover,
+body.dark-mode .filter-btn:hover,
+body.dark-mode .btn-secondary:hover,
+body.dark-mode .sidebar-request-item:hover,
+body.dark-mode .sidebar-suggestion-item:hover {
+    background: #2c2c2e;
+}
+
+body.dark-mode .friend-card-cover {
+    opacity: 0.8;
+}
+
+body.dark-mode .friend-card-avatar {
+    border-color: #1c1c1e;
+}
+
+/* ============================================
+   PULSE ANIMATION FOR BADGES
+   ============================================ */
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.9;
+    }
+}
+
+/* ============================================
+   FADE IN ANIMATION
+   ============================================ */
+
+.friend-card,
+.sidebar-request-item,
+.sidebar-suggestion-item {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

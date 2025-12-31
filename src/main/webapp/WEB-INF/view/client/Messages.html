@@ -12,14 +12,16 @@
     <link th:href="@{/client/css/Header.css}" rel="stylesheet" />
     <link th:href="@{/client/css/LeftSidebar.css}" rel="stylesheet" />
     <link th:href="@{/client/css/Messages.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/Notifications.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/DarkMode.css}" rel="stylesheet" />
 </head>
 <body>
     <!-- Include header -->
-    <div th:replace="~{fragments/header :: user-header}"></div>
+    <div th:replace="~{fragments/Header :: user-header}"></div>
 
     <div class="messages-wrapper">
         <!-- Include left sidebar -->
-        <div th:replace="~{fragments/left-sidebar :: left-sidebar}"></div>
+        <div th:replace="~{fragments/Left-Sidebar :: left-sidebar}"></div>
 
         <!-- Messages Main Container -->
         <div class="messages-container">
@@ -239,6 +241,7 @@
     <script th:src="@{/client/js/TimeUtils.js}"></script>
     <script th:src="@{/client/js/Header.js}"></script>
     <script th:src="@{/client/js/LeftSidebar.js}"></script>
+    <script th:src="@{/client/js/Notifications.js}"></script>
     <script th:src="@{/client/js/Messages.js}"></script>
 </body>
 </html>

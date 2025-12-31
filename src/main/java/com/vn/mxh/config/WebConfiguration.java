@@ -2,6 +2,7 @@ package com.vn.mxh.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -27,14 +28,25 @@ public class WebConfiguration implements WebMvcConfigurer {
     }
 
     @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/css/**").addResourceLocations("/resources/css/");
-        registry.addResourceHandler("/js/**").addResourceLocations("/resources/js/");
-        registry.addResourceHandler("/images/**").addResourceLocations("/resources/images/");
-        registry.addResourceHandler("/client/**").addResourceLocations("/resources/client/");
-        registry.addResourceHandler("/auth/**").addResourceLocations("/resources/auth/");
-        registry.addResourceHandler("/resources/admin/**").addResourceLocations("/resources/admin/");
-        // Serve uploaded files under /uploads/** from local filesystem 'uploads' directory
-        registry.addResourceHandler("/uploads/**").addResourceLocations("file:uploads/");
+    public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
+        // Map /client/** to /resources/client/
+        registry.addResourceHandler("/client/**")
+                .addResourceLocations("/resources/client/");
+        
+        // Map /auth/** to /resources/auth/
+        registry.addResourceHandler("/auth/**")
+                .addResourceLocations("/resources/auth/");
+        
+        // Map /admin/** to /resources/admin/
+        registry.addResourceHandler("/admin/**")
+                .addResourceLocations("/resources/admin/");
+        
+        // Map /resources/** for any other static files
+        registry.addResourceHandler("/resources/**")
+                .addResourceLocations("/resources/");
+        
+        // Map uploads folder from filesystem
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:uploads/");
     }
 }

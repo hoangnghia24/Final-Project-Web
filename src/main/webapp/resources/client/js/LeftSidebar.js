@@ -16,16 +16,11 @@ document.addEventListener('DOMContentLoaded', function() {
         sidebar.classList.add('collapsed');
         toggleBtn.classList.add('collapsed');
         
-        // Apply collapsed state to container
-        const homeContainer = document.querySelector('.home-container');
-        const profileWrapper = document.querySelector('.profile-wrapper');
-        
-        if (homeContainer) {
-            homeContainer.classList.add('sidebar-collapsed');
-        }
-        if (profileWrapper) {
-            profileWrapper.classList.add('sidebar-collapsed');
-        }
+        // Apply collapsed state to all containers
+        const containers = document.querySelectorAll('.home-container, .trending-container, .explore-container, .all-container, .profile-wrapper');
+        containers.forEach(container => {
+            container.classList.add('sidebar-collapsed');
+        });
     }
     
     // Toggle sidebar on button click
@@ -39,25 +34,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Save state to localStorage
         localStorage.setItem('leftSidebarCollapsed', collapsed);
         
-        // Update body/container class for layout adjustment
-        const homeContainer = document.querySelector('.home-container');
-        const profileWrapper = document.querySelector('.profile-wrapper');
-        
-        if (homeContainer) {
+        // Update all container classes for layout adjustment
+        const containers = document.querySelectorAll('.home-container, .trending-container, .explore-container, .all-container, .profile-wrapper');
+        containers.forEach(container => {
             if (collapsed) {
-                homeContainer.classList.add('sidebar-collapsed');
+                container.classList.add('sidebar-collapsed');
             } else {
-                homeContainer.classList.remove('sidebar-collapsed');
+                container.classList.remove('sidebar-collapsed');
             }
-        }
-        
-        if (profileWrapper) {
-            if (collapsed) {
-                profileWrapper.classList.add('sidebar-collapsed');
-            } else {
-                profileWrapper.classList.remove('sidebar-collapsed');
-            }
-        }
+        });
         
         console.log('Left sidebar collapsed:', collapsed);
     });

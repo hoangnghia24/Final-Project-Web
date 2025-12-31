@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔔 Notification System Demo - TFT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .demo-header h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .demo-header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .demo-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .demo-card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .demo-card h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .demo-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .demo-btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .demo-btn.like {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+        }
+
+        .demo-btn.comment {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        .demo-btn.friend {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            color: white;
+        }
+
+        .demo-btn.message {
+            background: linear-gradient(135deg, #fa709a, #fee140);
+            color: white;
+        }
+
+        .demo-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .demo-info h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .demo-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .demo-info li {
+            padding: 8px 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .demo-info li::before {
+            content: "✓ ";
+            color: #43e97b;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .console-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .console-output .log {
+            margin: 5px 0;
+            line-height: 1.5;
+        }
+
+        .console-output .log.info { color: #4fc3f7; }
+        .console-output .log.success { color: #66bb6a; }
+        .console-output .log.warning { color: #ffa726; }
+        .console-output .log.error { color: #ef5350; }
+
+        @media (max-width: 768px) {
+            .demo-content {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Mock Header for Demo */
+        .mock-header {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .mock-header .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .mock-header-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .mock-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .mock-icon:hover {
+            background: #e4e6eb;
+        }
+
+        .mock-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4444;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <!-- Demo Header -->
+        <div class="mock-header">
+            <div class="logo">TFT</div>
+            <div class="mock-header-icons">
+                <div class="mock-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </div>
+                <div class="mock-icon" id="mock-notification-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                    </svg>
+                    <span class="mock-badge" id="mock-badge">5</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Header -->
+        <div class="demo-header">
+            <h1>🔔 Notification System Demo</h1>
+            <p>Test hệ thống thông báo real-time với mock data</p>
+        </div>
+
+        <div class="demo-content">
+            <!-- Trigger Notifications -->
+            <div class="demo-card">
+                <h2>
+                    <span>🚀</span>
+                    Trigger Notifications
+                </h2>
+                <div class="demo-buttons">
+                    <button class="demo-btn like" onclick="triggerNotification('like')">
+                        <span>❤️</span>
+                        Like Notification
+                    </button>
+                    <button class="demo-btn comment" onclick="triggerNotification('comment')">
+                        <span>💬</span>
+                        Comment Notification
+                    </button>
+                    <button class="demo-btn friend" onclick="triggerNotification('friend')">
+                        <span>👥</span>
+                        Friend Request
+                    </button>
+                    <button class="demo-btn message" onclick="triggerNotification('message')">
+                        <span>📨</span>
+                        Message Notification
+                    </button>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-count">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="unread-count">0</div>
+                        <div class="stat-label">Unread</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="read-count">0</div>
+                        <div class="stat-label">Read</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="demo-card">
+                <h2>
+                    <span>✨</span>
+                    Features
+                </h2>
+                <div class="demo-info">
+                    <h3>🎨 Giao diện</h3>
+                    <ul>
+                        <li>Dropdown đẹp mắt với animations</li>
+                        <li>Badge đếm thông báo chưa đọc</li>
+                        <li>Dark mode support</li>
+                        <li>Responsive design</li>
+                    </ul>
+                </div>
+                <div class="demo-info">
+                    <h3>🚀 Chức năng</h3>
+                    <ul>
+                        <li>4 loại thông báo khác nhau</li>
+                        <li>Filter: Tất cả / Chưa đọc</li>
+                        <li>Mark as read / Mark all</li>
+                        <li>Real-time với WebSocket</li>
+                        <li>Browser notifications</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Console Output -->
+            <div class="demo-card" style="grid-column: span 2;">
+                <h2>
+                    <span>📋</span>
+                    Console Output
+                </h2>
+                <div class="console-output" id="console">
+                    <div class="log info">[INFO] Notification System Demo loaded</div>
+                    <div class="log success">[SUCCESS] Ready to test notifications</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let notificationCount = { total: 0, unread: 0, read: 0 };
+
+        function triggerNotification(type) {
+            const notifications = {
+                like: {
+                    icon: '❤️',
+                    title: 'Like Notification',
+                    message: 'Nguyễn Văn A đã thích bài viết của bạn'
+                },
+                comment: {
+                    icon: '💬',
+                    title: 'Comment Notification',
+                    message: 'Trần Thị B đã bình luận: "Tuyệt vời!"'
+                },
+                friend: {
+                    icon: '👥',
+                    title: 'Friend Request',
+                    message: 'Lê Văn C đã gửi lời mời kết bạn'
+                },
+                message: {
+                    icon: '📨',
+                    title: 'Message Notification',
+                    message: 'Phạm Thị D đã gửi tin nhắn cho bạn'
+                }
+            };
+
+            const notif = notifications[type];
+            
+            // Update stats
+            notificationCount.total++;
+            notificationCount.unread++;
+            updateStats();
+
+            // Show browser notification
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(notif.title, {
+                    body: notif.message,
+                    icon: 'https://api.dicebear.com/9.x/avataaars/svg?seed=user' + Math.random()
+                });
+            }
+
+            // Log to console
+            logToConsole('success', `[${notif.icon}] ${notif.title} triggered`);
+            logToConsole('info', `Message: ${notif.message}`);
+
+            // Update badge
+            updateBadge();
+
+            // Play sound
+            playBeep();
+        }
+
+        function updateStats() {
+            document.getElementById('total-count').textContent = notificationCount.total;
+            document.getElementById('unread-count').textContent = notificationCount.unread;
+            document.getElementById('read-count').textContent = notificationCount.read;
+        }
+
+        function updateBadge() {
+            const badge = document.getElementById('mock-badge');
+            badge.textContent = notificationCount.unread;
+            badge.style.animation = 'none';
+            setTimeout(() => badge.style.animation = 'badgePop 0.3s ease', 10);
+        }
+
+        function logToConsole(type, message) {
+            const console = document.getElementById('console');
+            const log = document.createElement('div');
+            log.className = `log ${type}`;
+            log.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            console.appendChild(log);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function playBeep() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            setTimeout(() => {
+                Notification.requestPermission().then(permission => {
+                    logToConsole('info', `Notification permission: ${permission}`);
+                });
+            }, 2000);
+        }
+
+        // Badge animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes badgePop {
+                0% { transform: scale(0); }
+                50% { transform: scale(1.2); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Log initial state
+        logToConsole('info', 'Notification types: Like, Comment, Friend Request, Message');
+        logToConsole('info', 'Click any button to trigger a notification');
+    </script>
+</body>
+</html>

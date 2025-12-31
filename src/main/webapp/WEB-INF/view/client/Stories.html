@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stories - TFT</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link th:href="@{/client/css/Stories.css}" rel="stylesheet" />
+</head>
+
+<body>
+
+    <div class="stories-container">
+
+        <!-- Stories Sidebar -->
+        <div class="stories-sidebar">
+            <div class="sidebar-header">
+                <button class="back-btn" onclick="window.history.back()">
+                    <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <h2>Stories</h2>
+            </div>
+
+            <div class="stories-list">
+                <!-- Your Story -->
+                <div class="story-item your-story" data-story-id="your-story">
+                    <div class="story-avatar-wrapper">
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=You" alt="You" class="story-avatar">
+                        <div class="add-story-icon">
+                            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </div>
+                    </div>
+                    <div class="story-info">
+                        <div class="story-name">Tin của bạn</div>
+                        <div class="story-time">Tạo story mới</div>
+                    </div>
+                </div>
+
+                <!-- Friend Stories -->
+                <div class="story-item active" data-story-id="story1" data-user="Nguyễn Văn A" data-avatar="https://api.dicebear.com/9.x/avataaars/svg?seed=UserA" data-time="2 giờ trước">
+                    <div class="story-avatar-wrapper">
+                        <div class="story-ring">
+                            <svg class="ring-svg" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="46" class="ring-bg"></circle>
+                                <circle cx="50" cy="50" r="46" class="ring-progress" style="stroke-dashoffset: 0;"></circle>
+                            </svg>
+                        </div>
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=UserA" alt="User A" class="story-avatar">
+                    </div>
+                    <div class="story-info">
+                        <div class="story-name">Nguyễn Văn A</div>
+                        <div class="story-time">2 giờ trước</div>
+                    </div>
+                </div>
+
+                <div class="story-item" data-story-id="story2" data-user="Trần Thị B" data-avatar="https://api.dicebear.com/9.x/avataaars/svg?seed=UserB" data-time="5 giờ trước">
+                    <div class="story-avatar-wrapper">
+                        <div class="story-ring">
+                            <svg class="ring-svg" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="46" class="ring-bg"></circle>
+                                <circle cx="50" cy="50" r="46" class="ring-progress" style="stroke-dashoffset: 144;"></circle>
+                            </svg>
+                        </div>
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=UserB" alt="User B" class="story-avatar">
+                    </div>
+                    <div class="story-info">
+                        <div class="story-name">Trần Thị B</div>
+                        <div class="story-time">5 giờ trước</div>
+                    </div>
+                </div>
+
+                <div class="story-item" data-story-id="story3" data-user="Lê Văn C" data-avatar="https://api.dicebear.com/9.x/avataaars/svg?seed=UserC" data-time="8 giờ trước">
+                    <div class="story-avatar-wrapper">
+                        <div class="story-ring">
+                            <svg class="ring-svg" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="46" class="ring-bg"></circle>
+                                <circle cx="50" cy="50" r="46" class="ring-progress" style="stroke-dashoffset: 0;"></circle>
+                            </svg>
+                        </div>
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=UserC" alt="User C" class="story-avatar">
+                    </div>
+                    <div class="story-info">
+                        <div class="story-name">Lê Văn C</div>
+                        <div class="story-time">8 giờ trước</div>
+                    </div>
+                </div>
+
+                <div class="story-item viewed" data-story-id="story4" data-user="Phạm Văn D" data-avatar="https://api.dicebear.com/9.x/avataaars/svg?seed=UserD" data-time="12 giờ trước">
+                    <div class="story-avatar-wrapper">
+                        <div class="story-ring viewed-ring">
+                            <svg class="ring-svg" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="46" class="ring-bg"></circle>
+                            </svg>
+                        </div>
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=UserD" alt="User D" class="story-avatar">
+                    </div>
+                    <div class="story-info">
+                        <div class="story-name">Phạm Văn D</div>
+                        <div class="story-time">12 giờ trước</div>
+                    </div>
+                </div>
+
+                <div class="story-item viewed" data-story-id="story5" data-user="Hoàng Thị E" data-avatar="https://api.dicebear.com/9.x/avataaars/svg?seed=UserE" data-time="15 giờ trước">
+                    <div class="story-avatar-wrapper">
+                        <div class="story-ring viewed-ring">
+                            <svg class="ring-svg" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="46" class="ring-bg"></circle>
+                            </svg>
+                        </div>
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=UserE" alt="User E" class="story-avatar">
+                    </div>
+                    <div class="story-info">
+                        <div class="story-name">Hoàng Thị E</div>
+                        <div class="story-time">15 giờ trước</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Story Viewer -->
+        <div class="story-viewer">
+            
+            <!-- Story Header -->
+            <div class="story-header">
+                <div class="story-progress-bars">
+                    <div class="progress-bar-item">
+                        <div class="progress-fill active" style="animation: progressFill 5s linear;"></div>
+                    </div>
+                    <div class="progress-bar-item">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div class="progress-bar-item">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+                <div class="story-user-info">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=UserA" alt="User" class="story-user-avatar" id="currentStoryAvatar">
+                    <div class="story-user-details">
+                        <div class="story-user-name" id="currentStoryUser">Nguyễn Văn A</div>
+                        <div class="story-user-time" id="currentStoryTime">2 giờ trước</div>
+                    </div>
+                    <button class="story-pause-btn">
+                        <svg class="pause-icon" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                        <svg class="play-icon" viewBox="0 0 24 24" style="display: none;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    </button>
+                    <button class="story-close-btn" onclick="window.history.back()">
+                        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Story Content -->
+            <div class="story-content" id="storyContent">
+                <img src="https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=1080" alt="Story" class="story-image" id="currentStoryImage">
+                <div class="story-text-overlay" id="storyTextOverlay" style="display: none;">
+                    <p>Đây là nội dung text story</p>
+                </div>
+            </div>
+
+            <!-- Story Navigation -->
+            <div class="story-nav-areas">
+                <div class="story-nav-area prev-area" id="prevArea"></div>
+                <div class="story-nav-area next-area" id="nextArea"></div>
+            </div>
+
+            <!-- Story Actions -->
+            <div class="story-actions">
+                <div class="story-reply-input">
+                    <input type="text" placeholder="Trả lời Nguyễn Văn A..." id="replyInput">
+                    <button class="reply-emoji-btn">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                    </button>
+                    <button class="reply-send-btn">
+                        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+                <div class="story-quick-reactions">
+                    <button class="quick-reaction-btn" data-reaction="❤️">❤️</button>
+                    <button class="quick-reaction-btn" data-reaction="😂">😂</button>
+                    <button class="quick-reaction-btn" data-reaction="😮">😮</button>
+                    <button class="quick-reaction-btn" data-reaction="😢">😢</button>
+                    <button class="quick-reaction-btn" data-reaction="👏">👏</button>
+                    <button class="quick-reaction-btn" data-reaction="🔥">🔥</button>
+                </div>
+            </div>
+
+            <!-- Story Controls (mobile) -->
+            <div class="story-mobile-controls">
+                <button class="mobile-control-btn prev-btn" id="mobilePrevBtn">
+                    <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <button class="mobile-control-btn next-btn" id="mobileNextBtn">
+                    <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Create Story Modal (Optional) -->
+    <div class="create-story-modal" id="createStoryModal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tạo story</h3>
+                <button class="modal-close-btn" onclick="closeCreateStoryModal()">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="create-story-options">
+                    <button class="create-option">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        <span>Tạo story ảnh</span>
+                    </button>
+                    <button class="create-option">
+                        <svg viewBox="0 0 24 24"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"></path><path d="M20.5 10H6.5c-1.1 0-2 .9-2 2v4c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-4c0-1.1-.9-2-2-2z"></path></svg>
+                        <span>Tạo story text</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Stories data (would come from server)
+        const storiesData = {
+            story1: [
+                { type: 'image', url: 'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=1080' },
+                { type: 'image', url: 'https://images.unsplash.com/photo-1682687221213-4b91e4c968a5?w=1080' },
+                { type: 'text', content: 'Hôm nay thật tuyệt vời! 🌟', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }
+            ],
+            story2: [
+                { type: 'image', url: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=1080' },
+                { type: 'image', url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1080' }
+            ],
+            story3: [
+                { type: 'image', url: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=1080' }
+            ]
+        };
+
+        let currentStoryId = 'story1';
+        let currentStoryIndex = 0;
+        let isPlaying = true;
+        let storyTimer;
+        let isPaused = false;
+
+        // Load story
+        function loadStory(storyId, index = 0) {
+            currentStoryId = storyId;
+            currentStoryIndex = index;
+
+            const story = storiesData[storyId][index];
+            const storyContent = document.getElementById('storyContent');
+            const storyImage = document.getElementById('currentStoryImage');
+            const storyTextOverlay = document.getElementById('storyTextOverlay');
+
+            // Update progress bars
+            updateProgressBars(storyId, index);
+
+            // Update user info
+            const storyItem = document.querySelector(`[data-story-id="${storyId}"]`);
+            document.getElementById('currentStoryAvatar').src = storyItem.dataset.avatar;
+            document.getElementById('currentStoryUser').textContent = storyItem.dataset.user;
+            document.getElementById('currentStoryTime').textContent = storyItem.dataset.time;
+            document.getElementById('replyInput').placeholder = `Trả lời ${storyItem.dataset.user}...`;
+
+            // Mark as active
+            document.querySelectorAll('.story-item').forEach(item => item.classList.remove('active'));
+            storyItem.classList.add('active');
+
+            // Load content
+            if (story.type === 'image') {
+                storyImage.style.display = 'block';
+                storyTextOverlay.style.display = 'none';
+                storyImage.src = story.url;
+            } else if (story.type === 'text') {
+                storyImage.style.display = 'none';
+                storyTextOverlay.style.display = 'flex';
+                storyTextOverlay.querySelector('p').textContent = story.content;
+                storyTextOverlay.style.background = story.background;
+            }
+
+            // Start timer
+            if (!isPaused) {
+                startStoryTimer();
+            }
+        }
+
+        // Update progress bars
+        function updateProgressBars(storyId, currentIndex) {
+            const progressBars = document.querySelector('.story-progress-bars');
+            const storyCount = storiesData[storyId].length;
+
+            progressBars.innerHTML = '';
+            for (let i = 0; i < storyCount; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'progress-bar-item';
+                
+                const fill = document.createElement('div');
+                fill.className = 'progress-fill';
+                
+                if (i < currentIndex) {
+                    fill.classList.add('completed');
+                } else if (i === currentIndex) {
+                    fill.classList.add('active');
+                }
+                
+                bar.appendChild(fill);
+                progressBars.appendChild(bar);
+            }
+        }
+
+        // Start story timer
+        function startStoryTimer() {
+            clearTimeout(storyTimer);
+            storyTimer = setTimeout(() => {
+                nextStory();
+            }, 5000);
+        }
+
+        // Next story
+        function nextStory() {
+            const stories = storiesData[currentStoryId];
+            
+            if (currentStoryIndex < stories.length - 1) {
+                loadStory(currentStoryId, currentStoryIndex + 1);
+            } else {
+                // Move to next user's story
+                const currentItem = document.querySelector(`[data-story-id="${currentStoryId}"]`);
+                const nextItem = currentItem.nextElementSibling;
+                
+                if (nextItem && nextItem.classList.contains('story-item') && !nextItem.classList.contains('your-story')) {
+                    loadStory(nextItem.dataset.storyId, 0);
+                } else {
+                    // No more stories
+                    window.history.back();
+                }
+            }
+        }
+
+        // Previous story
+        function prevStory() {
+            if (currentStoryIndex > 0) {
+                loadStory(currentStoryId, currentStoryIndex - 1);
+            } else {
+                // Move to previous user's story
+                const currentItem = document.querySelector(`[data-story-id="${currentStoryId}"]`);
+                const prevItem = currentItem.previousElementSibling;
+                
+                if (prevItem && prevItem.classList.contains('story-item') && !prevItem.classList.contains('your-story')) {
+                    const prevStoryId = prevItem.dataset.storyId;
+                    const prevStoryLastIndex = storiesData[prevStoryId].length - 1;
+                    loadStory(prevStoryId, prevStoryLastIndex);
+                }
+            }
+        }
+
+        // Toggle pause/play
+        document.querySelector('.story-pause-btn').addEventListener('click', function() {
+            isPaused = !isPaused;
+            
+            if (isPaused) {
+                clearTimeout(storyTimer);
+                document.querySelector('.pause-icon').style.display = 'none';
+                document.querySelector('.play-icon').style.display = 'block';
+                document.querySelectorAll('.progress-fill.active').forEach(fill => {
+                    fill.style.animationPlayState = 'paused';
+                });
+            } else {
+                startStoryTimer();
+                document.querySelector('.pause-icon').style.display = 'block';
+                document.querySelector('.play-icon').style.display = 'none';
+                document.querySelectorAll('.progress-fill.active').forEach(fill => {
+                    fill.style.animationPlayState = 'running';
+                });
+            }
+        });
+
+        // Navigation areas
+        document.getElementById('prevArea').addEventListener('click', prevStory);
+        document.getElementById('nextArea').addEventListener('click', nextStory);
+
+        // Mobile controls
+        document.getElementById('mobilePrevBtn').addEventListener('click', prevStory);
+        document.getElementById('mobileNextBtn').addEventListener('click', nextStory);
+
+        // Story item click
+        document.querySelectorAll('.story-item:not(.your-story)').forEach(item => {
+            item.addEventListener('click', function() {
+                loadStory(this.dataset.storyId, 0);
+            });
+        });
+
+        // Your story click
+        document.querySelector('.your-story').addEventListener('click', function() {
+            document.getElementById('createStoryModal').style.display = 'flex';
+        });
+
+        // Quick reactions
+        document.querySelectorAll('.quick-reaction-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const reaction = this.dataset.reaction;
+                this.classList.add('reaction-sent');
+                
+                // Show floating reaction
+                const floatingReaction = document.createElement('div');
+                floatingReaction.className = 'floating-reaction';
+                floatingReaction.textContent = reaction;
+                floatingReaction.style.left = this.offsetLeft + 'px';
+                document.querySelector('.story-actions').appendChild(floatingReaction);
+                
+                setTimeout(() => {
+                    floatingReaction.remove();
+                    this.classList.remove('reaction-sent');
+                }, 2000);
+            });
+        });
+
+        // Send reply
+        document.querySelector('.reply-send-btn').addEventListener('click', function() {
+            const input = document.getElementById('replyInput');
+            if (input.value.trim()) {
+                console.log('Send reply:', input.value);
+                input.value = '';
+                // Show success feedback
+                this.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                setTimeout(() => {
+                    this.innerHTML = '<svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>';
+                }, 1500);
+            }
+        });
+
+        // Close modal
+        function closeCreateStoryModal() {
+            document.getElementById('createStoryModal').style.display = 'none';
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                prevStory();
+            } else if (e.key === 'ArrowRight') {
+                nextStory();
+            } else if (e.key === ' ') {
+                e.preventDefault();
+                document.querySelector('.story-pause-btn').click();
+            } else if (e.key === 'Escape') {
+                window.history.back();
+            }
+        });
+
+        // Initialize
+        loadStory('story1', 0);
+    </script>
+
+</body>
+
+</html>

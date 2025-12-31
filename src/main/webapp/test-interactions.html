@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Test - Post Interactions</title>
+    <style>
+        body { 
+            font-family: sans-serif; 
+            padding: 20px; 
+            background: #f0f2f5;
+        }
+        .test-info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .test-info h2 { margin-top: 0; color: #1877f2; }
+        .test-info li { margin: 8px 0; }
+    </style>
+    <link rel="stylesheet" href="/resources/client/css/PostInteractions.css">
+</head>
+<body>
+    <div class="test-info">
+        <h2>🧪 Test Instructions</h2>
+        <ol>
+            <li><strong>Long-press test:</strong> Giữ chuột trên nút "Thích" trong 500ms → Sẽ hiện emoji picker</li>
+            <li><strong>Quick click test:</strong> Click nhanh nút "Thích" → Like ngay với trái tim bay</li>
+            <li><strong>View likes test:</strong> Click vào số "42" hoặc vào các icon emoji → Mở modal danh sách</li>
+        </ol>
+    </div>
+
+    <!-- Test Post -->
+    <div class="post-card" data-post-id="test1">
+        <div class="post-header">
+            <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Test" alt="Test" class="post-avatar">
+            <div class="post-author-info">
+                <div class="post-author-name">Test User</div>
+                <div class="post-timestamp">Just now</div>
+            </div>
+            <button class="post-more-btn">⋮</button>
+        </div>
+
+        <div class="post-content">
+            Test post for interactions.<br>
+            👉 Long-press "Thích" button to see emoji reactions<br>
+            👉 Click on the "42" number to view likes list
+        </div>
+
+        <div class="post-stats">
+            <div class="post-stats-left">
+                <div class="post-reaction-icons">
+                    <div class="post-reaction-icon reaction-like">👍</div>
+                    <div class="post-reaction-icon reaction-love">❤️</div>
+                    <div class="post-reaction-icon reaction-haha">😂</div>
+                </div>
+                <span class="post-likes-count">42</span>
+            </div>
+            <div class="post-stats-right">
+                <span class="post-stat-item"><span class="post-comments-count">5</span> bình luận</span>
+                <span class="post-stat-item"><span class="post-shares-count">2</span> chia sẻ</span>
+            </div>
+        </div>
+
+        <div class="post-actions">
+            <button class="post-action-btn post-like-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <span>Thích</span>
+            </button>
+            <button class="post-action-btn post-comment-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>Bình luận</span>
+            </button>
+            <button class="post-action-btn post-share-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+                <span>Chia sẻ</span>
+            </button>
+            <button class="post-action-btn post-save-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>Lưu</span>
+            </button>
+        </div>
+
+        <div class="post-saved-indicator">
+            <svg viewBox="0 0 24 24">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
+        </div>
+
+        <div class="post-comments-section">
+            <div class="comment-input-wrapper">
+                <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=You" alt="You" class="comment-avatar">
+                <div class="comment-input-box">
+                    <input type="text" class="comment-input" placeholder="Viết bình luận...">
+                    <button class="comment-emoji-btn">😊</button>
+                    <button class="comment-send-btn">Gửi</button>
+                </div>
+            </div>
+            <div class="comments-list"></div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🧪 Test page loaded');
+        localStorage.setItem('currentUserId', '1');
+        localStorage.setItem('currentUsername', 'Test User');
+        localStorage.setItem('currentUserAvatar', 'https://api.dicebear.com/9.x/avataaars/svg?seed=You');
+    </script>
+    <script src="/resources/client/js/PostInteractions.js"></script>
+    <script>
+        // Add debug logging
+        setTimeout(() => {
+            console.log('✅ Page ready. Test these features:');
+            console.log('1. LONG PRESS nút "Thích" (giữ 500ms) → emoji picker');
+            console.log('2. QUICK CLICK nút "Thích" → like + flying heart');
+            console.log('3. CLICK số "42" → likes modal');
+        }, 500);
+    </script>
+</body>
+</html>

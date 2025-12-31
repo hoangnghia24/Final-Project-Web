@@ -1,0 +1,244 @@
+/* =========================================
+   STYLE CHO TRANG NHÓM & SỰ KIỆN (MODERN DASHBOARD)
+   ========================================= */
+
+/* --- 1. HERO SECTION (Banner đầu trang) --- */
+.page-hero {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px); /* Hiệu ứng kính mờ */
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    padding: 40px;
+    margin-bottom: 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+    /* Chữ Gradient màu tím xanh */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-desc {
+    color: #718096;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* --- 2. GRID SYSTEM CHO NHÓM --- */
+.groups-grid {
+    display: grid;
+    /* Tự động chia cột: Tối thiểu 280px, còn lại tự co giãn */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+    gap: 30px;
+}
+
+/* --- 3. GROUP CARD (Thẻ Nhóm) --- */
+.group-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.8);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.group-card:hover {
+    transform: translateY(-10px); /* Bay lên khi hover */
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+.group-cover {
+    height: 120px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+/* Lớp phủ đen nhẹ lên cover để avatar nổi hơn */
+.group-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+}
+
+.group-content {
+    padding: 20px;
+    text-align: center;
+    margin-top: -40px; /* Kéo nội dung lên đè ảnh bìa */
+    position: relative;
+    z-index: 2;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.group-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 24px; /* Avatar hình vuông bo góc mềm mại */
+    border: 4px solid white;
+    object-fit: cover;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin: 0 auto 10px auto;
+}
+
+.group-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 5px;
+    /* Giới hạn 1 dòng, nếu dài quá thì ... */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.group-stats {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: #718096;
+    margin-bottom: 20px;
+}
+
+.btn-join {
+    margin-top: auto; /* Đẩy nút xuống đáy */
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    background: #f7fafc;
+    color: #4a5568;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-join:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 5px 15px rgba(118, 75, 162, 0.3);
+}
+
+/* --- 4. EVENT TICKET (Thẻ Sự Kiện) --- */
+.events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.event-ticket {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.event-ticket:hover {
+    transform: scale(1.01);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    background: white;
+}
+
+/* Khối ngày tháng nổi bật */
+.date-badge {
+    min-width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid #f0f0f0;
+}
+
+.date-month {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #e53e3e; /* Màu đỏ cho tháng */
+    text-transform: uppercase;
+}
+
+.date-day {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #2d3748;
+    line-height: 1;
+}
+
+.event-details {
+    flex-grow: 1;
+}
+
+.event-details h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+    color: #2d3748;
+}
+
+.event-meta {
+    display: flex;
+    gap: 20px;
+    color: #718096;
+    font-size: 0.9rem;
+    align-items: center;
+}
+
+.event-meta i {
+    margin-right: 5px;
+}
+
+/* Nút hành động cho sự kiện */
+.btn-event {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    transition: 0.3s;
+}
+
+.btn-event:hover {
+    background: #667eea;
+    color: white;
+}
+
+/* --- 5. RESPONSIVE --- */
+@media (max-width: 768px) {
+    .event-ticket {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    .event-meta {
+        flex-direction: column;
+        gap: 5px;
+    }
+    .btn-event {
+        width: 100%;
+    }
+}

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${user != null ? user.fullName + ' - Profile' : 'User Profile'}">User Profile</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link th:href="@{/client/css/ModernUI.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/ModernPost.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/Profile.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/Header.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/LeftSidebar.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/Home.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/Notifications.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/PostInteractions.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/RedditPost.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/DarkMode.css}" rel="stylesheet" />
+    
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --radius-xl: 24px;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            background-image: radial-gradient(circle at 10% 20%, rgb(242, 235, 243) 0%, rgb(234, 241, 249) 90%);
+        }
+
+        /* Layout Grid */
+        .creative-profile-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* --- LEFT COLUMN: STICKY IDENTITY --- */
+        .profile-sticky-col {
+            position: sticky;
+            top: 80px; /* Cách top header */
+            height: fit-content;
+        }
+
+        .identity-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            border: var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            overflow: hidden;
+            text-align: center;
+            padding-bottom: 30px;
+        }
+
+        .mini-cover {
+            height: 120px;
+            background: var(--primary-gradient);
+            position: relative;
+        }
+
+        .creative-avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 40%; /* Bo góc lạ mắt hơn tròn */
+            border: 5px solid rgba(255,255,255,0.8);
+            margin-top: -70px;
+            object-fit: cover;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .creative-avatar:hover {
+            transform: scale(1.05) rotate(2deg);
+        }
+
+        .user-name-glitch {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-top: 15px;
+            background: -webkit-linear-gradient(45deg, #333, #667eea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-bio-short {
+            padding: 0 20px;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .action-buttons-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 0 30px;
+        }
+
+        .btn-creative {
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary-glass {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+        }
+
+        .btn-primary-glass:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(118, 75, 162, 0.4);
+        }
+
+        .info-list {
+            text-align: left;
+            padding: 20px 30px;
+            margin-top: 10px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .info-icon {
+            width: 32px;
+            height: 32px;
+            background: #f0f2f5;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+        }
+
+        /* --- RIGHT COLUMN: CONTENT FLOW --- */
+        
+        /* Bento Grid Stats */
+        .bento-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #333;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Navigation Pills */
+        .nav-pills-floating {
+            background: white;
+            padding: 10px;
+            border-radius: 50px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            position: sticky;
+            top: 20px;
+            z-index: 99;
+        }
+
+        .nav-pill-item {
+            padding: 10px 25px;
+            border-radius: 30px;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .nav-pill-item.active, .nav-pill-item:hover {
+            background: #f0f2f5;
+            color: #333;
+        }
+        
+        .nav-pill-item.active {
+            background: #333;
+            color: white;
+        }
+
+        /* Achievements Row */
+        .achievements-scroll {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            margin-bottom: 10px;
+            scrollbar-width: none;
+        }
+        
+        .badge-card {
+            min-width: 150px;
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border-radius: 16px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            border: 1px solid white;
+            box-shadow: 5px 5px 10px #d1d1d1, -5px -5px 10px #ffffff;
+        }
+
+        /* Post Styles Adjustments */
+        .reddit-post-card {
+            border-radius: var(--radius-xl);
+            border: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            margin-bottom: 30px;
+            background: white;
+            overflow: hidden;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 992px) {
+            .creative-profile-layout {
+                grid-template-columns: 1fr;
+            }
+            .profile-sticky-col {
+                position: relative;
+                top: 0;
+            }
+            .identity-card {
+                display: flex;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script th:src="@{/client/js/TimeUtils.js}"></script>
+    <script th:src="@{/client/js/Header.js}"></script>
+    <script th:src="@{/client/js/LeftSidebar.js}"></script>
+    <script th:src="@{/client/js/Notifications.js}"></script>
+    <script th:src="@{/client/js/RedditInteractions.js}"></script>
+    <script th:src="@{/client/js/PostInteractions.js}"></script>
+
+    <!-- Include header fragment -->
+    <div th:replace="~{fragments/Header :: user-header}"></div>
+
+    <div class="home-container">
+        <div th:replace="~{fragments/Left-Sidebar :: left-sidebar}"></div>
+        <main class="main-feed">
+            <div class="creative-profile-layout">
+                <aside class="profile-sticky-col">
+                    <div class="identity-card">
+                        <div class="mini-cover">
+                            <button class="btn btn-sm btn-light position-absolute top-0 end-0 m-2 rounded-circle" title="Đổi ảnh bìa">📷</button>
+                        </div>
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=UserA" alt="Avatar" class="creative-avatar">
+                        <h1 class="user-name-glitch">Nguyễn Văn A 
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#3b82f6"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                        </h1>
+                        <p class="user-bio-short">✨ Creative Developer | 🚀 React & Spring Boot | 📸 Photography Enthusiast</p>
+                        <div class="action-buttons-vertical">
+                            <button class="btn-creative btn-primary-glass">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                                Kết bạn
+                            </button>
+                            <div class="d-flex gap-2">
+                                <button class="btn-creative btn-light flex-grow-1">
+                                    💬 Nhắn tin
+                                </button>
+                                <button class="btn-creative btn-light">
+                                    ...
+                                </button>
+                            </div>
+                        </div>
+                        <div class="info-list">
+                            <div class="info-item">
+                                <div class="info-icon">💼</div>
+                                <span>Dev tại <strong>TechCorp</strong></span>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-icon">🎓</div>
+                                <span>Học tại <strong>Bách Khoa HN</strong></span>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-icon">📍</div>
+                                <span>Sống tại <strong>Hà Nội</strong></span>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-icon">🔗</div>
+                                <a href="#" class="text-decoration-none">github.com/nguyenvana</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="identity-card mt-3 p-3 text-start">
+                        <div class="d-flex justify-content-between mb-2">
+                            <h6 class="fw-bold m-0">Ảnh gần đây</h6>
+                            <small class="text-primary">Xem tất cả</small>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <img src="https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=100" class="rounded-3" style="width: 70px; height: 70px; object-fit: cover;">
+                            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=100" class="rounded-3" style="width: 70px; height: 70px; object-fit: cover;">
+                            <img src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=100" class="rounded-3" style="width: 70px; height: 70px; object-fit: cover;">
+                            <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=100" class="rounded-3" style="width: 70px; height: 70px; object-fit: cover;">
+                        </div>
+                    </div>
+                </aside>
+                <div class="profile-content-flow">
+                    <div class="bento-stats">
+                        <div class="stat-box">
+                            <span class="stat-number">456</span>
+                            <span class="stat-label">Bài viết</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-number">1.2k</span>
+                            <span class="stat-label">Bạn bè</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-number">8.9k</span>
+                            <span class="stat-label">Followers</span>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold mb-3 ms-2">Thành tựu nổi bật</h5>
+                    <div class="achievements-scroll">
+                        <div class="badge-card">
+                            <div class="fs-1">🏆</div>
+                            <small class="fw-bold mt-2">Hackathon Winner</small>
+                            <small class="text-muted" style="font-size: 10px;">2023</small>
+                        </div>
+                        <div class="badge-card">
+                            <div class="fs-1">🔥</div>
+                            <small class="fw-bold mt-2">Top Contributor</small>
+                        </div>
+                        <div class="badge-card">
+                            <div class="fs-1">✈️</div>
+                            <small class="fw-bold mt-2">Traveler</small>
+                            <small class="text-muted" style="font-size: 10px;">10 Countries</small>
+                        </div>
+                        <div class="badge-card">
+                            <div class="fs-1">💻</div>
+                            <small class="fw-bold mt-2">Code Master</small>
+                        </div>
+                    </div>
+                    <div class="nav-pills-floating">
+                        <button class="nav-pill-item active" data-tab="posts">Dòng thời gian</button>
+                        <button class="nav-pill-item" data-tab="about">Giới thiệu</button>
+                        <button class="nav-pill-item" data-tab="friends">Bạn bè</button>
+                        <button class="nav-pill-item" data-tab="photos">Media</button>
+                    </div>
+                    <div class="feed-stream">
+                        <div class="reddit-post-card p-3 d-flex gap-3 align-items-center mb-4">
+                            <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=UserA" class="rounded-circle" width="40" height="40">
+                            <input type="text" class="form-control rounded-pill bg-light border-0" placeholder="Hôm nay bạn thế nào, A?">
+                        </div>
+                        <div class="reddit-post-card" data-post-id="u1">
+                            <div class="post-header p-3 pb-0 d-flex justify-content-between">
+                                <div class="d-flex gap-2">
+                                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=UserA" class="rounded-circle border" width="45" height="45">
+                                    <div>
+                                        <div class="fw-bold">Nguyễn Văn A</div>
+                                        <small class="text-muted">5 giờ trước • 🌏</small>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm text-muted">•••</button>
+                            </div>
+                            <div class="post-content p-3">
+                                <h5 class="fw-bold">Vừa hoàn thành dự án React mới! 🎉</h5>
+                                <p>Sau 2 tháng cày cuốc cuối cùng cũng xong dự án này. Giao diện Dashboard mới nhìn thế nào anh em?</p>
+                            </div>
+                            <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800" class="w-100" style="max-height: 400px; object-fit: cover;">
+                            <div class="p-2 d-flex justify-content-around border-top mt-2">
+                                <button class="btn btn-light flex-grow-1 border-0">❤️ Thích</button>
+                                <button class="btn btn-light flex-grow-1 border-0">💬 Bình luận</button>
+                                <button class="btn btn-light flex-grow-1 border-0">🚀 Chia sẻ</button>
+                            </div>
+                        </div>
+                        <div class="reddit-post-card" data-post-id="u2">
+                            <div class="post-header p-3 pb-0 d-flex justify-content-between">
+                                <div class="d-flex gap-2">
+                                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=UserA" class="rounded-circle border" width="45" height="45">
+                                    <div>
+                                        <div class="fw-bold">Nguyễn Văn A</div>
+                                        <small class="text-muted">1 ngày trước • 👥</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="post-content p-3">
+                                <p class="mb-0 fs-5">Cuối tuần này ai rảnh đi cafe không? ☕ Muốn tìm chỗ nào chill chill ở Hồ Tây.</p>
+                            </div>
+                            <div class="p-2 d-flex justify-content-around border-top mt-2">
+                                <button class="btn btn-light flex-grow-1 border-0">❤️ Thích</button>
+                                <button class="btn btn-light flex-grow-1 border-0">💬 Bình luận</button>
+                                <button class="btn btn-light flex-grow-1 border-0">🚀 Chia sẻ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Hiệu ứng simple cho tab
+        document.querySelectorAll('.nav-pill-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.nav-pill-item').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

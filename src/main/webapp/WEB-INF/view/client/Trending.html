@@ -4,269 +4,509 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trending - TFT</title>
+    <title>Thịnh hành - TFT</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/client/css/ModernUI.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/ModernPost.css}" rel="stylesheet" />
     <link th:href="@{/client/css/Profile.css}" rel="stylesheet" />
     <link th:href="@{/client/css/Header.css}" rel="stylesheet" />
     <link th:href="@{/client/css/LeftSidebar.css}" rel="stylesheet" />
     <link th:href="@{/client/css/Home.css}" rel="stylesheet" />
-    <script th:src="@{/client/js/TimeUtils.js}"></script>
-    <script th:src="@{/client/js/Header.js}"></script>
-    <script th:src="@{/client/js/LeftSidebar.js}"></script>
-    
-    <style>
-        .trending-header {
-            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
-            padding: 20px 0;
-            margin-bottom: 20px;
-            border-radius: 12px;
-            color: white;
-            text-align: center;
-        }
-        
-        .trending-header h2 {
-            margin: 0;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .trending-header p {
-            margin: 5px 0 0 0;
-            opacity: 0.9;
-        }
-        
-        .filter-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e0e0e0;
-            padding-bottom: 0;
-        }
-        
-        .filter-tab {
-            padding: 10px 20px;
-            background: none;
-            border: none;
-            color: #666;
-            font-weight: 600;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-        }
-        
-        .filter-tab:hover {
-            color: #FF6B6B;
-        }
-        
-        .filter-tab.active {
-            color: #FF6B6B;
-            border-bottom-color: #FF6B6B;
-        }
-        
-        .trending-badge {
-            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .vote-count {
-            color: #FF6B6B;
-            font-weight: 700;
-            font-size: 18px;
-        }
-        
-        .hot-icon {
-            animation: pulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-    </style>
+    <link th:href="@{/client/css/Notifications.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/PostInteractions.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/RedditPost.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/DarkMode.css}" rel="stylesheet" />
 </head>
 
 <body>
 
-    <!-- Include header fragment -->
-    <div th:replace="~{fragments/header :: user-header}"></div>
+    <script th:src="@{/client/js/TimeUtils.js}"></script>
+    <script th:src="@{/client/js/Header.js}"></script>
+    <script th:src="@{/client/js/LeftSidebar.js}"></script>
+    <script th:src="@{/client/js/Notifications.js}"></script>
+    <script th:src="@{/client/js/RedditInteractions.js}"></script>
+    <script th:src="@{/client/js/PostInteractions.js}"></script>
 
-    <div class="home-container">
+    <!-- Include header fragment -->
+    <div th:replace="~{fragments/Header :: user-header}"></div>
+
+    <div class="trending-container">
 
         <!-- Include left sidebar fragment -->
-        <div th:replace="~{fragments/left-sidebar :: left-sidebar}"></div>
+        <div th:replace="~{fragments/Left-Sidebar :: left-sidebar}"></div>
 
         <main class="main-feed">
-            <div class="trending-header">
-                <h2>
-                    <span class="hot-icon">🔥</span>
-                    Trending Now
-                </h2>
-                <p>Những bài viết đang hot nhất hiện nay</p>
+            <!-- Trending Stats Banner -->
+            <div class="trending-stats-banner">
+                <div class="stat-item">
+                    <svg viewBox="0 0 24 24" fill="#f5533d" width="24" height="24">
+                        <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
+                    </svg>
+                    <div class="stat-info">
+                        <div class="stat-value">2.5M</div>
+                        <div class="stat-label">Bài viết hot</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <svg viewBox="0 0 24 24" fill="#1877f2" width="24" height="24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    <div class="stat-info">
+                        <div class="stat-value">850K</div>
+                        <div class="stat-label">Tương tác/giờ</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <svg viewBox="0 0 24 24" fill="#45bd62" width="24" height="24">
+                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                    </svg>
+                    <div class="stat-info">
+                        <div class="stat-value">125K</div>
+                        <div class="stat-label">Người online</div>
+                    </div>
+                </div>
             </div>
             
-            <div class="filter-tabs">
-                <button class="filter-tab active">Hôm nay</button>
-                <button class="filter-tab">Tuần này</button>
-                <button class="filter-tab">Tháng này</button>
-                <button class="filter-tab">Mọi lúc</button>
+            <!-- Filter Tabs -->
+            <div class="filter-tabs-unified">
+                <button class="filter-tab-btn active" data-filter="today">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                    </svg>
+                    Hôm nay
+                </button>
+                <button class="filter-tab-btn" data-filter="week">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                        <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                    </svg>
+                    Tuần này
+                </button>
+                <button class="filter-tab-btn" data-filter="month">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                        <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/>
+                    </svg>
+                    Tháng này
+                </button>
+                <button class="filter-tab-btn" data-filter="all">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    Mọi lúc
+                </button>
             </div>
 
             <!-- Trending Post 1 -->
-            <div class="feed-card">
-                <div class="feed-header">
-                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=trending1" class="feed-avatar">
-                    <div>
-                        <h6 class="mb-0 fw-bold">
-                            Tech Insider
-                            <span class="trending-badge">🔥 Trending #1</span>
-                        </h6>
-                        <small class="text-muted">2 giờ trước • r/technology</small>
+            <div class="reddit-post-card" data-post-id="t1">
+                <div class="post-header">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=TechInsider" alt="Tech" class="post-user-avatar">
+                    <div class="post-user-info">
+                        <div class="post-user-name-row">
+                            <a href="#" class="post-user-name">Tech Insider Vietnam</a>
+                            <button class="post-follow-btn following">• Đang theo dõi</button>
+                        </div>
+                        <div class="post-time-privacy">
+                            <span class="post-time">2 giờ trước</span>
+                            <span>•</span>
+                            <svg class="post-privacy-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                            </svg>
+                            <span>Công khai</span>
+                        </div>
+                    </div>
+                    <div class="post-header-actions">
+                        <button class="post-menu-btn" onclick="togglePostMenu(event, 't1')">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
-                <div class="feed-content">
-                    <h5 class="fw-bold mb-2">AI mới của Google đã vượt qua GPT-4 trong các bài test lập trình</h5>
-                    Google vừa công bố mô hình AI mới có khả năng giải quyết các bài toán lập trình phức tạp tốt hơn 40% so với GPT-4. Đây là bước tiến lớn trong lĩnh vực AI...
+                <div class="post-main-content">
+                    <span class="post-category-tag">🔥 #1 Trending - AI</span>
+                    <div class="post-title-text">AI mới của Google đã vượt qua GPT-4 trong các bài test lập trình</div>
+                    <div class="post-body-text">
+                        Google vừa công bố mô hình AI mới có khả năng giải quyết các bài toán lập trình phức tạp tốt hơn 40% so với GPT-4. Đây là bước tiến lớn trong lĩnh vực AI...
+                    </div>
                 </div>
-                <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995" class="feed-image">
-                <hr>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="vote-count">↑ 12.5k</span>
-                    <span class="text-muted">💬 1.2k bình luận</span>
-                    <span class="text-muted">🔗 Share</span>
+                <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995" alt="AI Technology" class="post-full-image">
+                <div class="post-stats-bar">
+                    <div class="post-stats-left">
+                        <div class="post-reactions-preview">
+                            <span class="reaction-icon-small">😮</span>
+                            <span class="reaction-icon-small">👍</span>
+                            <span class="reaction-icon-small">❤️</span>
+                        </div>
+                        <span class="post-likes-count">Bạn và 12.4k người khác</span>
+                    </div>
+                    <div class="post-stats-right">
+                        <span class="post-stat-item">1.2k bình luận</span>
+                        <span class="post-stat-item">845 chia sẻ</span>
+                    </div>
                 </div>
-                <div class="d-flex text-center">
-                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Upvote</button>
-                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Bình luận</button>
-                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Chia sẻ</button>
+                <div class="post-action-buttons">
+                    <button class="action-btn post-like-btn liked" data-post-id="t1" onmouseenter="showReactions(event)" onmouseleave="hideReactions(event)">
+                        <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        <span>😮 Wow</span>
+                        <div class="reactions-popup">
+                            <span class="reaction-emoji" onclick="selectReaction(event, 't1', '❤️')">❤️</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 't1', '👍')">👍</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 't1', '😂')">😂</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 't1', '😮')">😮</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 't1', '😢')">😢</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 't1', '😠')">😠</span>
+                        </div>
+                    </button>
+                    <button class="action-btn">
+                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <span>Bình luận</span>
+                    </button>
+                    <button class="action-btn">
+                        <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                        <span>Chia sẻ</span>
+                    </button>
                 </div>
             </div>
 
             <!-- Trending Post 2 -->
-            <div class="feed-card">
-                <div class="feed-header">
-                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=trending2" class="feed-avatar">
-                    <div>
-                        <h6 class="mb-0 fw-bold">
-                            Gaming News
-                            <span class="trending-badge">🔥 Trending #2</span>
-                        </h6>
-                        <small class="text-muted">4 giờ trước • r/gaming</small>
+            <div class="reddit-post-card" data-post-id="t2">
+                <div class="post-header">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=GamingNews" alt="Gaming" class="post-user-avatar">
+                    <div class="post-user-info">
+                        <div class="post-user-name-row">
+                            <a href="#" class="post-user-name">Gaming News VN</a>
+                            <button class="post-follow-btn">• Theo dõi</button>
+                        </div>
+                        <div class="post-time-privacy">
+                            <span class="post-time">4 giờ trước</span>
+                            <span>•</span>
+                            <svg class="post-privacy-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                            </svg>
+                            <span>Công khai</span>
+                        </div>
+                    </div>
+                    <div class="post-header-actions">
+                        <button class="post-menu-btn" onclick="togglePostMenu(event, 't2')">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
-                <div class="feed-content">
-                    <h5 class="fw-bold mb-2">Game mới của Nintendo vừa phá kỷ lục doanh thu ngày đầu</h5>
-                    Với hơn 10 triệu bản được bán trong 24 giờ đầu, đây là game có doanh thu cao nhất mọi thời đại của Nintendo...
+                <div class="post-main-content">
+                    <span class="post-category-tag">🔥 #2 Trending - Gaming</span>
+                    <div class="post-title-text">Game mới của Nintendo vừa phá kỷ lục doanh thu ngày đầu</div>
+                    <div class="post-body-text">
+                        Với hơn 10 triệu bản được bán trong 24 giờ đầu, đây là game có doanh thu cao nhất mọi thời đại của Nintendo...
+                    </div>
                 </div>
-                <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f" class="feed-image">
-                <hr>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="vote-count">↑ 8.9k</span>
-                    <span class="text-muted">💬 856 bình luận</span>
-                    <span class="text-muted">🔗 Share</span>
+                <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f" alt="Gaming" class="post-full-image">
+                <div class="post-stats-bar">
+                    <div class="post-stats-left">
+                        <div class="post-reactions-preview">
+                            <span class="reaction-icon-small">😂</span>
+                            <span class="reaction-icon-small">👍</span>
+                        </div>
+                        <span class="post-likes-count">8.9k lượt thích</span>
+                    </div>
+                    <div class="post-stats-right">
+                        <span class="post-stat-item">856 bình luận</span>
+                        <span class="post-stat-item">567 chia sẻ</span>
+                    </div>
                 </div>
-                <div class="d-flex text-center">
-                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Upvote</button>
-                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Bình luận</button>
-                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Chia sẻ</button>
+                <div class="post-action-buttons">
+                    <button class="action-btn post-like-btn" data-post-id="t2" onmouseenter="showReactions(event)" onmouseleave="hideReactions(event)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        <span>Thích</span>
+                        <div class="reactions-popup">
+                            <span class="reaction-emoji" onclick="selectReaction(event, 't2', '❤️')">❤️</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 't2', '👍')">👍</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 't2', '😂')">😂</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 't2', '😮')">😮</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 't2', '😢')">😢</span>
+                            <span class="reaction-emoji" onclick="selectReaction(event, 't2', '😠')">😠</span>
+                        </div>
+                    </button>
+                    <button class="action-btn">
+                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <span>Bình luận</span>
+                    </button>
+                    <button class="action-btn">
+                        <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                        <span>Chia sẻ</span>
+                    </button>
                 </div>
             </div>
 
             <!-- Trending Post 3 -->
-            <div class="feed-card">
-                <div class="feed-header">
-                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=trending3" class="feed-avatar">
-                    <div>
-                        <h6 class="mb-0 fw-bold">
-                            Science Daily
-                            <span class="trending-badge">🔥 Trending #3</span>
-                        </h6>
-                        <small class="text-muted">5 giờ trước • r/science</small>
+            <div class="reddit-post-card" data-post-id="t3">
+                <div class="post-vote-section">
+                    <button class="vote-btn upvote">
+                        <svg viewBox="0 0 24 24"><path d="M12 4l8 8h-6v8h-4v-8H4z"/></svg>
+                    </button>
+                    <span class="vote-count">7.2k</span>
+                    <button class="vote-btn downvote">
+                        <svg viewBox="0 0 24 24"><path d="M12 20l-8-8h6V4h4v8h6z"/></svg>
+                    </button>
+                </div>
+                <div class="post-main-content">
+                    <div class="post-meta-info">
+                        <span class="post-tag">🔥 #3 Trending</span>
+                        <span class="post-community">r/science</span>
+                        <span>•</span>
+                        <span class="post-author">u/ScienceDaily</span>
+                        <span>•</span>
+                        <span class="post-time">6 giờ trước</span>
                     </div>
-                </div>
-                <div class="feed-content">
-                    <h5 class="fw-bold mb-2">Các nhà khoa học phát hiện ra hành tinh có thể sống được giống Trái Đất</h5>
-                    NASA công bố phát hiện một hành tinh cách chúng ta 120 năm ánh sáng có khí quyển và nhiệt độ phù hợp với sự sống...
-                </div>
-                <img src="https://images.unsplash.com/photo-1614728894747-a83421e2b9c9" class="feed-image">
-                <hr>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="vote-count">↑ 15.2k</span>
-                    <span class="text-muted">💬 2.1k bình luận</span>
-                    <span class="text-muted">🔗 Share</span>
-                </div>
-                <div class="d-flex text-center">
-                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Upvote</button>
-                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Bình luận</button>
-                    <button class="btn btn-light flex-grow-1 fw-bold text-secondary">Chia sẻ</button>
+                    <div class="post-title-text">Phát hiện hành tinh mới có khả năng duy trì sự sống</div>
+                    <div class="post-body-text">
+                        Các nhà khoa học NASA vừa phát hiện một hành tinh cách Trái Đất 100 năm ánh sáng với điều kiện khí hậu tương tự Trái Đất. Đây có thể là khám phá quan trọng nhất của thập kỷ...
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1614732414444-096e5f1122d5" alt="Space" class="post-full-image">
+                    <div class="post-action-buttons">
+                        <button class="action-btn post-like-btn" data-post-id="t3">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                            <span>Thích</span>
+                        </button>
+                        <button class="action-btn">
+                            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            <span>634 bình luận</span>
+                        </button>
+                        <button class="action-btn">
+                            <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                            <span>Chia sẻ</span>
+                        </button>
+                        <button class="action-btn">
+                            <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                            <span>Lưu</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
+            <!-- Load More -->
+            <div class="load-more-section">
+                <button class="load-more-btn">Xem thêm bài viết thịnh hành</button>
+            </div>
         </main>
 
-        <aside class="right-sidebar">
-            <div class="contacts-widget">
-                <div class="contacts-header">
-                    <h6 class="contacts-title">📈 Top Communities</h6>
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <!-- Trending Topics Widget -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title-text">Xu hướng hàng đầu</h3>
+                    <a href="#" class="widget-more">Xem tất cả</a>
                 </div>
-                
-                <div class="contacts-list">
-                    <div class="contact-item">
-                        <div class="contact-avatar-wrapper">
-                            <div class="avatar-circle" style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-                        </div>
-                        <div>
-                            <span class="contact-name">r/technology</span>
-                            <small class="d-block text-muted">1.2M members</small>
-                        </div>
+                <div class="trending-item">
+                    <span class="trending-rank">1</span>
+                    <div>
+                        <div class="trending-topic">#AITrends2024</div>
+                        <div class="trending-stats">45.2K bài viết • Đang thịnh hành</div>
                     </div>
-                    
-                    <div class="contact-item">
-                        <div class="contact-avatar-wrapper">
-                            <div class="avatar-circle" style="width: 36px; height: 36px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
-                        </div>
-                        <div>
-                            <span class="contact-name">r/gaming</span>
-                            <small class="d-block text-muted">890K members</small>
-                        </div>
+                </div>
+                <div class="trending-item">
+                    <span class="trending-rank">2</span>
+                    <div>
+                        <div class="trending-topic">#WebDevelopment</div>
+                        <div class="trending-stats">32.8K bài viết • Công nghệ</div>
                     </div>
-                    
-                    <div class="contact-item">
-                        <div class="contact-avatar-wrapper">
-                            <div class="avatar-circle" style="width: 36px; height: 36px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
-                        </div>
-                        <div>
-                            <span class="contact-name">r/science</span>
-                            <small class="d-block text-muted">750K members</small>
-                        </div>
+                </div>
+                <div class="trending-item">
+                    <span class="trending-rank">3</span>
+                    <div>
+                        <div class="trending-topic">#HealthyLifestyle</div>
+                        <div class="trending-stats">28.5K bài viết • Sức khỏe</div>
+                    </div>
+                </div>
+                <div class="trending-item">
+                    <span class="trending-rank">4</span>
+                    <div>
+                        <div class="trending-topic">#TravelVietnam</div>
+                        <div class="trending-stats">21.3K bài viết • Du lịch</div>
+                    </div>
+                </div>
+                <div class="trending-item">
+                    <span class="trending-rank">5</span>
+                    <div>
+                        <div class="trending-topic">#FoodieLife</div>
+                        <div class="trending-stats">18.7K bài viết • Ẩm thực</div>
                     </div>
                 </div>
             </div>
-        </aside>
+
+            <!-- Suggested Users Widget -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title-text">Người dùng nổi bật</h3>
+                    <a href="#" class="widget-more">Xem tất cả</a>
+                </div>
+                <div class="suggested-user">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=TechGuru" alt="Avatar" class="suggested-avatar">
+                    <div class="suggested-info">
+                        <div class="suggested-name">
+                            Tech Guru
+                            <svg viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                            </svg>
+                        </div>
+                        <div class="suggested-mutual">25K người theo dõi</div>
+                    </div>
+                    <button class="suggested-follow-btn">Theo dõi</button>
+                </div>
+                <div class="suggested-user">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Creator" alt="Avatar" class="suggested-avatar">
+                    <div class="suggested-info">
+                        <div class="suggested-name">Content Creator</div>
+                        <div class="suggested-mutual">18K người theo dõi</div>
+                    </div>
+                    <button class="suggested-follow-btn">Theo dõi</button>
+                </div>
+                <div class="suggested-user">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Influencer" alt="Avatar" class="suggested-avatar">
+                    <div class="suggested-info">
+                        <div class="suggested-name">Influencer Pro</div>
+                        <div class="suggested-mutual">12K người theo dõi</div>
+                    </div>
+                    <button class="suggested-follow-btn">Theo dõi</button>
+                </div>
+            </div>
+
+            <!-- Trending Communities Widget -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title-text">Cộng đồng hot</h3>
+                    <a href="#" class="widget-more">Xem tất cả</a>
+                </div>
+                <div class="event-item">
+                    <div class="event-date">
+                        <div class="event-month">👥</div>
+                    </div>
+                    <div class="event-details">
+                        <div class="event-title">Lập trình viên VN</div>
+                        <div class="event-meta">125K thành viên • 50 bài mới hôm nay</div>
+                    </div>
+                </div>
+                <div class="event-item">
+                    <div class="event-date">
+                        <div class="event-month">🎨</div>
+                    </div>
+                    <div class="event-details">
+                        <div class="event-title">Design & UI/UX</div>
+                        <div class="event-meta">89K thành viên • 35 bài mới hôm nay</div>
+                    </div>
+                </div>
+                <div class="event-item">
+                    <div class="event-date">
+                        <div class="event-month">💡</div>
+                    </div>
+                    <div class="event-details">
+                        <div class="event-title">Khởi nghiệp Startup</div>
+                        <div class="event-meta">67K thành viên • 28 bài mới hôm nay</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sponsored Content Widget -->
+            <div class="widget-card sponsored-card">
+                <div class="sponsored-label">Được tài trợ</div>
+                <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=400" alt="Sponsored" class="sponsored-image">
+                <div class="sponsored-title">Nâng cao kỹ năng digital marketing</div>
+                <div class="sponsored-description">Khóa học từ chuyên gia với chứng chỉ quốc tế</div>
+                <a href="#" class="sponsored-link">marketing-academy.vn</a>
+            </div>
+        </div><!-- End right-sidebar -->
 
     </div>
 
     <script>
         // Filter tabs functionality
-        document.querySelectorAll('.filter-tab').forEach(tab => {
+        document.querySelectorAll('.filter-tab-btn').forEach(tab => {
             tab.addEventListener('click', function() {
-                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.filter-tab-btn').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
                 console.log('Filter changed to:', this.textContent);
             });
         });
+
+        // Reactions popup
+        let reactionTimer;
+        function showReactions(event) {
+            const btn = event.currentTarget;
+            const popup = btn.querySelector('.reactions-popup');
+            if (popup) {
+                clearTimeout(reactionTimer);
+                reactionTimer = setTimeout(() => popup.classList.add('active'), 500);
+            }
+        }
+
+        function hideReactions(event) {
+            clearTimeout(reactionTimer);
+            const btn = event.currentTarget;
+            const popup = btn.querySelector('.reactions-popup');
+            if (popup) setTimeout(() => popup.classList.remove('active'), 200);
+        }
+
+        function selectReaction(event, postId, emoji) {
+            event.stopPropagation();
+            const btn = event.target.closest('.post-like-btn');
+            const span = btn.querySelector('span');
+            btn.classList.add('liked');
+            span.textContent = emoji + ' ' + getReactionName(emoji);
+            const popup = btn.querySelector('.reactions-popup');
+            if (popup) popup.classList.remove('active');
+        }
+
+        function getReactionName(emoji) {
+            const names = {'❤️': 'Yêu thích', '👍': 'Thích', '😂': 'Haha', '😮': 'Wow', '😢': 'Buồn', '😠': 'Phẫn nộ'};
+            return names[emoji] || 'Thích';
+        }
+
+        function togglePostMenu(event, postId) {
+            event.stopPropagation();
+            const btn = event.currentTarget;
+            document.querySelectorAll('.post-menu-dropdown').forEach(menu => menu.remove());
+            const menu = document.createElement('div');
+            menu.className = 'post-menu-dropdown active';
+            menu.innerHTML = `
+                <div class="menu-item" onclick="savePost('${postId}')">
+                    <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    Lưu bài viết
+                </div>
+                <div class="menu-item" onclick="hidePost('${postId}')">
+                    <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Ẩn bài viết
+                </div>
+                <div class="menu-divider"></div>
+                <div class="menu-item danger" onclick="reportPost('${postId}')">
+                    <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                    Báo cáo
+                </div>
+            `;
+            btn.parentElement.style.position = 'relative';
+            btn.parentElement.appendChild(menu);
+            setTimeout(() => {
+                document.addEventListener('click', function closeMenu(e) {
+                    if (!menu.contains(e.target)) {
+                        menu.remove();
+                        document.removeEventListener('click', closeMenu);
+                    }
+                });
+            }, 10);
+        }
+
+        function savePost(postId) { alert('Đã lưu bài viết!'); }
+        function hidePost(postId) { document.querySelector(`[data-post-id="${postId}"]`).style.display = 'none'; }
+        function reportPost(postId) { alert('Cảm ơn bạn đã báo cáo!'); }
     </script>
 
 </body>
