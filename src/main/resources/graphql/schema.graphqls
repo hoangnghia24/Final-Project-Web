@@ -1,16 +1,22 @@
-type User{
+# 1. Định nghĩa kết quả trả về cho Login/Register (Gồm Token + User)
+type AuthPayload {
+    token: String!
+    user: User!
+}
+
+type User {
     id: ID!
     fullName: String!
     email: String!
-    passwordHash: String!
     username: String!
+    # passwordHash: String!  <-- ĐÃ XÓA DÒNG NÀY VÌ BẢO MẬT
     avatarUrl: String
     bio: String
     role: String
     createdAt: String
 }
 
-type InfoUserForAdmin{
+type InfoUserForAdmin {
     id: ID!
     fullName: String!
     email: String!
@@ -20,20 +26,23 @@ type InfoUserForAdmin{
     createdAt: String
 }
 
-
-input RegisterInput{
+input RegisterInput {
     username: String!
     password: String!
     email: String!
     fullName: String!
 }
 
-type Mutation{
-    createRegister(input: RegisterInput!): User!
+type Mutation {
+    # 2. Đổi return type thành AuthPayload để lấy được Token
+    register(input: RegisterInput!): AuthPayload!
+
+    # 3. Thêm login vào Mutation (thay vì Query) và trả về AuthPayload
+    login(username: String!, password: String!): AuthPayload!
 }
 
-type Query{
-    getUserLogin(username: String!, password: String!): User
+type Query {
+    # Đã xóa getUserLogin ở đây vì chuyển sang Mutation login bên trên
     getUserByUsername(username: String!): User
     getAllUsers: [InfoUserForAdmin]
 }

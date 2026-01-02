@@ -29,7 +29,7 @@
     <div class="post-detail-container">
 
         <!-- Include left sidebar fragment -->
-        <div th:replace="~{fragments/Left-Sidebar :: left-sidebar}"></div>
+        <div th:replace="~{fragments/Left-sidebar :: left-sidebar}"></div>
 
         <main class="post-detail-main">
             <!-- Breadcrumb -->
@@ -43,7 +43,8 @@
             <div class="post-detail-card">
                 <!-- Post Header -->
                 <div class="post-header">
-                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Admin" alt="Admin" class="post-user-avatar">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Admin" alt="Admin"
+                        class="post-user-avatar">
                     <div class="post-user-info">
                         <div class="post-user-name-row">
                             <a href="/profile/admin" class="post-user-name">Nguyễn Văn Admin</a>
@@ -53,7 +54,8 @@
                             <span class="post-time">2 giờ trước</span>
                             <span>•</span>
                             <svg class="post-privacy-icon" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
                             </svg>
                             <span>Công khai</span>
                         </div>
@@ -61,7 +63,9 @@
                     <div class="post-header-actions">
                         <button class="post-menu-btn" onclick="togglePostMenu(event, '1')">
                             <svg viewBox="0 0 24 24" fill="currentColor">
-                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                                <circle cx="12" cy="5" r="2" />
+                                <circle cx="12" cy="12" r="2" />
+                                <circle cx="12" cy="19" r="2" />
                             </svg>
                         </button>
                     </div>
@@ -72,7 +76,8 @@
                     <span class="post-category-tag">🎉 Công nghệ</span>
                     <h1 class="post-detail-title">Chào mừng bạn đến với hệ thống mạng xã hội mới!</h1>
                     <div class="post-detail-text">
-                        <p>Thử các tính năng mới: Nhấn giữ nút thích để xem emoji reactions, bình luận, chia sẻ và lưu bài viết. Thiết kế hiện đại theo phong cách các mạng xã hội phổ biến!</p>
+                        <p>Thử các tính năng mới: Nhấn giữ nút thích để xem emoji reactions, bình luận, chia sẻ và lưu
+                            bài viết. Thiết kế hiện đại theo phong cách các mạng xã hội phổ biến!</p>
                         <p>Chúng tôi đã tích hợp nhiều tính năng thú vị:</p>
                         <ul>
                             <li>✨ Emoji reactions đa dạng</li>
@@ -84,9 +89,10 @@
                         <p>Hãy khám phá và trải nghiệm ngay nhé! 🚀</p>
                     </div>
                 </div>
-                
-                <img src="https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=1200" alt="Post image" class="post-detail-image">
-                
+
+                <img src="https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=1200" alt="Post image"
+                    class="post-detail-image">
+
                 <!-- Post Stats -->
                 <div class="post-stats-bar">
                     <div class="post-stats-left">
@@ -105,9 +111,12 @@
 
                 <!-- Post Actions -->
                 <div class="post-action-buttons">
-                    <button class="action-btn post-like-btn" data-post-id="1" onmouseenter="showReactions(event)" onmouseleave="hideReactions(event)">
+                    <button class="action-btn post-like-btn" data-post-id="1" onmouseenter="showReactions(event)"
+                        onmouseleave="hideReactions(event)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            <path
+                                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                            </path>
                         </svg>
                         <span>Thích</span>
                         <div class="reactions-popup">
@@ -120,11 +129,15 @@
                         </div>
                     </button>
                     <button class="action-btn">
-                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
                         <span>Bình luận</span>
                     </button>
                     <button class="action-btn" onclick="sharePost()">
-                        <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" />
+                        </svg>
                         <span>Chia sẻ</span>
                     </button>
                 </div>
@@ -143,7 +156,8 @@
 
                 <!-- Comment Input -->
                 <div class="comment-input-wrapper">
-                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=CurrentUser" alt="You" class="comment-avatar">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=CurrentUser" alt="You"
+                        class="comment-avatar">
                     <div class="comment-input-box">
                         <textarea class="comment-textarea" placeholder="Viết bình luận của bạn..." rows="1"></textarea>
                         <div class="comment-input-actions">
@@ -159,10 +173,11 @@
 
                 <!-- Comments List -->
                 <div class="comments-list">
-                    
+
                     <!-- Comment 1 (Top Level) -->
                     <div class="comment-item" data-comment-id="c1">
-                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=User1" alt="User1" class="comment-avatar">
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=User1" alt="User1"
+                            class="comment-avatar">
                         <div class="comment-content">
                             <div class="comment-header">
                                 <a href="/profile/user1" class="comment-author">Trần Thị Hương</a>
@@ -173,15 +188,25 @@
                             </div>
                             <div class="comment-actions">
                                 <button class="comment-action-btn liked">
-                                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <path
+                                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                        </path>
+                                    </svg>
                                     Thích (23)
                                 </button>
                                 <button class="comment-action-btn" onclick="showReplyBox('c1')">
-                                    <svg viewBox="0 0 24 24"><path d="M9 11l-6 6v-6H1V1h18v10h-8l-2 2z"/></svg>
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M9 11l-6 6v-6H1V1h18v10h-8l-2 2z" />
+                                    </svg>
                                     Trả lời
                                 </button>
                                 <button class="comment-action-btn">
-                                    <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <circle cx="12" cy="5" r="2" />
+                                        <circle cx="12" cy="12" r="2" />
+                                        <circle cx="12" cy="19" r="2" />
+                                    </svg>
                                 </button>
                             </div>
 
@@ -189,7 +214,8 @@
                             <div class="comment-replies">
                                 <!-- Reply 1.1 -->
                                 <div class="comment-item reply-item">
-                                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Admin" alt="Admin" class="comment-avatar">
+                                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Admin" alt="Admin"
+                                        class="comment-avatar">
                                     <div class="comment-content">
                                         <div class="comment-header">
                                             <a href="/profile/admin" class="comment-author">Nguyễn Văn Admin</a>
@@ -197,15 +223,23 @@
                                             <span class="comment-time">45 phút trước</span>
                                         </div>
                                         <div class="comment-text">
-                                            <span class="reply-mention">@Trần Thị Hương</span> Cảm ơn bạn! Chúng mình sẽ tiếp tục cải thiện để mang đến trải nghiệm tốt nhất 💪
+                                            <span class="reply-mention">@Trần Thị Hương</span> Cảm ơn bạn! Chúng mình sẽ
+                                            tiếp tục cải thiện để mang đến trải nghiệm tốt nhất 💪
                                         </div>
                                         <div class="comment-actions">
                                             <button class="comment-action-btn">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <path
+                                                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                                    </path>
+                                                </svg>
                                                 Thích (8)
                                             </button>
                                             <button class="comment-action-btn" onclick="showReplyBox('c1')">
-                                                <svg viewBox="0 0 24 24"><path d="M9 11l-6 6v-6H1V1h18v10h-8l-2 2z"/></svg>
+                                                <svg viewBox="0 0 24 24">
+                                                    <path d="M9 11l-6 6v-6H1V1h18v10h-8l-2 2z" />
+                                                </svg>
                                                 Trả lời
                                             </button>
                                         </div>
@@ -214,7 +248,8 @@
 
                                 <!-- Reply 1.2 -->
                                 <div class="comment-item reply-item">
-                                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=User3" alt="User3" class="comment-avatar">
+                                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=User3" alt="User3"
+                                        class="comment-avatar">
                                     <div class="comment-content">
                                         <div class="comment-header">
                                             <a href="/profile/user3" class="comment-author">Lê Văn Minh</a>
@@ -225,11 +260,18 @@
                                         </div>
                                         <div class="comment-actions">
                                             <button class="comment-action-btn">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <path
+                                                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                                    </path>
+                                                </svg>
                                                 Thích (5)
                                             </button>
                                             <button class="comment-action-btn" onclick="showReplyBox('c1')">
-                                                <svg viewBox="0 0 24 24"><path d="M9 11l-6 6v-6H1V1h18v10h-8l-2 2z"/></svg>
+                                                <svg viewBox="0 0 24 24">
+                                                    <path d="M9 11l-6 6v-6H1V1h18v10h-8l-2 2z" />
+                                                </svg>
                                                 Trả lời
                                             </button>
                                         </div>
@@ -238,7 +280,9 @@
 
                                 <!-- Show more replies button -->
                                 <button class="show-more-replies">
-                                    <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M7 10l5 5 5-5z" />
+                                    </svg>
                                     Xem thêm 2 phản hồi
                                 </button>
                             </div>
@@ -247,7 +291,8 @@
 
                     <!-- Comment 2 -->
                     <div class="comment-item" data-comment-id="c2">
-                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=User2" alt="User2" class="comment-avatar">
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=User2" alt="User2"
+                            class="comment-avatar">
                         <div class="comment-content">
                             <div class="comment-header">
                                 <a href="/profile/user2" class="comment-author">Phạm Đức Anh</a>
@@ -258,15 +303,25 @@
                             </div>
                             <div class="comment-actions">
                                 <button class="comment-action-btn">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path
+                                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                        </path>
+                                    </svg>
                                     Thích (12)
                                 </button>
                                 <button class="comment-action-btn" onclick="showReplyBox('c2')">
-                                    <svg viewBox="0 0 24 24"><path d="M9 11l-6 6v-6H1V1h18v10h-8l-2 2z"/></svg>
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M9 11l-6 6v-6H1V1h18v10h-8l-2 2z" />
+                                    </svg>
                                     Trả lời
                                 </button>
                                 <button class="comment-action-btn">
-                                    <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <circle cx="12" cy="5" r="2" />
+                                        <circle cx="12" cy="12" r="2" />
+                                        <circle cx="12" cy="19" r="2" />
+                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -274,7 +329,8 @@
 
                     <!-- Comment 3 -->
                     <div class="comment-item" data-comment-id="c3">
-                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=User4" alt="User4" class="comment-avatar">
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=User4" alt="User4"
+                            class="comment-avatar">
                         <div class="comment-content">
                             <div class="comment-header">
                                 <a href="/profile/user4" class="comment-author">Hoàng Thị Mai</a>
@@ -285,15 +341,25 @@
                             </div>
                             <div class="comment-actions">
                                 <button class="comment-action-btn">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path
+                                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                        </path>
+                                    </svg>
                                     Thích (7)
                                 </button>
                                 <button class="comment-action-btn" onclick="showReplyBox('c3')">
-                                    <svg viewBox="0 0 24 24"><path d="M9 11l-6 6v-6H1V1h18v10h-8l-2 2z"/></svg>
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M9 11l-6 6v-6H1V1h18v10h-8l-2 2z" />
+                                    </svg>
                                     Trả lời
                                 </button>
                                 <button class="comment-action-btn">
-                                    <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <circle cx="12" cy="5" r="2" />
+                                        <circle cx="12" cy="12" r="2" />
+                                        <circle cx="12" cy="19" r="2" />
+                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -303,7 +369,10 @@
 
                 <!-- Load More Comments -->
                 <button class="load-more-comments">
-                    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
+                        <path d="M12 6v6l4 2" />
+                    </svg>
                     Xem thêm bình luận
                 </button>
             </div>
@@ -315,9 +384,10 @@
             <div class="sidebar-widget">
                 <h3 class="widget-title">📌 Bài viết liên quan</h3>
                 <div class="related-posts">
-                    
+
                     <a href="/post/2" class="related-post-item">
-                        <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=200" alt="Related" class="related-post-img">
+                        <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=200" alt="Related"
+                            class="related-post-img">
                         <div class="related-post-info">
                             <div class="related-post-title">Tips học lập trình hiệu quả</div>
                             <div class="related-post-meta">89 lượt thích • 28 bình luận</div>
@@ -325,7 +395,8 @@
                     </a>
 
                     <a href="/post/3" class="related-post-item">
-                        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=200" alt="Related" class="related-post-img">
+                        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=200" alt="Related"
+                            class="related-post-img">
                         <div class="related-post-info">
                             <div class="related-post-title">Dự án mạng xã hội đầu tiên</div>
                             <div class="related-post-meta">256 lượt thích • 67 bình luận</div>
@@ -333,7 +404,8 @@
                     </a>
 
                     <a href="/post/4" class="related-post-item">
-                        <img src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=200" alt="Related" class="related-post-img">
+                        <img src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=200" alt="Related"
+                            class="related-post-img">
                         <div class="related-post-info">
                             <div class="related-post-title">React 19: Những thay đổi quan trọng</div>
                             <div class="related-post-meta">2.1k lượt thích • 312 bình luận</div>
@@ -346,9 +418,10 @@
             <div class="sidebar-widget">
                 <h3 class="widget-title">👥 Người bạn có thể biết</h3>
                 <div class="suggested-users">
-                    
+
                     <div class="suggested-user-item">
-                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Suggest1" alt="User" class="suggested-user-avatar">
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Suggest1" alt="User"
+                            class="suggested-user-avatar">
                         <div class="suggested-user-info">
                             <div class="suggested-user-name">Nguyễn Văn A</div>
                             <div class="suggested-user-mutual">3 bạn chung</div>
@@ -357,7 +430,8 @@
                     </div>
 
                     <div class="suggested-user-item">
-                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Suggest2" alt="User" class="suggested-user-avatar">
+                        <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Suggest2" alt="User"
+                            class="suggested-user-avatar">
                         <div class="suggested-user-info">
                             <div class="suggested-user-name">Trần Thị B</div>
                             <div class="suggested-user-mutual">7 bạn chung</div>
@@ -401,7 +475,7 @@
         }
 
         function getReactionName(emoji) {
-            const names = {'❤️': 'Yêu thích', '👍': 'Thích', '😂': 'Haha', '😮': 'Wow', '😢': 'Buồn', '😠': 'Phẫn nộ'};
+            const names = { '❤️': 'Yêu thích', '👍': 'Thích', '😂': 'Haha', '😮': 'Wow', '😢': 'Buồn', '😠': 'Phẫn nộ' };
             return names[emoji] || 'Thích';
         }
 
@@ -423,13 +497,13 @@
         }
 
         // Comment textarea auto-expand
-        document.querySelector('.comment-textarea').addEventListener('input', function() {
+        document.querySelector('.comment-textarea').addEventListener('input', function () {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
         });
 
         // Sort comments
-        document.querySelector('.comments-sort').addEventListener('change', function() {
+        document.querySelector('.comments-sort').addEventListener('change', function () {
             console.log('Sắp xếp bình luận theo:', this.value);
         });
     </script>

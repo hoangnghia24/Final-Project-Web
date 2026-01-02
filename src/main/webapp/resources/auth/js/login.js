@@ -1,5 +1,4 @@
 $(document).ready(function () {
-    // Giữ nguyên cách đặt tên biến như code gốc để dễ đối chiếu
     const loginForm = $("#loginForm");
     const usernameInput = $("#username");
     const passwordInput = $("#password");
@@ -8,106 +7,85 @@ $(document).ready(function () {
     const btnLogin = $("#btnLogin");
 
     loginForm.on("submit", function (event) {
-        event.preventDefault(); // Ngăn reload trang
+        event.preventDefault();
 
-        // Reset thông báo lỗi cũ
-        let errorMessage = "";
+        // Reset lỗi
         clientError.addClass("d-none");
         errorAlert.addClass("d-none");
 
-        // 1. VALIDATION (Giữ nguyên logic và câu văn)
+        // 1. Validation
         if (!usernameInput.val().trim()) {
-            errorMessage = "Vui lòng nhập tên đăng nhập hoặc email.";
-        } else if (!passwordInput.val().trim()) {
-            errorMessage = "Vui lòng nhập mật khẩu.";
-        }
-
-        if (errorMessage) {
-            clientError.text(errorMessage);
+            clientError.text("Vui lòng nhập tên đăng nhập.");
             clientError.removeClass("d-none");
-            usernameInput.focus();
             return;
         }
 
-        // 2. GỌI AJAX (Đã thay công cụ sang jQuery)
-
-        // Hiệu ứng loading (Giữ nguyên html loading)
+        // 2. Hiệu ứng Loading
         const originalBtnText = btnLogin.html();
-        btnLogin.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...');
+        btnLogin.html('<span class="spinner-border spinner-border-sm"></span> Đang xử lý...');
         btnLogin.prop("disabled", true);
 
-        const username = usernameInput.val();
-        const password = passwordInput.val();
-
-        // Chuẩn bị data (Giữ nguyên cấu trúc Query gốc)
+        // 3. Chuẩn bị GraphQL (SỬA LẠI KHỚP SCHEMA)
+        // Lưu ý: Đổi từ query sang mutation login
+        // Lấy về token và thông tin user
         var graphqlData = {
             query: `
-                query GetUserLogin($username: String!, $password: String!) {
-                    getUserLogin(username: $username, password: $password) {
-                        id
-                        username
-                        email
+                mutation Login($username: String!, $password: String!) {
+                    login(username: $username, password: $password) {
+                        token
+                        user {
+                            id
+                            username
+                            email
+                            fullName
+                            role
+                        }
                     }
                 }
             `,
             variables: {
-                username: username,
-                password: password
+                username: usernameInput.val(),
+                password: passwordInput.val()
             }
         };
 
-        // --- BẮT ĐẦU THAY ĐỔI CÔNG CỤ (XMLHttpRequest -> $.ajax) ---
+        // 4. Gọi Ajax
         $.ajax({
             url: "/graphql",
             type: "POST",
             contentType: "application/json",
-            dataType: "json", // jQuery tự động parse JSON
+            dataType: "json",
             data: JSON.stringify(graphqlData),
 
-            // Xử lý khi thành công (tương đương status === 200)
-            // ... Trong file Login.js đoạn success: function (response) ...
-
             success: function (response) {
+                // Check lỗi GraphQL
                 if (response.errors && response.errors.length > 0) {
                     showErrorServer(response.errors[0].message);
                 }
-                else if (response.data && response.data.getUserLogin) {
-                    // --- BƯỚC QUAN TRỌNG CẦN THÊM ---
+                // Check dữ liệu trả về (SỬA LẠI logic lấy data)
+                else if (response.data && response.data.login) {
+                    const payload = response.data.login;
 
-                    // 1. Lấy thông tin user từ kết quả trả về
-                    const user = response.data.getUserLogin;
+                    // --- QUAN TRỌNG: LƯU TOKEN ---
+                    localStorage.setItem("accessToken", payload.token);
+                    localStorage.setItem("currentUser", JSON.stringify(payload.user));
 
-                    // 2. Lưu username và userId vào localStorage
-                    localStorage.setItem("username", user.username);
-                    localStorage.setItem("currentUserId", user.id);
-
-                    // 3. Sau khi lưu xong mới chuyển trang
-                    window.location.href = "/profile";
-                }
-                else {
+                    // Chuyển hướng
+                    window.location.href = "/"; // Hoặc /home tùy bạn
+                } else {
                     showErrorServer("Tên đăng nhập hoặc mật khẩu không đúng.");
                 }
             },
-
-            // Xử lý khi có lỗi mạng/server (tương đương else của status 200)
             error: function (xhr) {
-                if (xhr.status === 403) {
-                    showErrorServer("Lỗi 403: Truy cập bị từ chối.");
-                } else {
-                    showErrorServer("Lỗi hệ thống (" + xhr.status + ").");
-                }
+                showErrorServer("Lỗi kết nối server (" + xhr.status + ")");
             },
-
-            // Xử lý dọn dẹp (tương đương readyState === 4 để reset nút)
             complete: function () {
                 btnLogin.prop("disabled", false);
                 btnLogin.html(originalBtnText);
             }
         });
-        // --- KẾT THÚC THAY ĐỔI CÔNG CỤ ---
     });
 
-    // Hàm hiển thị lỗi giữ nguyên
     function showErrorServer(msg) {
         errorAlert.text(msg);
         errorAlert.removeClass('d-none');

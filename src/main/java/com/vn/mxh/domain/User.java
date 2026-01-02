@@ -3,10 +3,14 @@ package com.vn.mxh.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails; // PHẢI IMPORT CÁI NÀY
 
 import com.vn.mxh.domain.enums.Role;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -15,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User implements UserDetails { // THÊM implements UserDetails
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,12 +31,11 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    // Password không expose ra GraphQL Schema
     @Column(nullable = false)
     private String passwordHash;
 
     private String fullName;
-    
+
     @Column(columnDefinition = "TEXT")
     private String avatarUrl;
 
@@ -42,12 +45,51 @@ public class User {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    // Quan hệ 1-N: Một user có nhiều bài viết
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Post> posts;
 
-    @Builder.Default()
-    @Enumerated(EnumType.STRING) // Lưu chữ "USER", "ADMIN" vào database
-    @Column(nullable = false)
-    private Role role = Role.USER; // Mặc định khi tạo mới sẽ là USER
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER;
+
+    // ============================================================
+    // CÁC HÀM BẮT BUỘC TỪ USERDETAILS
+    // ============================================================
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Trả về quyền hạn của user (ví dụ: ROLE_USER hoặc ROLE_ADMIN)
+        // Spring Security yêu cầu quyền hạn thường có tiền tố "ROLE_"
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return this.passwordHash; // Trả về mật khẩu đã mã hóa
+    }
+
+    @Override
+    public String getUsername() {
+        return this.username; // Hoặc trả về email nếu bạn dùng email để đăng nhập
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // Tài khoản không bị hết hạn
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true; // Tài khoản không bị khóa
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true; // Mật khẩu không bị hết hạn
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true; // Tài khoản đang hoạt động
+    }
 }

@@ -36,14 +36,15 @@
     <div class="trending-container">
 
         <!-- Include left sidebar fragment -->
-        <div th:replace="~{fragments/Left-Sidebar :: left-sidebar}"></div>
+        <div th:replace="~{fragments/Left-sidebar :: left-sidebar}"></div>
 
         <main class="main-feed">
             <!-- Trending Stats Banner -->
             <div class="trending-stats-banner">
                 <div class="stat-item">
                     <svg viewBox="0 0 24 24" fill="#f5533d" width="24" height="24">
-                        <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
+                        <path
+                            d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z" />
                     </svg>
                     <div class="stat-info">
                         <div class="stat-value">2.5M</div>
@@ -52,7 +53,8 @@
                 </div>
                 <div class="stat-item">
                     <svg viewBox="0 0 24 24" fill="#1877f2" width="24" height="24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                     </svg>
                     <div class="stat-info">
                         <div class="stat-value">850K</div>
@@ -61,7 +63,8 @@
                 </div>
                 <div class="stat-item">
                     <svg viewBox="0 0 24 24" fill="#45bd62" width="24" height="24">
-                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                        <path
+                            d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
                     </svg>
                     <div class="stat-info">
                         <div class="stat-value">125K</div>
@@ -69,30 +72,34 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Filter Tabs -->
             <div class="filter-tabs-unified">
                 <button class="filter-tab-btn active" data-filter="today">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                        <path
+                            d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
                     </svg>
                     Hôm nay
                 </button>
                 <button class="filter-tab-btn" data-filter="week">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                        <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                        <path
+                            d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z" />
                     </svg>
                     Tuần này
                 </button>
                 <button class="filter-tab-btn" data-filter="month">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                        <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/>
+                        <path
+                            d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z" />
                     </svg>
                     Tháng này
                 </button>
                 <button class="filter-tab-btn" data-filter="all">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        <path
+                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                     </svg>
                     Mọi lúc
                 </button>
@@ -101,7 +108,8 @@
             <!-- Trending Post 1 -->
             <div class="reddit-post-card" data-post-id="t1">
                 <div class="post-header">
-                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=TechInsider" alt="Tech" class="post-user-avatar">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=TechInsider" alt="Tech"
+                        class="post-user-avatar">
                     <div class="post-user-info">
                         <div class="post-user-name-row">
                             <a href="#" class="post-user-name">Tech Insider Vietnam</a>
@@ -111,7 +119,8 @@
                             <span class="post-time">2 giờ trước</span>
                             <span>•</span>
                             <svg class="post-privacy-icon" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
                             </svg>
                             <span>Công khai</span>
                         </div>
@@ -119,7 +128,9 @@
                     <div class="post-header-actions">
                         <button class="post-menu-btn" onclick="togglePostMenu(event, 't1')">
                             <svg viewBox="0 0 24 24" fill="currentColor">
-                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                                <circle cx="12" cy="5" r="2" />
+                                <circle cx="12" cy="12" r="2" />
+                                <circle cx="12" cy="19" r="2" />
                             </svg>
                         </button>
                     </div>
@@ -128,10 +139,12 @@
                     <span class="post-category-tag">🔥 #1 Trending - AI</span>
                     <div class="post-title-text">AI mới của Google đã vượt qua GPT-4 trong các bài test lập trình</div>
                     <div class="post-body-text">
-                        Google vừa công bố mô hình AI mới có khả năng giải quyết các bài toán lập trình phức tạp tốt hơn 40% so với GPT-4. Đây là bước tiến lớn trong lĩnh vực AI...
+                        Google vừa công bố mô hình AI mới có khả năng giải quyết các bài toán lập trình phức tạp tốt hơn
+                        40% so với GPT-4. Đây là bước tiến lớn trong lĩnh vực AI...
                     </div>
                 </div>
-                <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995" alt="AI Technology" class="post-full-image">
+                <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995" alt="AI Technology"
+                    class="post-full-image">
                 <div class="post-stats-bar">
                     <div class="post-stats-left">
                         <div class="post-reactions-preview">
@@ -147,9 +160,12 @@
                     </div>
                 </div>
                 <div class="post-action-buttons">
-                    <button class="action-btn post-like-btn liked" data-post-id="t1" onmouseenter="showReactions(event)" onmouseleave="hideReactions(event)">
+                    <button class="action-btn post-like-btn liked" data-post-id="t1" onmouseenter="showReactions(event)"
+                        onmouseleave="hideReactions(event)">
                         <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            <path
+                                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                            </path>
                         </svg>
                         <span>😮 Wow</span>
                         <div class="reactions-popup">
@@ -162,11 +178,15 @@
                         </div>
                     </button>
                     <button class="action-btn">
-                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
                         <span>Bình luận</span>
                     </button>
                     <button class="action-btn">
-                        <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" />
+                        </svg>
                         <span>Chia sẻ</span>
                     </button>
                 </div>
@@ -175,7 +195,8 @@
             <!-- Trending Post 2 -->
             <div class="reddit-post-card" data-post-id="t2">
                 <div class="post-header">
-                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=GamingNews" alt="Gaming" class="post-user-avatar">
+                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=GamingNews" alt="Gaming"
+                        class="post-user-avatar">
                     <div class="post-user-info">
                         <div class="post-user-name-row">
                             <a href="#" class="post-user-name">Gaming News VN</a>
@@ -185,7 +206,8 @@
                             <span class="post-time">4 giờ trước</span>
                             <span>•</span>
                             <svg class="post-privacy-icon" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
                             </svg>
                             <span>Công khai</span>
                         </div>
@@ -193,7 +215,9 @@
                     <div class="post-header-actions">
                         <button class="post-menu-btn" onclick="togglePostMenu(event, 't2')">
                             <svg viewBox="0 0 24 24" fill="currentColor">
-                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                                <circle cx="12" cy="5" r="2" />
+                                <circle cx="12" cy="12" r="2" />
+                                <circle cx="12" cy="19" r="2" />
                             </svg>
                         </button>
                     </div>
@@ -202,10 +226,12 @@
                     <span class="post-category-tag">🔥 #2 Trending - Gaming</span>
                     <div class="post-title-text">Game mới của Nintendo vừa phá kỷ lục doanh thu ngày đầu</div>
                     <div class="post-body-text">
-                        Với hơn 10 triệu bản được bán trong 24 giờ đầu, đây là game có doanh thu cao nhất mọi thời đại của Nintendo...
+                        Với hơn 10 triệu bản được bán trong 24 giờ đầu, đây là game có doanh thu cao nhất mọi thời đại
+                        của Nintendo...
                     </div>
                 </div>
-                <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f" alt="Gaming" class="post-full-image">
+                <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f" alt="Gaming"
+                    class="post-full-image">
                 <div class="post-stats-bar">
                     <div class="post-stats-left">
                         <div class="post-reactions-preview">
@@ -220,9 +246,12 @@
                     </div>
                 </div>
                 <div class="post-action-buttons">
-                    <button class="action-btn post-like-btn" data-post-id="t2" onmouseenter="showReactions(event)" onmouseleave="hideReactions(event)">
+                    <button class="action-btn post-like-btn" data-post-id="t2" onmouseenter="showReactions(event)"
+                        onmouseleave="hideReactions(event)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            <path
+                                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                            </path>
                         </svg>
                         <span>Thích</span>
                         <div class="reactions-popup">
@@ -235,11 +264,15 @@
                         </div>
                     </button>
                     <button class="action-btn">
-                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
                         <span>Bình luận</span>
                     </button>
                     <button class="action-btn">
-                        <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" />
+                        </svg>
                         <span>Chia sẻ</span>
                     </button>
                 </div>
@@ -249,11 +282,15 @@
             <div class="reddit-post-card" data-post-id="t3">
                 <div class="post-vote-section">
                     <button class="vote-btn upvote">
-                        <svg viewBox="0 0 24 24"><path d="M12 4l8 8h-6v8h-4v-8H4z"/></svg>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 4l8 8h-6v8h-4v-8H4z" />
+                        </svg>
                     </button>
                     <span class="vote-count">7.2k</span>
                     <button class="vote-btn downvote">
-                        <svg viewBox="0 0 24 24"><path d="M12 20l-8-8h6V4h4v8h6z"/></svg>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 20l-8-8h6V4h4v8h6z" />
+                        </svg>
                     </button>
                 </div>
                 <div class="post-main-content">
@@ -267,26 +304,40 @@
                     </div>
                     <div class="post-title-text">Phát hiện hành tinh mới có khả năng duy trì sự sống</div>
                     <div class="post-body-text">
-                        Các nhà khoa học NASA vừa phát hiện một hành tinh cách Trái Đất 100 năm ánh sáng với điều kiện khí hậu tương tự Trái Đất. Đây có thể là khám phá quan trọng nhất của thập kỷ...
+                        Các nhà khoa học NASA vừa phát hiện một hành tinh cách Trái Đất 100 năm ánh sáng với điều kiện
+                        khí hậu tương tự Trái Đất. Đây có thể là khám phá quan trọng nhất của thập kỷ...
                     </div>
-                    <img src="https://images.unsplash.com/photo-1614732414444-096e5f1122d5" alt="Space" class="post-full-image">
+                    <img src="https://images.unsplash.com/photo-1614732414444-096e5f1122d5" alt="Space"
+                        class="post-full-image">
                     <div class="post-action-buttons">
                         <button class="action-btn post-like-btn" data-post-id="t3">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                </path>
                             </svg>
                             <span>Thích</span>
                         </button>
                         <button class="action-btn">
-                            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            <svg viewBox="0 0 24 24">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
                             <span>634 bình luận</span>
                         </button>
                         <button class="action-btn">
-                            <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="18" cy="5" r="3"></circle>
+                                <circle cx="6" cy="12" r="3"></circle>
+                                <circle cx="18" cy="19" r="3"></circle>
+                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                            </svg>
                             <span>Chia sẻ</span>
                         </button>
                         <button class="action-btn">
-                            <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                            <svg viewBox="0 0 24 24">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                            </svg>
                             <span>Lưu</span>
                         </button>
                     </div>
@@ -351,12 +402,13 @@
                     <a href="#" class="widget-more">Xem tất cả</a>
                 </div>
                 <div class="suggested-user">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=TechGuru" alt="Avatar" class="suggested-avatar">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=TechGuru" alt="Avatar"
+                        class="suggested-avatar">
                     <div class="suggested-info">
                         <div class="suggested-name">
                             Tech Guru
                             <svg viewBox="0 0 24 24">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                             </svg>
                         </div>
                         <div class="suggested-mutual">25K người theo dõi</div>
@@ -364,7 +416,8 @@
                     <button class="suggested-follow-btn">Theo dõi</button>
                 </div>
                 <div class="suggested-user">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Creator" alt="Avatar" class="suggested-avatar">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Creator" alt="Avatar"
+                        class="suggested-avatar">
                     <div class="suggested-info">
                         <div class="suggested-name">Content Creator</div>
                         <div class="suggested-mutual">18K người theo dõi</div>
@@ -372,7 +425,8 @@
                     <button class="suggested-follow-btn">Theo dõi</button>
                 </div>
                 <div class="suggested-user">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Influencer" alt="Avatar" class="suggested-avatar">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Influencer" alt="Avatar"
+                        class="suggested-avatar">
                     <div class="suggested-info">
                         <div class="suggested-name">Influencer Pro</div>
                         <div class="suggested-mutual">12K người theo dõi</div>
@@ -419,7 +473,8 @@
             <!-- Sponsored Content Widget -->
             <div class="widget-card sponsored-card">
                 <div class="sponsored-label">Được tài trợ</div>
-                <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=400" alt="Sponsored" class="sponsored-image">
+                <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=400" alt="Sponsored"
+                    class="sponsored-image">
                 <div class="sponsored-title">Nâng cao kỹ năng digital marketing</div>
                 <div class="sponsored-description">Khóa học từ chuyên gia với chứng chỉ quốc tế</div>
                 <a href="#" class="sponsored-link">marketing-academy.vn</a>
@@ -431,7 +486,7 @@
     <script>
         // Filter tabs functionality
         document.querySelectorAll('.filter-tab-btn').forEach(tab => {
-            tab.addEventListener('click', function() {
+            tab.addEventListener('click', function () {
                 document.querySelectorAll('.filter-tab-btn').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
                 console.log('Filter changed to:', this.textContent);
@@ -467,7 +522,7 @@
         }
 
         function getReactionName(emoji) {
-            const names = {'❤️': 'Yêu thích', '👍': 'Thích', '😂': 'Haha', '😮': 'Wow', '😢': 'Buồn', '😠': 'Phẫn nộ'};
+            const names = { '❤️': 'Yêu thích', '👍': 'Thích', '😂': 'Haha', '😮': 'Wow', '😢': 'Buồn', '😠': 'Phẫn nộ' };
             return names[emoji] || 'Thích';
         }
 

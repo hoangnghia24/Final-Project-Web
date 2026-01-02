@@ -26,7 +26,7 @@
     <div class="home-container">
 
         <!-- Include left sidebar fragment -->
-        <div th:replace="~{fragments/Left-Sidebar :: left-sidebar}"></div>
+        <div th:replace="~{fragments/Left-sidebar :: left-sidebar}"></div>
 
         <main class="main-feed friends-main">
             <!-- Sticky Container for Header + Tabs -->
@@ -35,7 +35,8 @@
                 <div class="friends-header">
                     <h1 class="friends-title">Bạn bè</h1>
                     <div class="friends-search-bar">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <circle cx="11" cy="11" r="8"></circle>
                             <path d="m21 21-4.35-4.35"></path>
                         </svg>
@@ -47,24 +48,27 @@
                 <div class="friends-tabs">
                     <button class="friends-tab active" data-tab="all-friends">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                            <path
+                                d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
                         </svg>
                         <span>Tất cả bạn bè</span>
                         <span class="tab-count" id="all-friends-count">0</span>
                     </button>
-                    
+
                     <button class="friends-tab" data-tab="friend-requests">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-                            <circle cx="19" cy="6" r="5" fill="#ff4757"/>
+                            <path
+                                d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                            <circle cx="19" cy="6" r="5" fill="#ff4757" />
                         </svg>
                         <span>Lời mời kết bạn</span>
                         <span class="tab-count badge-count" id="friend-requests-count">0</span>
                     </button>
-                    
+
                     <button class="friends-tab" data-tab="suggestions">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            <path
+                                d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                         </svg>
                         <span>Gợi ý kết bạn</span>
                     </button>
@@ -78,7 +82,7 @@
                     <button class="filter-btn" data-filter="online">Đang hoạt động</button>
                     <button class="filter-btn" data-filter="recent">Mới kết bạn</button>
                 </div>
-                
+
                 <div class="friends-grid" id="all-friends-grid">
                     <!-- Friend cards will be loaded here -->
                     <div class="friends-loading">
@@ -94,7 +98,7 @@
                     <h2>Lời mời kết bạn</h2>
                     <span class="section-subtitle" id="requests-subtitle">Bạn có 0 lời mời kết bạn</span>
                 </div>
-                
+
                 <div class="friend-requests-grid" id="friend-requests-grid">
                     <!-- Friend request cards will be loaded here -->
                     <div class="friends-loading">
@@ -110,7 +114,7 @@
                     <h2>Những người bạn có thể biết</h2>
                     <span class="section-subtitle">Dựa trên bạn chung và sở thích</span>
                 </div>
-                
+
                 <div class="friends-suggestions-grid" id="suggestions-grid">
                     <!-- Suggestion cards will be loaded here -->
                     <div class="friends-loading">
@@ -129,11 +133,12 @@
                     <h3 class="widget-title">Lời mời kết bạn</h3>
                     <a href="#" class="view-all-link" id="view-all-requests">Xem tất cả</a>
                 </div>
-                
+
                 <div class="sidebar-requests-list" id="sidebar-requests-list">
                     <!-- Mini friend request cards will be loaded here -->
                     <div class="no-requests">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
                             <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                             <circle cx="8.5" cy="7" r="4"></circle>
                             <line x1="20" y1="8" x2="20" y2="14"></line>
@@ -148,7 +153,7 @@
                 <div class="widget-header">
                     <h3 class="widget-title">Gợi ý kết bạn</h3>
                 </div>
-                
+
                 <div class="sidebar-suggestions-list" id="sidebar-suggestions-list">
                     <!-- Mini suggestion cards will be loaded here -->
                 </div>

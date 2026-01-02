@@ -107,15 +107,15 @@ public class ClientController {
     }
 
     @GetMapping("/groups")
-public String showGroupsPage(Model model) {
-    // Nếu bạn cần truyền dữ liệu user vào header thì giữ nguyên logic cũ
-    return "client/groups"; // Trả về file groups.html
-}
+    public String showGroupsPage(Model model) {
+        // Nếu bạn cần truyền dữ liệu user vào header thì giữ nguyên logic cũ
+        return "client/groups"; // Trả về file groups.html
+    }
 
-@GetMapping("/events")
-public String showEventsPage(Model model) {
-    return "client/events"; // Trả về file events.html
-}
+    @GetMapping("/events")
+    public String showEventsPage(Model model) {
+        return "client/events"; // Trả về file events.html
+    }
 
     @PostMapping("/update-avatar")
     @ResponseBody
