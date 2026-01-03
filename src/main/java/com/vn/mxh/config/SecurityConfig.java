@@ -1,6 +1,6 @@
 package com.vn.mxh.config;
 
-import com.vn.mxh.security.JwtAuthenticationFilter; // Nhớ import đúng package
+import com.vn.mxh.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,75 +15,84 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(securedEnabled = true)
-@RequiredArgsConstructor // Tự động inject các biến final (filter, provider)
+@EnableMethodSecurity(securedEnabled = true) // Quan trọng: Cho phép dùng @PreAuthorize trong Controller
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthFilter;
-    private final AuthenticationProvider authenticationProvider;
+        private final JwtAuthenticationFilter jwtAuthFilter;
+        private final AuthenticationProvider authenticationProvider;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable) // Tắt CSRF vì dùng JWT
-                .authorizeHttpRequests(auth -> auth
-                        // --------------------------------------------------------
-                        // 1. CÁC API PUBLIC (KHÔNG CẦN LOGIN)
-                        // --------------------------------------------------------
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                // 1. Tắt CSRF (Do dùng Token, không dùng Session/Cookie nên không sợ lỗi này)
+                                .csrf(AbstractHttpConfigurer::disable)
 
-                        // Cho phép API đăng nhập/đăng ký (Cần cụ thể hơn /api/**)
-                        // Ví dụ: /api/v1/auth/login, /api/v1/auth/register
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                                // 2. Cấu hình quyền truy cập (Authorize)
+                                .authorizeHttpRequests(auth -> auth
+                                                // ============================================================
+                                                // NHÓM 1: CÁC TÀI NGUYÊN TĨNH (STATIC RESOURCES) -> MỞ HẾT
+                                                // ============================================================
+                                                .requestMatchers(
+                                                                "/css/**", "/js/**", "/images/**",
+                                                                "/webjars/**", "/favicon.ico",
+                                                                "/auth/**", "/client/**", "/admin/**", // Folder chứa
+                                                                                                       // file static
+                                                                                                       // của giao diện
+                                                                "/uploads/**")
+                                                .permitAll()
 
-                        // Cho phép trang Login/Register (View) hiển thị để người dùng nhập liệu
-                        .requestMatchers("/login", "/register").permitAll()
+                                                // ============================================================
+                                                // NHÓM 2: CÁC TRANG VIEW (HTML) -> PHẢI MỞ (PERMIT ALL)
+                                                // ============================================================
+                                                // Lý do: Trình duyệt tải trang HTML không kèm Token.
+                                                // Việc kiểm tra đăng nhập sẽ do file Javascript của trang đó đảm nhiệm.
+                                                .requestMatchers(
+                                                                "/", "/login", "/register", // Trang public
+                                                                "/home", // Trang chủ
+                                                                "/profile/**", "/u/**", // Trang cá nhân
+                                                                "/admin", "/admin/**", // Trang quản trị (JS sẽ chặn nếu
+                                                                                       // không phải admin)
+                                                                "/messages/**", // Trang tin nhắn
+                                                                "/settings", // Trang cài đặt
+                                                                "/search/**", // Trang tìm kiếm
+                                                                "/*.html" // Các file html lẻ
+                                                ).permitAll()
 
-                        // Cho phép GraphQL và WebSocket
-                        .requestMatchers("/graphql/**", "/graphiql/**", "/ws/**").permitAll()
+                                                // ============================================================
+                                                // NHÓM 3: API AUTH & GRAPHQL -> MỞ ĐỂ CLIENT GỌI VÀO
+                                                // ============================================================
+                                                // API Login/Register REST (nếu có dùng)
+                                                .requestMatchers("/api/v1/auth/**").permitAll()
 
-                        // Cho phép file tĩnh (CSS, JS, Ảnh...)
-                        .requestMatchers(
-                                "/css/**", "/js/**", "/images/**",
-                                "/client/**", "/auth/**", "/admin/**", // Lưu ý: folder auth/** trong static resources
-                                "/resources/**", "/uploads/**",
-                                "/*.html", "/chat-test-to-admin.html", "/websocket-test.html")
-                        .permitAll()
+                                                // GraphQL Endpoint: Phải mở để Client gửi Request (Token nằm trong
+                                                // Header)
+                                                // Việc chặn quyền cụ thể sẽ dùng @PreAuthorize trong Controller.
+                                                .requestMatchers("/graphql/**", "/graphiql/**").permitAll()
 
-                        // --------------------------------------------------------
-                        // 2. CÁC API CẦN BẢO MẬT (PHẢI CÓ TOKEN)
-                        // --------------------------------------------------------
+                                                // WebSocket (Nếu có)
+                                                .requestMatchers("/ws/**").permitAll()
 
-                        // Các trang View người dùng sau khi login
-                        .requestMatchers(
-                                "/", "/home", "/profile/**", "/u/**", "/messages",
-                                "/edit-avatar", "/update-avatar", "/chat-test-to-admin",
-                                "/trending", "/explore", "/all", "/saved", "/settings")
-                        .authenticated()
+                                                // ============================================================
+                                                // NHÓM 4: CÁC API REST KHÁC (NẾU CÓ) -> KHÓA CHẶT
+                                                // ============================================================
+                                                // Bất kỳ API nào bắt đầu bằng /api/ (trừ auth ở trên) đều phải có Token
+                                                .requestMatchers("/api/**").authenticated()
 
-                        // Bảo vệ tất cả các API còn lại (trừ auth ở trên)
-                        .requestMatchers("/api/**").authenticated()
+                                                // Chốt chặn cuối cùng: Mọi request lạ khác đều phải đăng nhập
+                                                .anyRequest().authenticated())
 
-                        // Các request khác mặc định phải xác thực
-                        .anyRequest().authenticated())
+                                // 3. Quản lý Session: STATELESS (Server không lưu trạng thái đăng nhập)
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // --------------------------------------------------------
-                // 3. CẤU HÌNH SESSION & FILTER
-                // --------------------------------------------------------
+                                // 4. Cấu hình Provider xác thực (Logic kiểm tra User/Pass từ DB)
+                                .authenticationProvider(authenticationProvider)
 
-                // Chuyển session sang STATELESS (Server không nhớ User, User tự gửi Token)
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                // 5. Thêm Filter JWT vào trước Filter mặc định của Spring Security
+                                // (Để hứng Token, giải mã và nạp User vào Context trước khi Request đi tiếp)
+                                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-                // Khai báo Provider xác thực (chứa logic check pass)
-                .authenticationProvider(authenticationProvider)
-
-                // Chèn Filter JWT vào trước Filter mặc định
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
-
-    // Lưu ý: Đã xóa Bean passwordEncoder() ở đây vì nên để nó bên file
-    // ApplicationConfig
-    // để tránh lỗi Circular Dependency (phụ thuộc vòng).
+                return http.build();
+        }
 }
