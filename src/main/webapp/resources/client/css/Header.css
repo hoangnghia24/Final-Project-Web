@@ -110,6 +110,7 @@ body.dark-mode .header-icon:hover {
         transform: translateY(100%);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
@@ -557,7 +558,8 @@ body.dark-mode .chat-expand-button:hover {
     display: flex;
     flex-direction: column;
     background: white;
-    min-height: 0; /* allow children to flex and scroll */
+    min-height: 0;
+    /* allow children to flex and scroll */
 }
 
 /* Empty State */
@@ -586,8 +588,10 @@ body.dark-mode .chat-expand-button:hover {
 .messages-popup-chat-view {
     display: flex;
     flex-direction: column;
-    flex: 1;       /* occupy right column */
-    min-height: 0; /* enable inner scroll area */
+    flex: 1;
+    /* occupy right column */
+    min-height: 0;
+    /* enable inner scroll area */
 }
 
 .messages-popup-chat-header {
@@ -1054,11 +1058,26 @@ body.dark-mode .messages-popup-chat-input input:focus {
     background-size: cover;
     transition: all 0.2s ease;
     object-fit: cover;
+
+    outline: none !important;
+    box-shadow: none !important;
+    /* Đôi khi viền là do box-shadow */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
 }
 
 body.dark-mode .header-avatar {
     background-color: #3a3a3c;
     border-color: transparent;
+}
+
+/* Thêm đoạn này để chặn tuyệt đối các trạng thái focus */
+.header-avatar:focus,
+.header-avatar:focus-visible,
+.header-avatar:active {
+    outline: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
 }
 
 .header-avatar:hover {
@@ -1197,6 +1216,8 @@ body.dark-mode .dropdown-item:hover {
     display: inline-block;
     width: 44px;
     height: 24px;
+    margin-left: 10px;
+    /* Thêm khoảng cách */
 }
 
 .switch input {
@@ -1220,7 +1241,9 @@ body.dark-mode .dropdown-item:hover {
 
 .slider:before {
     position: absolute;
-    content: "\\2600";
+    /* SỬA LỖI Ở ĐÂY: Dùng 1 dấu gạch chéo (\) thay vì 2 (\\) */
+    content: "\2600";
+    /* Icon Mặt trời */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1233,16 +1256,22 @@ body.dark-mode .dropdown-item:hover {
     border-radius: 50%;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     font-size: 10px;
+    color: #b8860b;
+    /* Thêm màu cho icon mặt trời rõ hơn */
 }
 
-input:checked + .slider {
+input:checked+.slider {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
     transform: translateX(20px);
-    content: "\\1F319";
+    /* SỬA LỖI Ở ĐÂY: Dùng 1 dấu gạch chéo (\) thay vì 2 (\\) */
+    content: "\1F319";
+    /* Icon Mặt trăng */
     background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+    color: #fff;
+    /* Màu trắng cho mặt trăng */
 }
 
 .slider:hover {
@@ -1447,18 +1476,53 @@ body.dark-mode p {
     .header-actions {
         gap: 4px;
     }
-    
+
     .header-icon {
         width: 36px;
         height: 36px;
     }
-    
+
     .header-icon svg {
         width: 18px;
         height: 18px;
     }
-    
+
     .profile-dropdown {
         width: 250px;
     }
+}
+
+/* --- FIX LỖI KHUNG VIỀN KHI CLICK AVATAR (GHI ĐÈ TẤT CẢ) --- */
+
+/* Sử dụng ID để có độ ưu tiên cao nhất */
+#header-user-avatar,
+.header-avatar {
+    outline: 0 !important;
+    outline-offset: 0 !important;
+    box-shadow: none !important;
+    /* Tắt bóng mờ của Bootstrap */
+    border-radius: 50% !important;
+    /* Giữ bo tròn */
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Chặn tất cả các trạng thái focus/active */
+#header-user-avatar:focus,
+#header-user-avatar:active,
+#header-user-avatar:focus-visible,
+.header-avatar:focus,
+.header-avatar:active,
+.header-avatar:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    /* Quan trọng: Xóa bóng focus */
+    border-color: transparent !important;
+}
+
+/* Giữ lại hiệu ứng Hover đẹp (nếu bạn muốn) */
+#header-user-avatar:hover,
+.header-avatar:hover {
+    border-color: #667eea !important;
+    /* Chỉ hiện shadow nhẹ khi di chuột, không phải khi click */
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
 }

@@ -1,4 +1,25 @@
-# 1. Định nghĩa kết quả trả về cho Login/Register (Gồm Token + User)
+# =========================
+# 1. SCALARS & ENUMS
+# =========================
+
+# Định nghĩa các loại quyền riêng tư
+enum PrivacyLevel {
+    PUBLIC
+    FRIENDS
+    PRIVATE
+}
+
+# Định nghĩa loại file media (để Frontend biết hiển thị thẻ img hay video)
+enum MediaType {
+    IMAGE
+    VIDEO
+    NONE
+}
+
+# =========================
+# 2. TYPES (User & Auth)
+# =========================
+
 type AuthPayload {
     token: String!
     user: User!
@@ -9,13 +30,13 @@ type User {
     fullName: String!
     email: String!
     username: String!
-    # passwordHash: String!  <-- ĐÃ XÓA DÒNG NÀY VÌ BẢO MẬT
     avatarUrl: String
     bio: String
     role: String
     createdAt: String
 }
 
+# Dùng cho các query admin hoặc list user đơn giản
 type InfoUserForAdmin {
     id: ID!
     fullName: String!
@@ -26,6 +47,48 @@ type InfoUserForAdmin {
     createdAt: String
 }
 
+# =========================
+# 3. TYPES (Post & Interaction)
+# =========================
+
+type Post {
+    id: ID!
+    content: String
+    
+    # --- CÁC TRƯỜNG MEDIA MỚI ---
+    mediaUrl: String        # Đường dẫn file (vd: /uploads/abc.jpg)
+    mediaType: MediaType    # Loại file
+    feeling: String         # Cảm xúc (vd: "đang vui vẻ")
+    # ----------------------------
+
+    createdAt: String
+    privacyLevel: PrivacyLevel
+    
+    # Quan hệ: Bài viết thuộc về 1 User
+    user: User 
+    
+    # Số liệu thống kê
+    likeCount: Int
+    commentCount: Int
+    
+    # Danh sách comment (Lấy mẫu vài cái, nếu muốn full thì cần Query riêng)
+    comments: [Comment]
+    
+    # Kiểm tra xem User đang đăng nhập đã like bài này chưa (để hiện nút xanh/xám)
+    isLikedByMe: Boolean
+}
+
+type Comment {
+    id: ID!
+    content: String!
+    user: User!           # Người comment
+    createdAt: String
+}
+
+# =========================
+# 4. INPUTS (Dữ liệu gửi lên)
+# =========================
+
 input RegisterInput {
     username: String!
     password: String!
@@ -33,16 +96,54 @@ input RegisterInput {
     fullName: String!
 }
 
-type Mutation {
-    # 2. Đổi return type thành AuthPayload để lấy được Token
-    register(input: RegisterInput!): AuthPayload!
-
-    # 3. Thêm login vào Mutation (thay vì Query) và trả về AuthPayload
-    login(username: String!, password: String!): AuthPayload!
+input CreatePostInput {
+    content: String!
+    
+    # --- INPUT MỚI ---
+    mediaUrl: String
+    mediaType: MediaType
+    feeling: String
+    # -----------------
+    
+    # Mặc định là PUBLIC nếu không truyền
+    privacyLevel: PrivacyLevel = PUBLIC 
 }
 
+input CreateCommentInput {
+    postId: ID!
+    content: String!
+}
+
+# =========================
+# 5. ROOT MUTATION (Ghi dữ liệu)
+# =========================
+
+type Mutation {
+    # --- AUTH ---
+    register(input: RegisterInput!): AuthPayload!
+    login(username: String!, password: String!): AuthPayload!
+
+    # --- POST ---
+    createPost(input: CreatePostInput!): Post!
+    
+    # --- INTERACTION (Tương tác) ---
+    # Like/Unlike bài viết (Trả về true nếu đã like, false nếu đã unlike)
+    toggleLikePost(postId: ID!): Boolean 
+    
+    # Bình luận bài viết
+    createComment(input: CreateCommentInput!): Comment!
+}
+
+# =========================
+# 6. ROOT QUERY (Đọc dữ liệu)
+# =========================
+
 type Query {
-    # Đã xóa getUserLogin ở đây vì chuyển sang Mutation login bên trên
+    # --- USER ---
     getUserByUsername(username: String!): User
     getAllUsers: [InfoUserForAdmin]
+
+    # --- POST ---
+    getAllPosts: [Post]
+    getPostById(id: ID!): Post
 }

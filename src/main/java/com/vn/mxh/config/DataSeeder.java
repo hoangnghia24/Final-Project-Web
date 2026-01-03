@@ -20,7 +20,7 @@ public class DataSeeder {
                 User admin = User.builder()
                         .username("admin")
                         .email("admin@mxh.vn")
-                        .fullName("Super Admin")
+                        .fullName("Admin")
                         // Mật khẩu là "admin123", nhưng phải mã hóa trước khi lưu
                         .passwordHash(passwordEncoder.encode("admin123"))
                         .role(Role.ADMIN) // Quan trọng nhất: Set quyền ADMIN

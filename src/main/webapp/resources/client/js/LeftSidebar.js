@@ -1,62 +1,71 @@
-// Left Sidebar Toggle Functionality
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const sidebar = document.getElementById('leftSidebar');
     const toggleBtn = document.getElementById('sidebarToggleBtn');
-    
-    if (!sidebar || !toggleBtn) {
-        console.log('Left sidebar elements not found');
-        return;
-    }
-    
-    console.log('Left sidebar initialized');
-    
-    // Load saved state from localStorage
-    const isCollapsed = localStorage.getItem('leftSidebarCollapsed') === 'true';
-    if (isCollapsed) {
-        sidebar.classList.add('collapsed');
-        toggleBtn.classList.add('collapsed');
-        
-        // Apply collapsed state to all containers
-        const containers = document.querySelectorAll('.home-container, .trending-container, .explore-container, .all-container, .profile-wrapper');
-        containers.forEach(container => {
-            container.classList.add('sidebar-collapsed');
+
+    // --- 1. XỬ LÝ ẨN/HIỆN SIDEBAR ---
+    if (sidebar && toggleBtn) {
+        // Load trạng thái từ localStorage
+        const isCollapsed = localStorage.getItem('leftSidebarCollapsed') === 'true';
+        if (isCollapsed) {
+            setSidebarState(true);
+        }
+
+        // Sự kiện click nút Toggle
+        toggleBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Toggle class
+            const willCollapse = !sidebar.classList.contains('collapsed');
+            setSidebarState(willCollapse);
+
+            // Lưu trạng thái
+            localStorage.setItem('leftSidebarCollapsed', willCollapse);
         });
     }
-    
-    // Toggle sidebar on button click
-    toggleBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const collapsed = sidebar.classList.toggle('collapsed');
-        toggleBtn.classList.toggle('collapsed');
-        
-        // Save state to localStorage
-        localStorage.setItem('leftSidebarCollapsed', collapsed);
-        
-        // Update all container classes for layout adjustment
-        const containers = document.querySelectorAll('.home-container, .trending-container, .explore-container, .all-container, .profile-wrapper');
-        containers.forEach(container => {
-            if (collapsed) {
-                container.classList.add('sidebar-collapsed');
-            } else {
-                container.classList.remove('sidebar-collapsed');
+
+    function setSidebarState(collapsed) {
+        if (collapsed) {
+            sidebar.classList.add('collapsed');
+            toggleBtn.classList.add('collapsed');
+            document.body.classList.add('sidebar-collapsed'); // Thêm class vào body để CSS khác bắt được
+        } else {
+            sidebar.classList.remove('collapsed');
+            toggleBtn.classList.remove('collapsed');
+            document.body.classList.remove('sidebar-collapsed');
+        }
+    }
+
+    // --- 2. XỬ LÝ ACCORDION (MENU CON) ---
+    // Sử dụng jQuery vì logic cũ của bạn dùng jQuery slideToggle
+    if (typeof $ !== 'undefined') {
+        $('.sidebar-accordion-toggle').on('click', function (e) {
+            e.preventDefault();
+
+            // Nếu sidebar đang thu nhỏ thì không cho mở menu con
+            if ($('#leftSidebar').hasClass('collapsed')) {
+                // Tùy chọn: Tự động mở sidebar ra nếu người dùng bấm vào accordion
+                // $('#sidebarToggleBtn').click(); 
+                return;
             }
+
+            var $block = $(this).closest('.sidebar-accordion-block');
+            var $submenu = $block.find('.sidebar-submenu').first();
+
+            $(this).toggleClass('active');
+            $submenu.stop().slideToggle(220);
         });
-        
-        console.log('Left sidebar collapsed:', collapsed);
-    });
-    
-    // Set active link based on current URL
+    }
+
+    // --- 3. ACTIVE LINK (Đánh dấu menu đang chọn) ---
     const currentPath = window.location.pathname;
-    const navLinks = document.querySelectorAll('.sidebar-nav-item');
-    
+    const navLinks = document.querySelectorAll('.sidebar-nav-item:not(.sidebar-accordion-toggle)'); // Trừ nút accordion ra
+
     navLinks.forEach(link => {
         link.classList.remove('active');
         const href = link.getAttribute('href');
-        
-        // Check if current path matches or starts with the link href
-        if (href === currentPath || (href !== '/home' && currentPath.startsWith(href))) {
+
+        if (href && (href === currentPath || (href !== '/home' && currentPath.startsWith(href)))) {
             link.classList.add('active');
         } else if (href === '/home' && currentPath === '/home') {
             link.classList.add('active');

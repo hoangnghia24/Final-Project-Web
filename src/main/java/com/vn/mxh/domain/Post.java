@@ -3,9 +3,7 @@ package com.vn.mxh.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-
 import com.vn.mxh.domain.enums.PrivacyLevel;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,14 +22,29 @@ public class Post {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private String imageUrl;
+    // --- CẬP NHẬT MỚI: Hỗ trợ Media & Cảm xúc ---
+    private String mediaUrl; // URL file ảnh/video
+
+    private String mediaType; // "IMAGE" hoặc "VIDEO" hoặc "NONE"
+
+    private String feeling; // "đang cảm thấy vui", "đang chúc mừng"...
+    // ---------------------------------------------
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    // Quan hệ N-1: Bài viết thuộc về 1 User
-    // FetchType.LAZY là bắt buộc để GraphQL Resolver xử lý hiệu quả
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Builder.Default
+    private int likeCount = 0;
+
+    @Builder.Default
+    private int commentCount = 0;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "privacy_level")
+    private PrivacyLevel privacyLevel = PrivacyLevel.PUBLIC;
+
+    @ManyToOne(fetch = FetchType.EAGER) // Để EAGER cho tiện lấy avatar user
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -40,9 +53,4 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Like> likes;
-
-    @Builder.Default()
-    @Enumerated(EnumType.STRING)
-    @Column(name = "privacy_level")
-    private PrivacyLevel privacyLevel = PrivacyLevel.PUBLIC; // Mặc định là công khai
 }

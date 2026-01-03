@@ -56,8 +56,10 @@ public class SecurityConfig {
                                                                 "/messages/**", // Trang tin nhắn
                                                                 "/settings", // Trang cài đặt
                                                                 "/search/**", // Trang tìm kiếm
-                                                                "/*.html" // Các file html lẻ
-                                                ).permitAll()
+                                                                "/*.html", // Các file html lẻ
+                                                                "/friends",
+                                                                "/edit-avatar")
+                                                .permitAll()
 
                                                 // ============================================================
                                                 // NHÓM 3: API AUTH & GRAPHQL -> MỞ ĐỂ CLIENT GỌI VÀO
@@ -92,7 +94,19 @@ public class SecurityConfig {
                                 // 5. Thêm Filter JWT vào trước Filter mặc định của Spring Security
                                 // (Để hứng Token, giải mã và nạp User vào Context trước khi Request đi tiếp)
                                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                http.exceptionHandling(exception -> exception
+                                // 1. Xử lý lỗi 403 (Access Denied): Đã đăng nhập nhưng vào trang không được
+                                // phép (hoặc trang lạ bị chặn)
+                                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                                        response.sendRedirect("/home"); // Đá về trang chủ
+                                })
 
+                                // 2. Xử lý lỗi 401 (Unauthenticated): Chưa đăng nhập mà vào trang lạ
+                                // (Lưu ý: Thường thì cái này nên về /login, nhưng nếu bạn muốn về /home thì sửa
+                                // ở đây)
+                                .authenticationEntryPoint((request, response, authException) -> {
+                                        response.sendRedirect("/home"); // Đá về trang chủ (hoặc /login)
+                                }));
                 return http.build();
         }
 }

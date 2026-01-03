@@ -1,47 +1,59 @@
 /* Left Sidebar Navigation */
-.left-sidebar-nav {
+.Sidebar-nav {
     width: 240px;
-    background: transparent;
-    height: calc(100vh - 48px);
+    background: #ffffff;
+    /* SỬA: Đặt màu nền trắng, không dùng transparent */
+    height: calc(100vh - 56px);
+    /* 56px là chiều cao header chuẩn */
     position: fixed;
-    top: 48px;
+    top: 56px;
     left: 0;
     padding: 16px 0;
     overflow-y: auto;
     overflow-x: hidden;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 999;
+    border-right: 1px solid #dbdbdb;
+    /* Thêm viền phải */
 }
 
-/* Scrollbar styling for sidebar */
-.left-sidebar-nav::-webkit-scrollbar {
-    width: 8px;
+/* --- TRẠNG THÁI THU GỌN (QUAN TRỌNG) --- */
+.Sidebar-nav.collapsed {
+    width: 72px;
+    /* SỬA: Thu về 72px để hiện icon */
+    padding: 16px 0;
 }
 
-.left-sidebar-nav::-webkit-scrollbar-track {
-    background: transparent;
+/* Ẩn chữ và mũi tên khi thu gọn */
+.Sidebar-nav.collapsed .sidebar-nav-item span:not(.sidebar-icon),
+.Sidebar-nav.collapsed .sidebar-chevron,
+.Sidebar-nav.collapsed .sidebar-accordion-toggle span {
+    display: none !important;
 }
 
-.left-sidebar-nav::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
+/* Căn giữa icon khi thu gọn */
+.Sidebar-nav.collapsed .sidebar-nav-item,
+.Sidebar-nav.collapsed .sidebar-accordion-toggle {
+    justify-content: center;
+    padding: 10px 0;
 }
 
-.left-sidebar-nav::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.3);
+.Sidebar-nav.collapsed .sidebar-icon {
+    margin-right: 0;
+    /* Bỏ margin phải của icon */
 }
 
-.left-sidebar-nav.collapsed {
-    width: 0;
-    padding: 0;
-    overflow: hidden;
+/* Ẩn menu con khi sidebar đang đóng để tránh vỡ giao diện */
+.Sidebar-nav.collapsed .sidebar-submenu {
+    display: none !important;
 }
 
-/* Toggle Button */
+/* --- TOGGLE BUTTON --- */
 .sidebar-toggle-btn {
     position: fixed;
     left: 224px;
-    top: 68px;
+    /* Vị trí khi mở */
+    top: 70px;
     width: 32px;
     height: 32px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -58,7 +70,6 @@
 
 .sidebar-toggle-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
 }
 
 .sidebar-toggle-btn svg {
@@ -66,14 +77,17 @@
     transition: transform 0.3s ease;
 }
 
+/* Vị trí nút khi thu gọn */
 .sidebar-toggle-btn.collapsed {
-    left: 16px;
+    left: 56px;
+    /* 72px width - 16px */
 }
 
 .sidebar-toggle-btn.collapsed svg {
     transform: rotate(180deg);
 }
 
+/* --- MENU ITEMS --- */
 .sidebar-nav-menu {
     display: flex;
     flex-direction: column;
@@ -93,11 +107,10 @@
     font-weight: 500;
     transition: background-color 0.2s;
     cursor: pointer;
-    background-color: rgba(255, 255, 255, 0.9);
 }
 
 .sidebar-nav-item:hover {
-    background-color: rgba(240, 242, 245, 0.95);
+    background-color: #f0f2f5;
 }
 
 .sidebar-nav-item.active {
@@ -111,54 +124,85 @@
     height: 24px;
 }
 
+/* --- ACCORDION STYLES --- */
+.sidebar-chevron {
+    margin-left: auto;
+    transition: transform 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-accordion-toggle.active .sidebar-chevron {
+    transform: rotate(-180deg);
+}
+
+.sidebar-submenu {
+    display: none;
+    padding-left: 0;
+    margin: 0;
+    list-style: none;
+    /* Bỏ chấm tròn li */
+}
+
+.sidebar-subitem {
+    padding-left: 48px !important;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    color: #444;
+    text-decoration: none;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.sidebar-subitem:hover {
+    background: #f0f2f5;
+    color: #667eea;
+}
+
+.sidebar-subitem-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
 /* Scrollbar */
-.left-sidebar-nav::-webkit-scrollbar {
+.Sidebar-nav::-webkit-scrollbar {
     width: 6px;
 }
 
-.left-sidebar-nav::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.left-sidebar-nav::-webkit-scrollbar-thumb {
+.Sidebar-nav::-webkit-scrollbar-thumb {
     background: #d1d5db;
     border-radius: 10px;
 }
 
-.left-sidebar-nav::-webkit-scrollbar-thumb:hover {
+.Sidebar-nav::-webkit-scrollbar-thumb:hover {
     background: #9ca3af;
 }
 
-/* Dark Mode */
-body.dark-mode .left-sidebar-nav {
-    background-color: transparent;
-}
-
-body.dark-mode .left-sidebar-nav::-webkit-scrollbar-thumb {
-    background: #343536;
-}
-
-body.dark-mode .left-sidebar-nav::-webkit-scrollbar-thumb:hover {
-    background: #4a4a4b;
+/* Dark Mode Support */
+body.dark-mode .Sidebar-nav {
+    background-color: #242526;
+    border-right-color: #393a3b;
 }
 
 body.dark-mode .sidebar-nav-item {
-    color: #d7dadc;
-    background-color: rgba(26, 26, 27, 0.9);
+    color: #e4e6eb;
 }
 
 body.dark-mode .sidebar-nav-item:hover {
-    background-color: rgba(39, 39, 41, 0.95);
+    background-color: #3a3b3c;
 }
 
-body.dark-mode .sidebar-nav-item.active {
-    background: #2e89ff;
-    color: white;
+body.dark-mode .sidebar-subitem {
+    color: #b0b3b8;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .left-sidebar-nav {
-        display: none;
-    }
+body.dark-mode .sidebar-subitem:hover {
+    background-color: #3a3b3c;
 }
