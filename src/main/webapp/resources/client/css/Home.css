@@ -1,129 +1,449 @@
-/* Tổng thể layout */
+/* ========== 1. VARIABLES & RESET ========== */
+:root {
+    --header-height: 56px;
+    --sidebar-width: 240px;
+    --sidebar-collapsed: 72px;
+    --content-max-width: 600px;
+    --gap-md: 12px;
+    --gap-lg: 16px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+
+    /* Light Mode Colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: #fafafa;
+    --bg-tertiary: #f5f5f5;
+    --border-color: #dbdbdb;
+    --text-primary: #050505;
+    --text-secondary: #65676b;
+    --accent-blue: #1877f2;
+    --hover-overlay: rgba(0, 0, 0, 0.05);
+}
+
+/* ========== 2. DARK MODE DEFINITIONS ========== */
+body.dark-mode {
+    --bg-primary: #242526;
+    --bg-secondary: #18191a;
+    --bg-tertiary: #3a3b3c;
+    --border-color: #393a3b;
+    --text-primary: #e4e6eb;
+    --text-secondary: #b0b3b8;
+    --hover-overlay: rgba(255, 255, 255, 0.1);
+}
+
+/* Áp dụng màu nền và chữ cho toàn trang */
+body {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* ========== 3. MAIN LAYOUT ========== */
 .home-container {
-    display: grid;
-    /* Cột trái 280px, Cột giữa tự co giãn, Cột phải 320px */
-    grid-template-columns: 280px 1fr 320px;
-    gap: 0;
+    display: flex;
     width: 100%;
     min-height: 100vh;
-    padding: 20px 0;
-    /* Bỏ padding ngang để sát lề */
+    padding-top: calc(var(--header-height) + 20px);
+    padding-left: calc(var(--sidebar-width) + 40px);
+    padding-right: 340px;
+    /* Chừa chỗ cho sidebar phải */
+    justify-content: center;
+    background: var(--bg-secondary);
+    transition: all 0.3s ease;
 }
 
-/* Header sát lề */
-header {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 0 20px !important;
-}
-
-/* Cột trái: Navigation sát lề trái */
-.left-sidebar {
-    position: sticky;
-    top: 70px;
-    height: fit-content;
-    padding-left: 20px;
-    /* Tạo khoảng hở nhỏ với thành trình duyệt */
-}
-
-.nav-menu {
-    list-style: none;
-    padding: 0;
-}
-
-.nav-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 15px;
-    color: white;
-    text-decoration: none;
-    font-weight: 600;
-    border-radius: 8px;
-    transition: 0.2s;
-    margin-bottom: 5px;
-}
-
-.nav-item:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffeb3b;
-}
-
-/* Cột giữa: Bảng tin tập trung ở giữa */
+/* Khu vực Feed Chính */
 .main-feed {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    /* Căn giữa các card trong cột này */
+    align-items: stretch;
     width: 100%;
-    padding: 0 20px;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    gap: var(--gap-lg);
 }
 
-.post-form-card,
-.feed-card {
+/* Responsive khi sidebar thu nhỏ */
+.sidebar-collapsed .home-container {
+    padding-left: calc(var(--sidebar-collapsed) + 40px);
+}
+
+/* ========== 4. CREATE POST BOX ========== */
+.create-post-box {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: var(--gap-lg);
     width: 100%;
-    max-width: 680px;
-    /* Giới hạn độ rộng card để không bị quá loãng */
-    background: white;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    margin-bottom: 20px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.post-input-wrapper {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.post-input-wrapper input {
-    border: none;
-    background: #f0f2f5;
-    border-radius: 25px;
-    padding: 10px 20px;
-    flex-grow: 1;
-    outline: none;
-}
-
-.feed-header {
+.create-post-top {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: var(--gap-md);
+    margin-bottom: var(--gap-md);
 }
 
-.feed-avatar {
-    width: 42px;
-    height: 42px;
+.create-post-avatar {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
+    border: 1px solid var(--border-color);
 }
 
-.feed-image {
+.create-post-input {
+    flex: 1;
+    padding: 10px 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: background 0.2s;
+}
+
+.create-post-input:hover {
+    background: var(--bg-tertiary);
+}
+
+.create-post-actions {
+    display: flex;
+    padding-top: var(--gap-md);
+    border-top: 1px solid var(--border-color);
+}
+
+.create-action-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+}
+
+.create-action-btn:hover {
+    background: var(--bg-tertiary);
+}
+
+/* ========== 5. FILTER TABS ========== */
+.filter-tabs-unified {
+    display: flex;
+    width: 100%;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 6px;
+    gap: 8px;
+}
+
+.filter-tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+    background: var(--bg-secondary);
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-tab-btn:hover {
+    background: var(--bg-tertiary);
+}
+
+.filter-tab-btn.active {
+    background: rgba(24, 119, 242, 0.15);
+    color: var(--accent-blue);
+}
+
+/* ========== 6. POST CARD ========== */
+#newsfeed-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.reddit-post-card {
+    width: 100%;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.post-user-info {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+    justify-content: center;
+}
+
+/* QUAN TRỌNG: Ép màu chữ tên user theo biến theme */
+.post-user-info b {
+    color: var(--text-primary) !important;
+    font-size: 15px;
+}
+
+.post-user-info small {
+    color: var(--text-secondary);
+}
+
+.post-menu-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 20px;
+    padding: 0 8px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.post-menu-btn:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.post-body-text {
+    width: 100%;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    word-wrap: break-word;
+}
+
+.post-full-image {
     width: 100%;
     border-radius: 8px;
-    margin-top: 10px;
+    margin-top: 5px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
 }
 
-/* Cột phải: Widgets sát lề phải */
-.right-sidebar {
-    position: sticky;
-    top: 70px;
-    height: fit-content;
-    padding-right: 20px;
+.post-action-buttons {
+    display: flex;
+    border-top: 1px solid var(--border-color);
+    margin-top: 12px;
+    padding-top: 4px;
 }
 
+.action-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 8px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    background: var(--bg-tertiary);
+}
+
+/* ========== 7. WIDGETS (Right Sidebar) ========== */
 .widget-card {
-    background: white;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 15px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     margin-bottom: 20px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
-.widget-title {
+.widget-title-text {
+    font-size: 16px;
     font-weight: 700;
-    color: #4e54c8;
-    margin-bottom: 15px;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.trending-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.trending-item:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.trending-rank {
+    width: 24px;
+    height: 24px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    font-weight: bold;
+    margin-right: 10px;
+    font-size: 12px;
+}
+
+.trending-topic {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.trending-stats {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* ========== 8. MODAL & DROPDOWNS & FIX BOOTSTRAP ========== */
+
+/* Fix màu text-muted trong dark mode cho dễ đọc hơn */
+body.dark-mode .text-muted {
+    color: #b0b3b8 !important;
+}
+
+/* Modal Styling */
+.modal-content {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.modal-header,
+.modal-footer {
+    border-color: var(--border-color);
+}
+
+.modal-title {
+    color: var(--text-primary);
+}
+
+/* Nút đóng modal (X) - Đảo màu khi dark mode */
+.btn-close {
+    filter: invert(var(--dark-mode-invert, 0));
+}
+
+body.dark-mode {
+    --dark-mode-invert: 1;
+}
+
+/* Textarea Input */
+#postContentInput {
+    background-color: transparent;
+    color: var(--text-primary);
+}
+
+#postContentInput::placeholder {
+    color: var(--text-secondary);
+}
+
+.create-post-input::placeholder {
+    color: var(--text-secondary);
+}
+
+/* Dropdown Privacy */
+#privacySelect {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+/* Menu 3 chấm */
+.post-menu-dropdown {
+    position: absolute;
+    right: 15px;
+    top: 40px;
+    background: var(--bg-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    z-index: 100;
+    width: 150px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    padding: 5px 0;
+}
+
+.menu-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-primary);
+    transition: background 0.2s;
+}
+
+.menu-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.menu-item.danger {
+    color: #ff4444;
+}
+
+.menu-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 4px 0;
+}
+
+/* ========== 9. MEDIA PREVIEW (Upload ảnh) ========== */
+.media-preview-container {
+    position: relative;
+    margin-top: 10px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    overflow: hidden;
+    display: none;
+    border: 1px solid var(--border-color);
+}
+
+.preview-media {
+    width: 100%;
+    max-height: 350px;
+    object-fit: contain;
+    background: #000;
     display: block;
+}
+
+.btn-remove-media {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.btn-remove-media:hover {
+    background: rgba(0, 0, 0, 0.8);
 }
