@@ -124,7 +124,59 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="updatePostModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Chỉnh sửa bài viết</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <img id="updateModalUserAvatar" src="https://via.placeholder.com/40" class="rounded-circle me-2"
+                            style="width: 40px; height: 40px; object-fit: cover;">
+                        <div>
+                            <div id="updateModalUserName" class="fw-bold">...</div>
+                            <select id="updatePrivacySelect"
+                                class="form-select form-select-sm border-0 bg-light py-0 ps-2 pe-4"
+                                style="width: auto; cursor: pointer;">
+                                <option value="PUBLIC">🌎 Công khai</option>
+                                <option value="FRIENDS">👥 Bạn bè</option>
+                                <option value="PRIVATE">🔒 Chỉ mình tôi</option>
+                            </select>
+                        </div>
+                    </div>
 
+                    <textarea id="updatePostContentInput" class="form-control border-0 fs-5 px-0" rows="4"
+                        placeholder="Bạn đang nghĩ gì thế?" style="resize: none; box-shadow: none;"></textarea>
+
+                    <div id="updateMediaPreviewContainer" class="media-preview-container">
+                        <button type="button" id="btnRemoveUpdateMedia" class="btn-remove-media">✕</button>
+                        <img id="updateImagePreview" src="" class="preview-media" style="display: none;">
+                        <video id="updateVideoPreview" controls class="preview-media" style="display: none;"></video>
+                    </div>
+
+                    <input type="file" id="updateFileUploadInput" accept="image/*,video/*" hidden>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3 border rounded p-2">
+                        <span class="fw-semibold small">Thêm vào bài viết</span>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-light btn-sm rounded-circle"
+                                onclick="$('#updateFileUploadInput').click()">
+                                <svg viewBox="0 0 24 24" fill="#45bd62" width="24" height="24">
+                                    <path
+                                        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5.04-6.71l-2.75 3.54-1.96-2.36L6.5 17h11l-3.54-4.71z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" id="btnUpdatePost" class="btn btn-primary w-100 fw-bold">Lưu thay đổi</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script th:src="@{/client/js/Home.js}"></script>
     <script th:src="@{/client/js/Notifications.js}"></script>
     <script th:src="@{/client/js/TimeUtils.js}"></script>
