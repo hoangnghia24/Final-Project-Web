@@ -164,33 +164,26 @@ $(document).ready(function () {
     });
 
     btnUpdatePost.click(async function () {
-        const postId = $(this).data("id"); // Lấy ID bài viết đang sửa
+        const postId = $(this).data("id");
         const content = updatePostContentInput.val();
         const privacy = updatePrivacySelect.val();
 
-        // Disable nút để tránh bấm nhiều lần
         btnUpdatePost.text("Đang lưu...").prop("disabled", true);
 
-        // 1. Xác định URL ảnh cuối cùng
-        // Lấy lại thông tin bài viết gốc từ mảng currentPosts để so sánh
         const originalPost = currentPosts.find(p => p.id == postId);
-        let finalMediaUrl = originalPost.mediaUrl || originalPost.imageUrl; // Mặc định giữ nguyên ảnh cũ
+        let finalMediaUrl = originalPost.mediaUrl || originalPost.imageUrl;
         let finalMediaType = originalPost.mediaType || "NONE";
 
         try {
-            // Trường hợp 1: Người dùng chọn file mới -> Upload file mới
             if (updateFile) {
                 finalMediaUrl = await uploadMedia(updateFile);
                 finalMediaType = (updateFile.type.startsWith("video/")) ? "VIDEO" : "IMAGE";
             }
-            // Trường hợp 2: Người dùng bấm nút Xóa ảnh cũ -> Gán null
             else if (isMediaDeleted) {
                 finalMediaUrl = null;
                 finalMediaType = "NONE";
             }
-            // Trường hợp 3: Không làm gì cả -> Giữ nguyên finalMediaUrl cũ (đã gán ở trên)
 
-            // 2. Gọi GraphQL Mutation Update
             const mutation = {
                 query: `mutation UpdatePost($input: UpdatePostInput!) { 
                     updatePost(input: $input) { 
@@ -210,19 +203,13 @@ $(document).ready(function () {
             };
 
             sendGraphQLRequest(mutation, (res) => {
-                // Thành công
                 alert("Cập nhật bài viết thành công!");
                 updatePostModal.modal('hide');
-
-                // Reset form
                 updateFile = null;
                 isMediaDeleted = false;
                 updateFileInput.val("");
-
-                // Load lại feed để thấy thay đổi
                 loadAllPosts();
             }, () => {
-                // Thất bại
                 btnUpdatePost.text("Lưu thay đổi").prop("disabled", false);
             });
 
@@ -233,7 +220,7 @@ $(document).ready(function () {
     });
 
     // ==========================================
-    // 3. CÁC HÀM XỬ LÝ KHÁC
+    // 3. CÁC HÀM XỬ LÝ KHÁC (MENU, DELETE, LIKE, COMMENT)
     // ==========================================
 
     $(document).on('click', '.post-menu-btn', function (e) {
@@ -254,42 +241,30 @@ $(document).ready(function () {
     $(document).on('click', '.delete-post-btn', function (e) {
         e.stopPropagation();
         const postId = $(this).data('id');
-
-        // Xóa menu dropdown cho gọn
         $('.post-menu-dropdown').remove();
 
         if (confirm("Bạn có chắc chắn muốn xóa bài viết này không? Hành động này không thể hoàn tác.")) {
-            // Gọi API Xóa
             const mutation = {
                 query: `mutation DeletePost($id: ID!) { 
                     deletePost(id: $id) 
                 }`,
-                variables: {
-                    id: postId
-                }
+                variables: { id: postId }
             };
 
-            // Hiệu ứng UX: Tạm thời làm mờ bài viết để người dùng thấy đang xử lý
             const $postCard = $(`.reddit-post-card[data-post-id="${postId}"]`);
             $postCard.css('opacity', '0.5');
 
             sendGraphQLRequest(mutation, (res) => {
                 if (res.data && res.data.deletePost) {
-                    // Thành công: Xóa hẳn element khỏi giao diện (không cần load lại toàn bộ feed)
                     $postCard.slideUp(300, function () {
                         $(this).remove();
                     });
-
-                    // Cập nhật lại mảng currentPosts (xóa bài khỏi mảng cục bộ)
                     currentPosts = currentPosts.filter(p => p.id != postId);
                 } else {
                     alert("Xóa thất bại!");
-                    $postCard.css('opacity', '1'); // Hoàn tác hiệu ứng mờ
+                    $postCard.css('opacity', '1');
                 }
-            }, () => {
-                // Lỗi mạng
-                $postCard.css('opacity', '1');
-            });
+            }, () => $postCard.css('opacity', '1'));
         }
     });
 
@@ -300,6 +275,167 @@ $(document).ready(function () {
         container.find('.content-short').toggle(!isExpanding);
         container.find('.content-full').toggle(isExpanding);
         $(this).text(isExpanding ? "Thu gọn" : "Xem thêm");
+    });
+
+    // --- XỬ LÝ SỰ KIỆN LIKE ---
+    $(document).on('click', '.btn-like', function () {
+        const btn = $(this);
+        const postId = btn.data('id');
+
+        const mutation = {
+            query: `mutation ToggleLike($postId: ID!) { toggleLikePost(postId: $postId) }`,
+            variables: { postId: postId }
+        };
+
+        $.ajax({
+            url: "/graphql", type: "POST", contentType: "application/json",
+            headers: { "Authorization": "Bearer " + token },
+            data: JSON.stringify(mutation),
+            success: (res) => {
+                if (res.data) {
+                    const isLiked = res.data.toggleLikePost;
+                    const countSpan = $(`#like-count-${postId}`);
+                    let currentCount = parseInt(countSpan.text().replace(/[^0-9]/g, ''));
+
+                    if (isLiked) {
+                        btn.css('color', '#2e89ff').css('font-weight', 'bold');
+                        countSpan.text(`👍 ${currentCount + 1}`);
+                    } else {
+                        btn.css('color', '');
+                        countSpan.text(`👍 ${Math.max(0, currentCount - 1)}`);
+                    }
+                }
+            }
+        });
+    });
+
+    // --- XỬ LÝ ẨN/HIỆN VÀ LOAD COMMENT CŨ (ĐÃ CẬP NHẬT) ---
+    $(document).on('click', '.btn-toggle-comment', function () {
+        const postId = $(this).data('id');
+        const commentSection = $(`#comments-area-${postId}`);
+        const commentList = $(`#list-comments-${postId}`);
+
+        // Toggle hiển thị
+        commentSection.slideToggle();
+
+        // Nếu chưa load comment lần nào (check bằng class hoặc data attribute) thì gọi API
+        if (!commentList.data('loaded')) {
+            loadComments(postId, commentList);
+        }
+    });
+
+    function loadComments(postId, commentListElement) {
+        const query = {
+            query: `query GetComments($postId: ID!) {
+                getCommentsByPostId(postId: $postId) {
+                    id content createdAt 
+                    user { id fullName username avatarUrl }
+                }
+            }`,
+            variables: { postId: postId }
+        };
+
+        // Hiện loading
+        commentListElement.html('<div class="text-muted text-center small py-2">Đang tải bình luận...</div>');
+
+        $.ajax({
+            url: "/graphql", type: "POST", contentType: "application/json",
+            headers: { "Authorization": "Bearer " + token },
+            data: JSON.stringify(query),
+            success: (res) => {
+                commentListElement.empty(); // Xóa loading
+
+                // Kiểm tra lỗi từ GraphQL trả về (QUAN TRỌNG)
+                if (res.errors) {
+                    console.error("GraphQL Error:", res.errors);
+                    commentListElement.html(`<div class="text-danger text-center small">Lỗi: ${res.errors[0].message}</div>`);
+                    return;
+                }
+
+                if (res.data && res.data.getCommentsByPostId) {
+                    const comments = res.data.getCommentsByPostId;
+
+                    if (comments.length === 0) {
+                        commentListElement.html('<div class="text-muted text-center small mb-2">Chưa có bình luận nào. Hãy là người đầu tiên!</div>');
+                    } else {
+                        // Render từng comment
+                        comments.forEach(comment => {
+                            appendCommentToView(postId, comment);
+                        });
+                    }
+                    // Đánh dấu đã load xong
+                    commentListElement.data('loaded', true);
+                }
+            },
+            error: (err) => {
+                console.error("AJAX Error:", err);
+                commentListElement.html('<div class="text-danger text-center small">Lỗi kết nối server.</div>');
+            }
+        });
+    }
+
+    function appendCommentToView(postId, comment) {
+        const avatar = comment.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user.username}`;
+
+        // Dùng class CSS để style (đã sửa ở bước trước)
+        const commentHtml = `
+            <div class="comment-item">
+                <img src="${avatar}" class="comment-avatar">
+                <div class="comment-bubble">
+                    <div class="comment-author">${comment.user.fullName}</div>
+                    <div class="comment-text">${comment.content}</div>
+                </div>
+            </div>`;
+
+        $(`#list-comments-${postId}`).append(commentHtml);
+    }
+
+    // --- XỬ LÝ GỬI COMMENT MỚI ---
+    $(document).on('click', '.btn-send-comment', function () {
+        const postId = $(this).data('id');
+        const inputField = $(`.comment-input[data-id="${postId}"]`);
+        const content = inputField.val().trim();
+
+        if (!content) return;
+
+        const mutation = {
+            query: `mutation CreateComment($input: CreateCommentInput!) { 
+                createComment(input: $input) { 
+                    id content createdAt user { fullName username avatarUrl } 
+                } 
+            }`,
+            variables: {
+                input: { postId: postId, content: content }
+            }
+        };
+
+        const btnSend = $(this);
+        btnSend.prop('disabled', true);
+
+        $.ajax({
+            url: "/graphql", type: "POST", contentType: "application/json",
+            headers: { "Authorization": "Bearer " + token },
+            data: JSON.stringify(mutation),
+            success: (res) => {
+                if (res.data && res.data.createComment) {
+                    const comment = res.data.createComment;
+
+                    // Nếu đang có thông báo "Chưa có bình luận", xóa nó đi
+                    const commentList = $(`#list-comments-${postId}`);
+                    if (commentList.text().includes("Chưa có bình luận")) {
+                        commentList.empty();
+                    }
+
+                    appendCommentToView(postId, comment);
+                    inputField.val("");
+
+                    const countSpan = $(`#comment-count-${postId}`);
+                    let currentCount = parseInt(countSpan.text().replace(/[^0-9]/g, ''));
+                    countSpan.text(`${currentCount + 1} bình luận`);
+                }
+            },
+            complete: () => btnSend.prop('disabled', false)
+        });
     });
 
     // ==========================================
@@ -427,7 +563,6 @@ $(document).ready(function () {
         });
     }
 
-    // --- HÀM NÀY ĐÃ ĐƯỢC SỬA ĐỂ HIỂN THỊ ICON ĐÚNG ---
     function renderPosts(posts) {
         newsfeedContainer.empty();
         if (posts.length === 0) {
@@ -447,12 +582,11 @@ $(document).ready(function () {
                     <a href="#" class="see-more-btn">Xem thêm</a>`;
             }
 
-            // Xử lý icon Quyền riêng tư
-            let privacyIcon = '🔒'; // Mặc định là PRIVATE
+            let privacyIcon = '🔒';
             if (post.privacyLevel === 'PUBLIC') {
                 privacyIcon = '🌎';
-            } else if (post.privacyLevel === 'FRIENDS_ONLY') { // <-- Sửa logic ở đây
-                privacyIcon = '👥'; // Icon 2 người
+            } else if (post.privacyLevel === 'FRIENDS_ONLY') {
+                privacyIcon = '👥';
             }
 
             let mediaHtml = '';
@@ -479,21 +613,33 @@ $(document).ready(function () {
                             <div class="post-user-info ms-2">
                                 <b>${post.user.fullName}</b>
                                 <small class="text-muted" style="font-size: 12px;">
-                                    ${calculateTimeAgo(post.createdAt)} • ${privacyIcon} </small>
+                                    ${calculateTimeAgo(post.createdAt)} • ${privacyIcon}
+                                </small>
                             </div>
                         </div>
                         <button class="post-menu-btn">...</button>
                     </div>
                     <div class="post-body-text">${contentHtml}</div>
                     ${mediaHtml}
+                    
                     <div class="post-stats-bar mt-2 text-muted small d-flex justify-content-between">
-                        <span>👍 ${post.likeCount || 0}</span> 
-                        <span>${post.commentCount || 0} bình luận</span>
+                        <span id="like-count-${post.id}">👍 ${post.likeCount || 0}</span> 
+                        <span id="comment-count-${post.id}">${post.commentCount || 0} bình luận</span>
                     </div>
+                    
                     <div class="post-action-buttons">
-                        <button class="action-btn">👍 Thích</button>
-                        <button class="action-btn">💬 Bình luận</button>
+                        <button class="action-btn btn-like" data-id="${post.id}">👍 Thích</button>
+                        <button class="action-btn btn-toggle-comment" data-id="${post.id}">💬 Bình luận</button>
                         <button class="action-btn">↗️ Chia sẻ</button>
+                    </div>
+
+                    <div class="post-comments-section" id="comments-area-${post.id}" style="display:none; padding-top: 10px; border-top: 1px solid #eee;">
+                        <div class="comments-list" id="list-comments-${post.id}" style="margin-bottom: 10px;">
+                            </div>
+                        <div class="d-flex gap-2">
+                            <input type="text" class="form-control comment-input" data-id="${post.id}" placeholder="Viết bình luận..." style="border-radius: 20px;">
+                            <button class="btn btn-primary btn-sm btn-send-comment" data-id="${post.id}" style="border-radius: 20px;">Gửi</button>
+                        </div>
                     </div>
                 </div>`;
             newsfeedContainer.append(html);

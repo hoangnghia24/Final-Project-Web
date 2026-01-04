@@ -483,3 +483,73 @@ body.dark-mode {
 .btn-remove-media:hover {
     background: rgba(0, 0, 0, 0.8);
 }
+
+/* 1. Cấu trúc chung */
+.comment-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    animation: fadeIn 0.3s ease;
+}
+
+.comment-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 8px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+
+/* 2. Bong bóng chat (Mặc định Light Mode) */
+.comment-bubble {
+    background-color: #f0f2f5;
+    /* Màu xám nhạt Facebook */
+    padding: 8px 12px;
+    border-radius: 18px;
+    max-width: 100%;
+}
+
+.comment-author {
+    font-weight: 600;
+    font-size: 13px;
+    color: #050505;
+    margin-bottom: 2px;
+}
+
+.comment-text {
+    font-size: 14px;
+    color: #050505;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+/* 3. Dark Mode (Tự động đổi màu khi body có class dark-mode) */
+body.dark-mode .comment-bubble {
+    background-color: #3a3b3c;
+    /* Màu xám đậm dịu mắt */
+    color: #e4e6eb;
+}
+
+body.dark-mode .comment-author {
+    color: #e4e6eb;
+    /* Chữ trắng sáng */
+}
+
+body.dark-mode .comment-text {
+    color: #b0b3b8;
+    /* Chữ trắng mờ */
+}
+
+/* Hiệu ứng hiện comment */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

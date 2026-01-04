@@ -157,4 +157,6 @@ type Query {
     # --- POST ---
     getAllPosts: [Post]
     getPostById(id: ID!): Post
+    
+    getCommentsByPostId(postId: ID!): [Comment]
 }

@@ -14,6 +14,12 @@ import org.springframework.messaging.simp.SimpMessagingTemplate; // Import WS
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import com.vn.mxh.domain.Comment;
+import com.vn.mxh.domain.Like;
+import com.vn.mxh.domain.dto.CreateCommentInput;
+import com.vn.mxh.repository.CommentRepository;
+import com.vn.mxh.repository.LikeRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,13 +29,19 @@ public class PostController {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate; // Dùng để gửi Socket
+    private final LikeRepository likeRepository;
+    private final CommentRepository commentRepository;
 
     public PostController(PostRepository postRepository,
             UserRepository userRepository,
-            SimpMessagingTemplate messagingTemplate) {
+            SimpMessagingTemplate messagingTemplate,
+            LikeRepository likeRepository,
+            CommentRepository commentRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.messagingTemplate = messagingTemplate;
+        this.likeRepository = likeRepository;
+        this.commentRepository = commentRepository;
     }
 
     // ==========================================
@@ -112,8 +124,68 @@ public class PostController {
         return true; // Trả về true nếu xóa thành công
     }
 
+    @MutationMapping
+    @PreAuthorize("isAuthenticated()")
+    @Transactional
+    public Boolean toggleLikePost(@Argument String postId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username).orElseThrow();
+        Post post = postRepository.findById(Long.parseLong(postId))
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        // Kiểm tra xem đã like chưa
+        var existingLike = likeRepository.findByUserAndPost(user, post);
+
+        if (existingLike.isPresent()) {
+            // Nếu đã like -> Xóa like (Unlike)
+            likeRepository.delete(existingLike.get());
+            post.setLikeCount(Math.max(0, post.getLikeCount() - 1)); // Giảm count
+            postRepository.save(post);
+            return false; // Trả về false (đã unlike)
+        } else {
+            // Nếu chưa like -> Tạo like mới
+            Like newLike = Like.builder().user(user).post(post).build();
+            likeRepository.save(newLike);
+            post.setLikeCount(post.getLikeCount() + 1); // Tăng count
+            postRepository.save(post);
+
+            // TODO: Gửi thông báo cho chủ bài viết (Làm sau)
+            return true; // Trả về true (đã like)
+        }
+    }
+
+    @MutationMapping
+    @PreAuthorize("isAuthenticated()")
+    @Transactional
+    public Comment createComment(@Argument CreateCommentInput input) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username).orElseThrow();
+        Post post = postRepository.findById(Long.parseLong(input.postId()))
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        // Tạo Comment
+        Comment comment = new Comment();
+        comment.setContent(input.content());
+        comment.setUser(user);
+        comment.setPost(post);
+
+        Comment savedComment = commentRepository.save(comment);
+
+        // Tăng số lượng comment trong Post
+        post.setCommentCount(post.getCommentCount() + 1);
+        postRepository.save(post);
+
+        return savedComment;
+    }
+
     @QueryMapping
     public List<Post> getAllPosts() {
         return postRepository.findAllByOrderByCreatedAtDesc();
+    }
+
+    @QueryMapping
+    public List<Comment> getCommentsByPostId(@Argument String postId) {
+        // Gọi repository lấy list comment, sắp xếp cũ nhất lên trước
+        return commentRepository.findByPostIdOrderByCreatedAtAsc(Long.parseLong(postId));
     }
 }
