@@ -1,0 +1,203 @@
+/* Left Sidebar Navigation */
+.Sidebar-nav {
+    width: 280px;
+    background: #ffffff;
+    /* Ensure sidebar participates in the layout grid (not fixed) so it doesn't overlay content */
+    height: calc(100vh - 100px);
+    position: fixed;
+    top: 56px;
+    padding: 16px 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+    border-right: 1px solid #dbdbdb;
+}
+
+/* --- TRẠNG THÁI THU GỌN (QUAN TRỌNG) --- */
+.Sidebar-nav.collapsed {
+    width: 72px;
+    padding: 16px 0;
+}
+
+/* Ẩn chữ và mũi tên khi thu gọn */
+.Sidebar-nav.collapsed .sidebar-nav-item span:not(.sidebar-icon),
+.Sidebar-nav.collapsed .sidebar-chevron,
+.Sidebar-nav.collapsed .sidebar-accordion-toggle span {
+    display: none !important;
+}
+
+/* Căn giữa icon khi thu gọn */
+.Sidebar-nav.collapsed .sidebar-nav-item,
+.Sidebar-nav.collapsed .sidebar-accordion-toggle {
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.Sidebar-nav.collapsed .sidebar-icon {
+    margin-right: 0;
+    /* Bỏ margin phải của icon */
+}
+
+/* Ẩn menu con khi sidebar đang đóng để tránh vỡ giao diện */
+.Sidebar-nav.collapsed .sidebar-submenu {
+    display: none !important;
+}
+
+/* --- TOGGLE BUTTON --- */
+.sidebar-toggle-btn {
+    position: fixed;
+    /* Align toggle with new sidebar width (280px - 16px) */
+    left: 264px;
+    top: 70px;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-toggle-btn:hover {
+    transform: scale(1.1);
+}
+
+.sidebar-toggle-btn svg {
+    color: white;
+    transition: transform 0.3s ease;
+}
+
+/* Vị trí nút khi thu gọn */
+.sidebar-toggle-btn.collapsed {
+    left: 56px;
+}
+
+.sidebar-toggle-btn.collapsed svg {
+    transform: rotate(180deg);
+}
+
+/* --- MENU ITEMS --- */
+.sidebar-nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 8px;
+}
+
+.sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #1c1c1c;
+    font-size: 15px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.sidebar-nav-item:hover {
+    background-color: #f0f2f5;
+}
+
+.sidebar-nav-item.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.sidebar-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+}
+
+/* --- ACCORDION STYLES --- */
+.sidebar-chevron {
+    margin-left: auto;
+    transition: transform 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-accordion-toggle.active .sidebar-chevron {
+    transform: rotate(-180deg);
+}
+
+.sidebar-submenu {
+    display: none;
+    padding-left: 0;
+    margin: 0;
+    list-style: none;
+    /* Bỏ chấm tròn li */
+}
+
+.sidebar-subitem {
+    padding-left: 48px !important;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    color: #444;
+    text-decoration: none;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.sidebar-subitem:hover {
+    background: #f0f2f5;
+    color: #667eea;
+}
+
+.sidebar-subitem-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+/* Scrollbar */
+.Sidebar-nav::-webkit-scrollbar {
+    width: 6px;
+}
+
+.Sidebar-nav::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 10px;
+}
+
+.Sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Dark Mode Support */
+body.dark-mode .Sidebar-nav {
+    background-color: #242526;
+    border-right-color: #393a3b;
+}
+
+body.dark-mode .sidebar-nav-item {
+    color: #e4e6eb;
+}
+
+body.dark-mode .sidebar-nav-item:hover {
+    background-color: #3a3b3c;
+}
+
+body.dark-mode .sidebar-subitem {
+    color: #b0b3b8;
+}
+
+body.dark-mode .sidebar-subitem:hover {
+    background-color: #3a3b3c;
+}
