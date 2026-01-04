@@ -23,6 +23,7 @@ public class Post {
     private String content;
 
     // --- CẬP NHẬT MỚI: Hỗ trợ Media & Cảm xúc ---
+    @Column(columnDefinition = "TEXT")
     private String mediaUrl; // URL file ảnh/video
 
     private String mediaType; // "IMAGE" hoặc "VIDEO" hoặc "NONE"

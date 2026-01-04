@@ -112,29 +112,42 @@ $(document).ready(function () {
                 const formData = new FormData();
                 formData.append("file", currentFile);
 
-                // Gọi REST API upload
-                await $.ajax({
-                    url: "/api/upload",
-                    type: "POST",
-                    headers: { "Authorization": "Bearer " + token },
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: (res) => {
-                        finalImageUrl = res.url || res;
-                    },
-                    error: (err) => {
-                        console.error(err);
-                        throw new Error("Không thể upload ảnh/video. Vui lòng thử lại.");
-                    }
+                // Dùng Promise để bọc $.ajax giúp bắt lỗi chính xác hơn
+                finalImageUrl = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: "/api/upload/media",
+                        type: "POST",
+                        headers: { "Authorization": "Bearer " + token },
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: (res) => {
+                            // Kiểm tra kỹ phản hồi có phải là URL hợp lệ không
+                            if (res && res.url) {
+                                resolve(res.url);
+                            } else if (typeof res === 'string' && res.startsWith('/')) {
+                                resolve(res);
+                            } else {
+                                // Nếu server trả về HTML (do lỗi redirect), reject ngay
+                                reject(new Error("Lỗi upload: Server trả về dữ liệu không hợp lệ (Có thể do file quá lớn)."));
+                            }
+                        },
+                        error: (xhr) => {
+                            console.error(xhr);
+                            let msg = "Không thể upload ảnh.";
+                            if (xhr.status === 413) msg = "File quá lớn (Vượt quá giới hạn cho phép).";
+                            reject(new Error(msg));
+                        }
+                    });
                 });
             }
 
-            // BƯỚC 2: Gọi GraphQL CreatePost
+            // BƯỚC 2: Chỉ gọi tạo bài viết khi đã có link ảnh (hoặc không có file)
+            // Nếu bước trên lỗi, code sẽ nhảy xuống catch và KHÔNG tạo bài viết rác
             callCreatePostGraphQL(finalImageUrl);
 
         } catch (error) {
-            alert("Lỗi: " + error.message);
+            alert("⚠️ " + error.message);
             btnSubmitPost.text("Đăng").prop("disabled", false);
         }
     }
@@ -143,6 +156,16 @@ $(document).ready(function () {
         const content = postContentInput.val();
         const privacy = $("#privacySelect").val();
 
+        // 1. Xác định mediaType (IMAGE hoặc VIDEO) dựa trên file đang chọn
+        let type = "NONE";
+        if (imageUrl) {
+            if (currentFile && currentFile.type.startsWith("video/")) {
+                type = "VIDEO";
+            } else {
+                type = "IMAGE";
+            }
+        }
+
         const mutation = {
             query: `mutation CreatePost($input: CreatePostInput!) { 
                 createPost(input: $input) { id } 
@@ -150,7 +173,10 @@ $(document).ready(function () {
             variables: {
                 input: {
                     content: content,
-                    imageUrl: imageUrl, // URL ảnh từ server (nếu có)
+                    // 2. Đổi tên từ imageUrl -> mediaUrl
+                    mediaUrl: imageUrl,
+                    // 3. Thêm trường mediaType
+                    mediaType: type,
                     privacyLevel: privacy
                 }
             }
@@ -169,6 +195,7 @@ $(document).ready(function () {
                     resetForm();
                     loadAllPosts(); // Reload lại feed
                 } else {
+                    // Lấy thông báo lỗi chi tiết từ server
                     alert("Lỗi server: " + (res.errors ? res.errors[0].message : "Unknown"));
                 }
             },
@@ -197,7 +224,7 @@ $(document).ready(function () {
     function loadAllPosts() {
         // Query GraphQL lấy bài viết
         const query = {
-            query: `query { getAllPosts { id content imageUrl createdAt privacyLevel likeCount commentCount user { id fullName username avatarUrl } } }`
+            query: `query { getAllPosts { id content mediaUrl mediaType createdAt privacyLevel likeCount commentCount user { id fullName username avatarUrl } } }`
         };
 
         $.ajax({
@@ -239,10 +266,26 @@ $(document).ready(function () {
                     <a href="#" class="see-more-btn">Xem thêm</a>`;
             }
 
-            // Xử lý ảnh/video bài viết
+            // --- SỬA LỖI HIỂN THỊ ẢNH Ở ĐÂY ---
             let mediaHtml = '';
-            if (post.imageUrl) {
-                mediaHtml = `<img src="${post.imageUrl}" class="post-full-image" loading="lazy">`;
+            // Ưu tiên dùng mediaUrl vì đây là biến chuẩn mới, fallback về imageUrl nếu dữ liệu cũ còn
+            const urlToDisplay = post.mediaUrl || post.imageUrl;
+
+            if (urlToDisplay) {
+                // Kiểm tra xem là Video hay Ảnh dựa trên mediaType hoặc đuôi file
+                const isVideo = (post.mediaType === 'VIDEO') || (urlToDisplay.match(/\.(mp4|mov|avi|mkv)$/i));
+
+                if (isVideo) {
+                    mediaHtml = `
+                        <div style="background:black; width:100%; display:flex; justify-content:center;">
+                            <video controls class="post-full-image" style="max-height:500px; width:100%;">
+                                <source src="${urlToDisplay}" type="video/mp4">
+                                Trình duyệt không hỗ trợ thẻ video.
+                            </video>
+                        </div>`;
+                } else {
+                    mediaHtml = `<img src="${urlToDisplay}" class="post-full-image" loading="lazy" alt="Post image">`;
+                }
             }
 
             // QUAN TRỌNG: Đã xóa class 'text-dark' ở thẻ <b> để CSS có thể điều khiển màu

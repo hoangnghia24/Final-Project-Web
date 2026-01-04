@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails; // PHẢI IMPORT CÁI NÀY
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vn.mxh.domain.enums.Role;
 
 import java.time.LocalDateTime;
@@ -45,6 +46,7 @@ public class User implements UserDetails { // THÊM implements UserDetails
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Post> posts;
 

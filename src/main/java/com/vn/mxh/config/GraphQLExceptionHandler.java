@@ -26,9 +26,19 @@ public class GraphQLExceptionHandler {
     // username/email)
     @GraphQlExceptionHandler
     public GraphQLError handleDbError(DataIntegrityViolationException ex, DataFetchingEnvironment env) {
+        ex.printStackTrace();
+
+        String msg = "Lỗi dữ liệu Database!";
+
+        if (ex.getMessage() != null && ex.getMessage().contains("Duplicate entry")) {
+            msg = "Dữ liệu đã tồn tại (trùng lặp)!";
+        } else {
+            msg = "Lỗi DB: " + (ex.getRootCause() != null ? ex.getRootCause().getMessage() : ex.getMessage());
+        }
+
         return GraphQLError.newError()
                 .errorType(ErrorType.BAD_REQUEST)
-                .message("Tài khoản hoặc Email đã tồn tại trong hệ thống!") // Custom message cho user
+                .message(msg) // <--- Hiển thị lỗi thật sự thay vì câu hardcode cũ
                 .path(env.getExecutionStepInfo().getPath())
                 .location(env.getField().getSourceLocation())
                 .build();
