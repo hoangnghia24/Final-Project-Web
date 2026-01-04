@@ -42,7 +42,8 @@ body {
     display: flex;
     width: 100%;
     min-height: 100vh;
-    padding-top: calc(var(--header-height) + 20px);
+    padding-top: 76px;
+    /* Mới: Chỉ cần cách header một chút là đủ */
     padding-left: calc(var(--sidebar-width) + 40px);
     padding-right: 340px;
     /* Chừa chỗ cho sidebar phải */

@@ -1326,6 +1326,18 @@ body {
 header {
     background-color: #ffffff;
     border-bottom: 1px solid #e4e6eb;
+
+    /* --- THÊM ĐOẠN NÀY --- */
+    height: 56px;
+    /* Chiều cao cố định */
+    position: fixed;
+    /* Cố định vị trí */
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* Full màn hình */
+    z-index: 1002;
+    /* Nổi lên trên cùng (cao hơn Sidebar và Content) */
 }
 
 /* Dark Mode Styles - Reddit Style */
