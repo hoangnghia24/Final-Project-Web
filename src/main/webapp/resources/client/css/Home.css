@@ -53,19 +53,54 @@ body {
 }
 
 /* Khu vực Feed Chính */
+/* ========== 2. MAIN LAYOUT ========== */
+.home-container {
+    display: block;
+    /* SỬA: Đổi từ flex sang block để tránh lỗi trượt tâm */
+    width: 100%;
+    min-height: 100vh;
+    padding-top: 76px;
+    /* Giữ nguyên khoảng cách header */
+
+    /* CẤU HÌNH GIỐNG PROFILE */
+    padding-left: 280px;
+    /* Sidebar mở: 280px */
+    padding-right: 0;
+    /* Reset padding phải */
+
+    background: var(--bg-secondary);
+
+    /* Hiệu ứng trượt mượt mà giống Profile */
+    transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* KHI SIDEBAR THU GỌN (Class này do JS thêm vào body) */
+body.sidebar-collapsed .home-container {
+    padding-left: 72px;
+    /* Sidebar đóng: 72px */
+}
+
+/* KHU VỰC FEED CHÍNH */
 .main-feed {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     width: 100%;
     max-width: var(--content-max-width);
+
+    /* CĂN GIỮA NỘI DUNG (Quan trọng) */
     margin: 0 auto;
+
     gap: var(--gap-lg);
+    padding-bottom: 20px;
 }
 
-/* Responsive khi sidebar thu nhỏ */
-.sidebar-collapsed .home-container {
-    padding-left: calc(var(--sidebar-collapsed) + 40px);
+/* Responsive cho màn hình nhỏ (Mobile/Tablet) */
+@media (max-width: 768px) {
+    .home-container {
+        padding-left: 0 !important;
+        /* Mobile không cần padding trái */
+    }
 }
 
 /* ========== 4. CREATE POST BOX ========== */

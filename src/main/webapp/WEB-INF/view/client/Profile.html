@@ -21,10 +21,10 @@
 
     <!-- Include header fragment -->
     <div th:replace="~{fragments/Header :: user-header}"></div>
+    <!-- Include left sidebar fragment -->
+    <div th:replace="~{fragments/Sidebar :: Sidebar}"></div>
 
     <div class="profile-wrapper">
-        <!-- Include left sidebar fragment -->
-        <div th:replace="~{fragments/Sidebar :: Sidebar}"></div>
 
         <div class="container">
 
@@ -136,7 +136,6 @@
     <!-- Load JavaScript sau khi HTML đã render -->
     <script th:src="@{/client/js/TimeUtils.js}"></script>
     <script th:src="@{/client/js/Header.js}"></script>
-    <script th:src="@{/client/js/LeftSidebar.js}"></script>
     <script th:src="@{/client/js/Notifications.js}"></script>
     <script th:src="@{/client/js/Profile.js}"></script>
 </body>
