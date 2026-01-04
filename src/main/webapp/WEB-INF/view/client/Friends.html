@@ -9,27 +9,26 @@
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <link th:href="@{/client/css/Profile.css}" rel="stylesheet" />
     <link th:href="@{/client/css/Header.css}" rel="stylesheet" />
     <link th:href="@{/client/css/LeftSidebar.css}" rel="stylesheet" />
-    <link th:href="@{/client/css/Home.css}" rel="stylesheet" />
     <link th:href="@{/client/css/Notifications.css}" rel="stylesheet" />
-    <link th:href="@{/client/css/FriendRequests.css}" rel="stylesheet" />
     <link th:href="@{/client/css/DarkMode.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/Friends.css}" rel="stylesheet" />
+    <link th:href="@{/client/css/FriendRequests.css}" rel="stylesheet" />
 </head>
 
 <body>
 
-    <!-- Include header fragment -->
     <div th:replace="~{fragments/Header :: user-header}"></div>
-    <!-- Include left sidebar fragment -->
     <div th:replace="~{fragments/Sidebar :: Sidebar}"></div>
-    <div class="home-container">
 
-        <main class="main-feed friends-main">
-            <!-- Sticky Container for Header + Tabs -->
+    <div class="friends-page-container">
+
+        <main class="friends-feed">
+
             <div class="friends-sticky-container">
-                <!-- Friends Page Header -->
                 <div class="friends-header">
                     <h1 class="friends-title">Bạn bè</h1>
                     <div class="friends-search-bar">
@@ -42,7 +41,6 @@
                     </div>
                 </div>
 
-                <!-- Friends Navigation Tabs -->
                 <div class="friends-tabs">
                     <button class="friends-tab active" data-tab="all-friends">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -73,75 +71,36 @@
                 </div>
             </div>
 
-            <!-- All Friends Section -->
             <div class="friends-content-section active" id="all-friends-section">
-                <div class="friends-filter">
-                    <button class="filter-btn active" data-filter="all">Tất cả</button>
-                    <button class="filter-btn" data-filter="online">Đang hoạt động</button>
-                    <button class="filter-btn" data-filter="recent">Mới kết bạn</button>
-                </div>
-
-                <div class="friends-grid" id="all-friends-grid">
-                    <!-- Friend cards will be loaded here -->
-                    <div class="friends-loading">
-                        <div class="loading-spinner"></div>
-                        <p>Đang tải danh sách bạn bè...</p>
-                    </div>
-                </div>
+                <div class="friends-grid" id="all-friends-grid"></div>
             </div>
 
-            <!-- Friend Requests Section -->
             <div class="friends-content-section" id="friend-requests-section">
                 <div class="section-header">
                     <h2>Lời mời kết bạn</h2>
                     <span class="section-subtitle" id="requests-subtitle">Bạn có 0 lời mời kết bạn</span>
                 </div>
-
-                <div class="friend-requests-grid" id="friend-requests-grid">
-                    <!-- Friend request cards will be loaded here -->
-                    <div class="friends-loading">
-                        <div class="loading-spinner"></div>
-                        <p>Đang tải lời mời kết bạn...</p>
-                    </div>
-                </div>
+                <div class="friend-requests-grid" id="friend-requests-grid"></div>
             </div>
 
-            <!-- Friend Suggestions Section -->
             <div class="friends-content-section" id="suggestions-section">
                 <div class="section-header">
                     <h2>Những người bạn có thể biết</h2>
                     <span class="section-subtitle">Dựa trên bạn chung và sở thích</span>
                 </div>
-
-                <div class="friends-suggestions-grid" id="suggestions-grid">
-                    <!-- Suggestion cards will be loaded here -->
-                    <div class="friends-loading">
-                        <div class="loading-spinner"></div>
-                        <p>Đang tải gợi ý kết bạn...</p>
-                    </div>
-                </div>
+                <div class="friends-suggestions-grid" id="suggestions-grid"></div>
             </div>
 
         </main>
 
-        <!-- Right Sidebar - Friend Requests Summary -->
-        <aside class="right-sidebar">
+        <aside class="friends-right-sidebar">
             <div class="friends-sidebar-widget">
                 <div class="widget-header">
                     <h3 class="widget-title">Lời mời kết bạn</h3>
                     <a href="#" class="view-all-link" id="view-all-requests">Xem tất cả</a>
                 </div>
-
                 <div class="sidebar-requests-list" id="sidebar-requests-list">
-                    <!-- Mini friend request cards will be loaded here -->
                     <div class="no-requests">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.5">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="8.5" cy="7" r="4"></circle>
-                            <line x1="20" y1="8" x2="20" y2="14"></line>
-                            <line x1="23" y1="11" x2="17" y2="11"></line>
-                        </svg>
                         <p>Không có lời mời kết bạn</p>
                     </div>
                 </div>
@@ -151,16 +110,12 @@
                 <div class="widget-header">
                     <h3 class="widget-title">Gợi ý kết bạn</h3>
                 </div>
-
-                <div class="sidebar-suggestions-list" id="sidebar-suggestions-list">
-                    <!-- Mini suggestion cards will be loaded here -->
-                </div>
+                <div class="sidebar-suggestions-list" id="sidebar-suggestions-list"></div>
             </div>
         </aside>
 
     </div>
 
-    <!-- Scripts -->
     <script th:src="@{/client/js/TimeUtils.js}"></script>
     <script th:src="@{/client/js/Header.js}"></script>
     <script th:src="@{/client/js/Notifications.js}"></script>

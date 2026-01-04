@@ -1,9 +1,9 @@
 /* Left Sidebar Navigation */
 .Sidebar-nav {
     width: 280px;
-    background: #ffffff;
+    background: linear-gradient(135deg, #8f94fb 0%, #4e54c8 100%);
     /* Ensure sidebar participates in the layout grid (not fixed) so it doesn't overlay content */
-    height: calc(100vh - 100px);
+    height: calc(100vh - 10px);
     position: fixed;
     top: 56px;
     padding: 16px 0;

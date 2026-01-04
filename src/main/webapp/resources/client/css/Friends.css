@@ -1,0 +1,179 @@
+/* ========== 1. VARIABLES & CONFIG (Đồng bộ với Home.css) ========== */
+:root {
+    --header-height: 56px;
+    --sidebar-width: 240px;
+    /* Độ rộng chuẩn */
+    --friends-sidebar-gap: 20px;
+    --content-max-width: 1200px;
+    /* Rộng hơn Home để chứa Grid 2 cột */
+
+    /* --- PURPLE THEME PALETTE (LIGHT MODE) --- */
+    --purple-gradient: linear-gradient(135deg, #8f94fb 0%, #4e54c8 100%);
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.2);
+    --bg-primary: #ffffff;
+    --bg-secondary: #fafafa;
+    --bg-tertiary: #f5f5f5;
+    --text-primary: #050505;
+    --text-secondary: #65676b;
+    --border-color: #dbdbdb;
+    --radius-md: 16px;
+    /* Bo góc giống Home */
+
+    /* Background màu tím nhạt cho trang Friends */
+    --friends-bg: linear-gradient(135deg, #8f94fb 0%, #4e54c8 100%);
+}
+
+/* ========== 2. LAYOUT CHÍNH (Friends Page Container) ========== */
+/* Thay thế .home-container nhưng dành riêng cho trang Friends */
+.friends-page-container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    padding-top: 76px;
+    /* Cách Header */
+
+    /* Padding left = Sidebar rộng (280px) + Gap (20px) */
+    padding-left: 300px;
+    padding-right: 20px;
+
+    justify-content: center;
+    background: var(--friends-bg);
+    transition: all 0.3s ease;
+    gap: 20px;
+}
+
+/* Dark Mode Override */
+body.dark-mode .friends-page-container {
+    background: #18191a;
+}
+
+/* Khi Sidebar thu gọn */
+body.sidebar-collapsed .friends-page-container {
+    padding-left: 92px;
+    /* 72px sidebar + 20px gap */
+}
+
+/* ========== 3. CỘT NỘI DUNG CHÍNH (.friends-feed) ========== */
+.friends-feed {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 850px;
+    /* Rộng hơn Home một chút để hiển thị Grid đẹp */
+    gap: 16px;
+    padding-bottom: 20px;
+}
+
+/* ========== 4. SIDEBAR BÊN PHẢI (.friends-right-sidebar) ========== */
+.friends-right-sidebar {
+    width: 300px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 76px;
+    height: calc(100vh - 76px);
+    overflow-y: auto;
+    scrollbar-width: none;
+    /* Ẩn thanh cuộn Firefox */
+}
+
+.friends-right-sidebar::-webkit-scrollbar {
+    display: none;
+    /* Ẩn thanh cuộn Chrome */
+}
+
+/* ========== 5. RESPONSIVE ========== */
+@media (max-width: 1100px) {
+    .friends-right-sidebar {
+        display: none;
+        /* Ẩn cột phải trên màn hình vừa */
+    }
+
+    .friends-page-container {
+        padding-right: 20px;
+    }
+
+    .friends-feed {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .friends-page-container {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+}
+
+/* =========================================================
+   6. SIDEBAR TRÁI TÍM GRADIENT (GHI ĐÈ CHO TRANG FRIENDS)
+   ========================================================= */
+
+/* Đổi nền Sidebar sang Gradient Tím */
+.friends-page-container .Sidebar-nav {
+    background: var(--purple-gradient) !important;
+    border-right: none !important;
+    box-shadow: 4px 0 24px rgba(78, 84, 200, 0.25);
+}
+
+/* Đổi màu chữ và Icon sang Trắng */
+.friends-page-container .sidebar-nav-item {
+    color: rgba(255, 255, 255, 0.9) !important;
+    transition: all 0.2s ease;
+}
+
+.friends-page-container .sidebar-nav-item svg {
+    fill: currentColor !important;
+    /* Icon ăn theo màu chữ */
+    color: currentColor !important;
+}
+
+/* Hover: Nền trắng mờ */
+.friends-page-container .sidebar-nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    transform: translateX(4px);
+}
+
+/* Active: Nền trắng, Chữ tím (Đảo ngược) */
+.friends-page-container .sidebar-nav-item.active {
+    background: #ffffff !important;
+    color: #4e54c8 !important;
+    /* Màu tím chủ đạo của Home */
+    font-weight: 700 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.friends-page-container .sidebar-nav-item.active svg {
+    fill: #4e54c8 !important;
+    color: #4e54c8 !important;
+}
+
+/* Submenu */
+.friends-page-container .sidebar-subitem {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.friends-page-container .sidebar-subitem:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}
+
+/* Nút Toggle Sidebar */
+.friends-page-container .sidebar-toggle-btn {
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.friends-page-container .sidebar-toggle-btn svg {
+    color: #4e54c8 !important;
+}
+
+/* Dark Mode Sidebar Restore */
+body.dark-mode .friends-page-container .Sidebar-nav {
+    background: #1a1a1b !important;
+    border-right: 1px solid #343536 !important;
+}
