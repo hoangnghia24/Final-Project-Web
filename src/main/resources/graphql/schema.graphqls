@@ -5,7 +5,7 @@
 # Định nghĩa các loại quyền riêng tư
 enum PrivacyLevel {
     PUBLIC
-    FRIENDS
+    FRIENDS_ONLY
     PRIVATE
 }
 
@@ -114,6 +114,15 @@ input CreateCommentInput {
     content: String!
 }
 
+input UpdatePostInput {
+    id: ID!
+    content: String!
+    mediaUrl: String
+    mediaType: MediaType
+    feeling: String
+    privacyLevel: PrivacyLevel
+}
+
 # =========================
 # 5. ROOT MUTATION (Ghi dữ liệu)
 # =========================
@@ -125,6 +134,8 @@ type Mutation {
 
     # --- POST ---
     createPost(input: CreatePostInput!): Post!
+    updatePost(input: UpdatePostInput!): Post!
+    deletePost(id: ID!): Boolean
     
     # --- INTERACTION (Tương tác) ---
     # Like/Unlike bài viết (Trả về true nếu đã like, false nếu đã unlike)

@@ -3,6 +3,7 @@ package com.vn.mxh.controller;
 import com.vn.mxh.domain.Post;
 import com.vn.mxh.domain.User;
 import com.vn.mxh.domain.dto.CreatePostInput;
+import com.vn.mxh.domain.dto.UpdatePostInput;
 import com.vn.mxh.domain.enums.PrivacyLevel;
 import com.vn.mxh.repository.PostRepository;
 import com.vn.mxh.repository.UserRepository;
@@ -61,6 +62,54 @@ public class PostController {
         messagingTemplate.convertAndSend("/topic/new-posts", savedPost);
 
         return savedPost;
+    }
+
+    @MutationMapping
+    @PreAuthorize("isAuthenticated()")
+    public Post updatePost(@Argument UpdatePostInput input) {
+        // 1. Lấy User hiện tại
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // 2. Tìm bài viết theo ID
+        Post post = postRepository.findById(Long.parseLong(input.id()))
+                .orElseThrow(() -> new RuntimeException("Bài viết không tồn tại"));
+
+        // 3. Bảo mật: Kiểm tra xem người sửa có phải chủ bài viết không
+        if (!post.getUser().getUsername().equals(currentUsername)) {
+            throw new RuntimeException("Bạn không có quyền sửa bài viết này!");
+        }
+
+        // 4. Cập nhật thông tin
+        post.setContent(input.content());
+        post.setPrivacyLevel(input.privacyLevel());
+
+        // Cập nhật Media (Ảnh/Video)
+        post.setMediaUrl(input.mediaUrl());
+        post.setMediaType(input.mediaType());
+
+        // 5. Lưu xuống DB
+        return postRepository.save(post);
+    }
+
+    @MutationMapping
+    @PreAuthorize("isAuthenticated()")
+    public Boolean deletePost(@Argument String id) {
+        // 1. Lấy User hiện tại đang đăng nhập
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // 2. Tìm bài viết trong DB
+        Post post = postRepository.findById(Long.parseLong(id))
+                .orElseThrow(() -> new RuntimeException("Bài viết không tồn tại!"));
+
+        // 3. Kiểm tra quyền: Chỉ chủ bài viết mới được xóa
+        if (!post.getUser().getUsername().equals(currentUsername)) {
+            throw new RuntimeException("Bạn không có quyền xóa bài viết này!");
+        }
+
+        // 4. Xóa bài viết
+        postRepository.delete(post);
+
+        return true; // Trả về true nếu xóa thành công
     }
 
     @QueryMapping

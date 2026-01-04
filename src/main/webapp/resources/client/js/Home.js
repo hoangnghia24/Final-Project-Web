@@ -20,13 +20,13 @@ $(document).ready(function () {
     const updateMediaPreviewContainer = $("#updateMediaPreviewContainer");
     const updateImagePreview = $("#updateImagePreview");
     const updateVideoPreview = $("#updateVideoPreview");
-    const btnRemoveUpdateMedia = $("#btnRemoveUpdateMedia"); // Nút Xóa ảnh
-    const updateFileInput = $("#updateFileUploadInput");     // Input chọn file
+    const btnRemoveUpdateMedia = $("#btnRemoveUpdateMedia");
+    const updateFileInput = $("#updateFileUploadInput");
 
     let currentFile = null;
-    let updateFile = null;  // Biến lưu file mới khi sửa
+    let updateFile = null;
     let currentPosts = [];
-    let isMediaDeleted = false; // Cờ đánh dấu đã xóa ảnh cũ hay chưa
+    let isMediaDeleted = false;
 
     // --- CHECK LOGIN ---
     const token = localStorage.getItem("accessToken");
@@ -40,7 +40,7 @@ $(document).ready(function () {
     loadAllPosts();
 
     // ==========================================
-    // 1. XỬ LÝ MODAL TẠO BÀI (GIỮ NGUYÊN)
+    // 1. XỬ LÝ MODAL TẠO BÀI
     // ==========================================
     function updatePostButtonState() {
         const hasText = postContentInput.val().trim().length > 0;
@@ -79,10 +79,9 @@ $(document).ready(function () {
     });
 
     // ==========================================
-    // 2. XỬ LÝ MODAL SỬA BÀI (PHẦN BẠN CẦN)
+    // 2. XỬ LÝ MODAL SỬA BÀI
     // ==========================================
 
-    // A. Xử lý khi bấm nút "Sửa bài viết" từ menu 3 chấm
     $(document).on('click', '.edit-post-btn', function (e) {
         e.stopPropagation();
         const postId = $(this).data('id');
@@ -90,8 +89,6 @@ $(document).ready(function () {
         $('.post-menu-dropdown').remove();
     });
 
-    // B. Hàm đổ dữ liệu vào Modal Sửa
-    // B. Hàm đổ dữ liệu vào Modal Sửa
     function prepareEditPost(postId) {
         const post = currentPosts.find(p => p.id == postId);
         if (!post) {
@@ -99,35 +96,25 @@ $(document).ready(function () {
             return;
         }
 
-        // 1. Reset trạng thái file
         updateFile = null;
         isMediaDeleted = false;
         updateFileInput.val("");
 
-        // 2. Đổ thông tin User (Avatar + Tên) vào Modal
         const currentUserStr = localStorage.getItem("currentUser");
         if (currentUserStr) {
             const user = JSON.parse(currentUserStr);
-
-            // --- FIX LỖI AVATAR Ở ĐÂY ---
-            // Sử dụng logic giống hệt màn hình chính: Nếu không có avatarUrl thì dùng DiceBear theo username
             const avatar = user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`;
             $("#updateModalUserAvatar").attr("src", avatar);
-
             $("#updateModalUserName").text(user.fullName || user.username);
         }
 
-        // 3. Đổ nội dung bài viết
         updatePostContentInput.val(post.content);
         updatePrivacySelect.val(post.privacyLevel);
 
-        // 4. Hiển thị ảnh cũ (nếu có)
-        // Ưu tiên mediaUrl (biến mới), nếu không có thì tìm imageUrl (biến cũ)
         const mediaUrl = post.mediaUrl || post.imageUrl;
 
         if (mediaUrl) {
             updateMediaPreviewContainer.show();
-            // Kiểm tra xem là video hay ảnh
             const isVideo = (post.mediaType === 'VIDEO') || (mediaUrl.match(/\.(mp4|mov|avi|mkv)$/i));
 
             if (isVideo) {
@@ -138,26 +125,21 @@ $(document).ready(function () {
                 updateImagePreview.attr("src", mediaUrl).show();
             }
         } else {
-            // Nếu bài viết không có ảnh thì ẩn khung preview đi
             updateMediaPreviewContainer.hide();
             updateImagePreview.attr("src", "");
             updateVideoPreview.attr("src", "");
         }
 
-        // Lưu postId vào nút Lưu để biết đang sửa bài nào
         btnUpdatePost.data("id", postId);
-
-        // Hiện Modal
         updatePostModal.modal('show');
     }
 
-    // C. SỬA LỖI KHÔNG ĐỔI ĐƯỢC ẢNH: Sự kiện chọn file mới
     updateFileInput.on("change", function (e) {
         const file = e.target.files[0];
         if (!file) return;
 
-        updateFile = file; // Lưu file mới vào biến
-        isMediaDeleted = false; // Reset cờ xóa
+        updateFile = file;
+        isMediaDeleted = false;
 
         const objectUrl = URL.createObjectURL(file);
         updateMediaPreviewContainer.fadeIn();
@@ -171,30 +153,87 @@ $(document).ready(function () {
         }
     });
 
-    // D. SỬA LỖI KHÔNG XÓA ĐƯỢC ẢNH: Sự kiện bấm nút X
     btnRemoveUpdateMedia.on("click", function () {
-        updateFile = null;       // Hủy file mới chọn (nếu có)
-        updateFileInput.val(""); // Reset input file
-        isMediaDeleted = true;   // Đánh dấu là người dùng muốn xóa ảnh cũ
+        updateFile = null;
+        updateFileInput.val("");
+        isMediaDeleted = true;
 
         updateMediaPreviewContainer.hide();
         updateImagePreview.attr("src", "");
         updateVideoPreview.attr("src", "");
     });
 
-    // E. Sự kiện bấm nút "Lưu thay đổi" (Chưa gọi API thật, chỉ thông báo)
-    btnUpdatePost.click(function () {
-        // Logic xử lý API Update sẽ viết sau ở đây
-        // Gợi ý logic:
-        // - Nếu updateFile != null -> Upload ảnh mới -> Lấy URL mới
-        // - Nếu isMediaDeleted == true -> Gửi mediaUrl = null lên server để xóa ảnh
-        // - Nếu không -> Giữ nguyên URL cũ
-        alert("Đã bấm Lưu! (Chức năng Update API sẽ làm ở bước sau)");
-        updatePostModal.modal('hide');
+    btnUpdatePost.click(async function () {
+        const postId = $(this).data("id"); // Lấy ID bài viết đang sửa
+        const content = updatePostContentInput.val();
+        const privacy = updatePrivacySelect.val();
+
+        // Disable nút để tránh bấm nhiều lần
+        btnUpdatePost.text("Đang lưu...").prop("disabled", true);
+
+        // 1. Xác định URL ảnh cuối cùng
+        // Lấy lại thông tin bài viết gốc từ mảng currentPosts để so sánh
+        const originalPost = currentPosts.find(p => p.id == postId);
+        let finalMediaUrl = originalPost.mediaUrl || originalPost.imageUrl; // Mặc định giữ nguyên ảnh cũ
+        let finalMediaType = originalPost.mediaType || "NONE";
+
+        try {
+            // Trường hợp 1: Người dùng chọn file mới -> Upload file mới
+            if (updateFile) {
+                finalMediaUrl = await uploadMedia(updateFile);
+                finalMediaType = (updateFile.type.startsWith("video/")) ? "VIDEO" : "IMAGE";
+            }
+            // Trường hợp 2: Người dùng bấm nút Xóa ảnh cũ -> Gán null
+            else if (isMediaDeleted) {
+                finalMediaUrl = null;
+                finalMediaType = "NONE";
+            }
+            // Trường hợp 3: Không làm gì cả -> Giữ nguyên finalMediaUrl cũ (đã gán ở trên)
+
+            // 2. Gọi GraphQL Mutation Update
+            const mutation = {
+                query: `mutation UpdatePost($input: UpdatePostInput!) { 
+                    updatePost(input: $input) { 
+                        id content mediaUrl mediaType privacyLevel 
+                        user { id fullName avatarUrl }
+                    } 
+                }`,
+                variables: {
+                    input: {
+                        id: postId,
+                        content: content,
+                        mediaUrl: finalMediaUrl,
+                        mediaType: finalMediaType,
+                        privacyLevel: privacy
+                    }
+                }
+            };
+
+            sendGraphQLRequest(mutation, (res) => {
+                // Thành công
+                alert("Cập nhật bài viết thành công!");
+                updatePostModal.modal('hide');
+
+                // Reset form
+                updateFile = null;
+                isMediaDeleted = false;
+                updateFileInput.val("");
+
+                // Load lại feed để thấy thay đổi
+                loadAllPosts();
+            }, () => {
+                // Thất bại
+                btnUpdatePost.text("Lưu thay đổi").prop("disabled", false);
+            });
+
+        } catch (error) {
+            alert("Lỗi: " + error.message);
+            btnUpdatePost.text("Lưu thay đổi").prop("disabled", false);
+        }
     });
 
     // ==========================================
-    // 3. CÁC HÀM XỬ LÝ KHÁC (MENU, DELETE...)
+    // 3. CÁC HÀM XỬ LÝ KHÁC
     // ==========================================
 
     $(document).on('click', '.post-menu-btn', function (e) {
@@ -215,10 +254,43 @@ $(document).ready(function () {
     $(document).on('click', '.delete-post-btn', function (e) {
         e.stopPropagation();
         const postId = $(this).data('id');
-        if (confirm("Bạn có chắc chắn muốn xóa bài viết này không?")) {
-            alert("Đã xác nhận xóa bài ID: " + postId);
-        }
+
+        // Xóa menu dropdown cho gọn
         $('.post-menu-dropdown').remove();
+
+        if (confirm("Bạn có chắc chắn muốn xóa bài viết này không? Hành động này không thể hoàn tác.")) {
+            // Gọi API Xóa
+            const mutation = {
+                query: `mutation DeletePost($id: ID!) { 
+                    deletePost(id: $id) 
+                }`,
+                variables: {
+                    id: postId
+                }
+            };
+
+            // Hiệu ứng UX: Tạm thời làm mờ bài viết để người dùng thấy đang xử lý
+            const $postCard = $(`.reddit-post-card[data-post-id="${postId}"]`);
+            $postCard.css('opacity', '0.5');
+
+            sendGraphQLRequest(mutation, (res) => {
+                if (res.data && res.data.deletePost) {
+                    // Thành công: Xóa hẳn element khỏi giao diện (không cần load lại toàn bộ feed)
+                    $postCard.slideUp(300, function () {
+                        $(this).remove();
+                    });
+
+                    // Cập nhật lại mảng currentPosts (xóa bài khỏi mảng cục bộ)
+                    currentPosts = currentPosts.filter(p => p.id != postId);
+                } else {
+                    alert("Xóa thất bại!");
+                    $postCard.css('opacity', '1'); // Hoàn tác hiệu ứng mờ
+                }
+            }, () => {
+                // Lỗi mạng
+                $postCard.css('opacity', '1');
+            });
+        }
     });
 
     $(document).on('click', '.see-more-btn', function (e) {
@@ -231,7 +303,7 @@ $(document).ready(function () {
     });
 
     // ==========================================
-    // 4. CORE FUNCTIONS (UPLOAD, LOAD POSTS...)
+    // 4. CORE FUNCTIONS
     // ==========================================
 
     async function handlePostSubmission() {
@@ -345,7 +417,7 @@ $(document).ready(function () {
             data: JSON.stringify(query),
             success: (res) => {
                 if (res.data && res.data.getAllPosts) {
-                    currentPosts = res.data.getAllPosts; // Cập nhật danh sách bài để sửa
+                    currentPosts = res.data.getAllPosts;
                     renderPosts(currentPosts);
                 } else {
                     newsfeedContainer.html('<div class="text-center py-5 text-muted">Chưa có bài viết nào.</div>');
@@ -355,6 +427,7 @@ $(document).ready(function () {
         });
     }
 
+    // --- HÀM NÀY ĐÃ ĐƯỢC SỬA ĐỂ HIỂN THỊ ICON ĐÚNG ---
     function renderPosts(posts) {
         newsfeedContainer.empty();
         if (posts.length === 0) {
@@ -372,6 +445,14 @@ $(document).ready(function () {
                     <span class="content-short">${content.substring(0, 300).replace(/\n/g, "<br>")}...</span>
                     <span class="content-full" style="display:none;">${content.replace(/\n/g, "<br>")}</span>
                     <a href="#" class="see-more-btn">Xem thêm</a>`;
+            }
+
+            // Xử lý icon Quyền riêng tư
+            let privacyIcon = '🔒'; // Mặc định là PRIVATE
+            if (post.privacyLevel === 'PUBLIC') {
+                privacyIcon = '🌎';
+            } else if (post.privacyLevel === 'FRIENDS_ONLY') { // <-- Sửa logic ở đây
+                privacyIcon = '👥'; // Icon 2 người
             }
 
             let mediaHtml = '';
@@ -398,8 +479,7 @@ $(document).ready(function () {
                             <div class="post-user-info ms-2">
                                 <b>${post.user.fullName}</b>
                                 <small class="text-muted" style="font-size: 12px;">
-                                    ${calculateTimeAgo(post.createdAt)} • ${post.privacyLevel === 'PUBLIC' ? '🌎' : '🔒'}
-                                </small>
+                                    ${calculateTimeAgo(post.createdAt)} • ${privacyIcon} </small>
                             </div>
                         </div>
                         <button class="post-menu-btn">...</button>
