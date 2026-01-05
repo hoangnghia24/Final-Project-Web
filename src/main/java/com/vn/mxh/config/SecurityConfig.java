@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.Customizer;
 
 @Configuration
 @EnableWebSecurity
@@ -27,7 +28,7 @@ public class SecurityConfig {
                 http
                                 // 1. Tắt CSRF (Do dùng Token, không dùng Session/Cookie nên không sợ lỗi này)
                                 .csrf(AbstractHttpConfigurer::disable)
-
+                                .cors(Customizer.withDefaults())
                                 // 2. Cấu hình quyền truy cập (Authorize)
                                 .authorizeHttpRequests(auth -> auth
                                                 // ============================================================

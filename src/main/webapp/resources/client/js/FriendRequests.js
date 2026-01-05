@@ -1,15 +1,39 @@
 /**
  * FriendRequests.js - Friend Management System
  * TFT Social Network
+ * 
+ 
  */
+let friendStompClient = null;
+async function graphqlFetch(query, variables = {}) {
+    const token = localStorage.getItem('accessToken');
 
-(function() {
+    // 1. Tạo headers mặc định
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+
+    // 2. Chỉ thêm Authorization nếu token tồn tại và hợp lệ
+    if (token && token !== 'null' && token !== 'undefined') {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    // 3. Gọi fetch với headers đã xử lý
+    const response = await fetch('http://localhost:8081/graphql', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({ query, variables })
+    });
+
+    return response.json();
+}
+(function () {
     'use strict';
 
     // ============================================
     // STATE MANAGEMENT
     // ============================================
-    
+
     let allFriends = [];
     let friendRequests = [];
     let friendSuggestions = [];
@@ -21,7 +45,7 @@
     // ============================================
     // DOM ELEMENTS
     // ============================================
-    
+
     let friendsTabs;
     let contentSections;
     let allFriendsGrid;
@@ -35,7 +59,7 @@
     // ============================================
     // INITIALIZATION
     // ============================================
-    
+
     function init() {
         console.log('👥 Initializing Friend Management System...');
 
@@ -80,13 +104,13 @@
     // ============================================
     // EVENT LISTENERS
     // ============================================
-    
+
     function setupEventListeners() {
         console.log('🎯 Setting up event listeners...');
 
         // Tab switching
         friendsTabs.forEach(tab => {
-            tab.addEventListener('click', function() {
+            tab.addEventListener('click', function () {
                 const tabName = this.getAttribute('data-tab');
                 switchTab(tabName);
             });
@@ -94,14 +118,14 @@
 
         // Search functionality
         if (searchInput) {
-            searchInput.addEventListener('input', function() {
+            searchInput.addEventListener('input', function () {
                 handleSearch(this.value);
             });
         }
 
         // Filter buttons
         filterButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const filter = this.getAttribute('data-filter');
                 applyFilter(filter);
             });
@@ -110,19 +134,72 @@
         // View all requests link
         const viewAllLink = document.getElementById('view-all-requests');
         if (viewAllLink) {
-            viewAllLink.addEventListener('click', function(e) {
+            viewAllLink.addEventListener('click', function (e) {
                 e.preventDefault();
                 switchTab('friend-requests');
             });
         }
+        $(document).on('click', '.btn-add-friend', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
 
+            const userId = $(this).data('user-id');
+            // Gọi hàm gửi kết bạn, truyền vào 'this' là nút đang bấm
+            sendFriendRequest(userId, this);
+        });
+
+        // Xử lý nút Xóa gợi ý
+        $(document).on('click', '.btn-remove-suggestion', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const suggestionId = $(this).data('suggestion-id');
+            removeSuggestion(suggestionId);
+        });
+        $(document).on('click', '.btn-accept-request', function (e) {
+            e.preventDefault();
+            e.stopPropagation(); // Ngăn việc click xuyên qua thẻ cha
+            const requestId = $(this).data('request-id');
+            console.log('👆 Đã bấm nút Chấp nhận:', requestId);
+            acceptFriendRequest(requestId);
+        });
+
+        // Xử lý nút TỪ CHỐI / XÓA (cho cả Sidebar và Main Grid)
+        $(document).on('click', '.btn-reject-request', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const requestId = $(this).data('request-id');
+            console.log('👆 Đã bấm nút Từ chối:', requestId);
+            rejectFriendRequest(requestId);
+        });
+        // Xử lý nút HỦY KẾT BẠN (Unfriend)
+        $(document).on('click', '.btn-unfriend', function (e) {
+            e.preventDefault();
+            e.stopPropagation(); // Ngăn click nhầm vào thẻ cha
+
+            const friendId = $(this).data('friend-id');
+            const friendName = $(this).closest('.friend-card').find('.friend-card-name').text() || "người này";
+
+            if (confirm(`Bạn có chắc chắn muốn hủy kết bạn với ${friendName}?`)) {
+                unfriend(friendId);
+            }
+        });
+        $(document).on('click', '.btn-cancel-sent-request', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const requestId = $(this).data('request-id');
+            const userId = $(this).data('user-id'); // ID của user kia (để hồi phục nút thêm bạn)
+
+            // Gọi hàm hủy (dùng chung logic với reject nhưng xử lý UI khác)
+            cancelSentRequest(requestId, userId);
+        });
         console.log('✅ Event listeners setup complete');
     }
 
     // ============================================
     // TAB SWITCHING
     // ============================================
-    
+
     function switchTab(tabName) {
         console.log('🔄 Switching to tab:', tabName);
 
@@ -150,9 +227,9 @@
     // ============================================
     // LOAD ALL FRIENDS
     // ============================================
-    
-    function loadAllFriends() {
-        console.log('📥 Loading all friends...');
+
+    async function loadAllFriends() {
+        console.log('📥 Loading REAL friends list...');
 
         // Show loading state
         if (allFriendsGrid) {
@@ -164,12 +241,44 @@
             `;
         }
 
-        // Simulate API call with mock data
-        setTimeout(() => {
-            allFriends = generateMockFriends(20);
+        const query = `
+            query {
+                getMyFriends {
+                    id
+                    fullName
+                    avatarUrl
+                    # bio (nếu cần hiển thị thêm)
+                }
+            }
+        `;
+
+        try {
+            const result = await graphqlFetch(query);
+
+            if (result.errors) {
+                console.error("Lỗi GraphQL:", result.errors);
+                return;
+            }
+
+            const friends = result.data.getMyFriends || [];
+
+            // Map dữ liệu từ Server sang format của giao diện
+            allFriends = friends.map(u => ({
+                id: u.id,
+                name: u.fullName,
+                avatar: u.avatarUrl || '/img/default-avatar.png',
+                mutualFriends: 0, // Backend chưa tính được thì để 0
+                isOnline: false,  // Tạm thời để false
+                coverGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            }));
+
             renderAllFriends(allFriends);
             updateFriendCount(allFriends.length);
-        }, 800);
+
+        } catch (error) {
+            console.error("Lỗi tải bạn bè:", error);
+            if (allFriendsGrid) allFriendsGrid.innerHTML = '<p class="text-danger text-center">Lỗi tải dữ liệu</p>';
+        }
     }
 
     function renderAllFriends(friends) {
@@ -199,71 +308,91 @@
     }
 
     function createFriendCard(friend) {
-        const mutualText = friend.mutualFriends > 0 
-            ? `${friend.mutualFriends} bạn chung` 
+        const mutualText = friend.mutualFriends > 0
+            ? `${friend.mutualFriends} bạn chung`
             : 'Không có bạn chung';
 
-        const onlineStatus = friend.isOnline 
-            ? '<span class="friend-online-status"></span>' 
+        const onlineStatus = friend.isOnline
+            ? '<span class="friend-online-status"></span>'
             : '';
 
         return `
-            <div class="friend-card" data-friend-id="${friend.id}">
-                <div class="friend-card-cover" style="background: ${friend.coverGradient}"></div>
-                <div class="friend-card-avatar-wrapper">
-                    <img src="${friend.avatar}" alt="${friend.name}" class="friend-card-avatar">
-                    ${onlineStatus}
+        <div class="friend-card" data-friend-id="${friend.id}">
+            <div class="friend-card-cover" style="background: ${friend.coverGradient}"></div>
+            <div class="friend-card-avatar-wrapper">
+                <img src="${friend.avatar}" alt="${friend.name}" class="friend-card-avatar">
+                ${onlineStatus}
+            </div>
+            <div class="friend-card-body">
+                <h3 class="friend-card-name">${friend.name}</h3>
+                <div class="friend-card-mutual">
+                     ${mutualText}
                 </div>
-                <div class="friend-card-body">
-                    <h3 class="friend-card-name">${friend.name}</h3>
-                    <div class="friend-card-mutual">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-                        </svg>
-                        ${mutualText}
-                    </div>
-                    <div class="friend-card-actions">
-                        <button class="friend-card-btn btn-primary" onclick="window.location.href='/profile?id=${friend.id}'">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                            Trang cá nhân
-                        </button>
-                        <button class="friend-card-btn btn-secondary btn-unfriend" data-friend-id="${friend.id}">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
-                    </div>
+                
+                <div class="friend-card-actions" style="position: relative; z-index: 10;">
+                    <button class="friend-card-btn btn-primary" onclick="window.location.href='/profile?id=${friend.id}'">
+                         Trang cá nhân
+                    </button>
+                    <button class="friend-card-btn btn-secondary btn-unfriend" data-friend-id="${friend.id}">
+                         Hủy kết bạn
+                    </button>
                 </div>
             </div>
-        `;
+        </div>
+    `;
     }
 
     // ============================================
     // LOAD FRIEND REQUESTS
     // ============================================
-    
-    function loadFriendRequests() {
-        console.log('📥 Loading friend requests...');
 
-        if (friendRequestsGrid) {
-            friendRequestsGrid.innerHTML = `
-                <div class="friends-loading">
-                    <div class="loading-spinner"></div>
-                    <p>Đang tải lời mời kết bạn...</p>
-                </div>
-            `;
+    async function loadFriendRequests() {
+        console.log('📥 Fetching real friend requests...');
+
+        const query = `
+        query {
+            getMyFriendRequests {
+                id
+                requester {
+                    id
+                    fullName
+                    avatarUrl
+                }
+                createdAt
+            }
         }
+    `;
 
-        setTimeout(() => {
-            friendRequests = generateMockFriendRequests(5);
+        try {
+            const result = await graphqlFetch(query);
+            const requests = result.data.getMyFriendRequests || [];
+
+            // --- SỬA ĐOẠN NÀY ---
+            friendRequests = requests
+                // 1. Lọc bỏ các bản ghi bị null hoặc thiếu người gửi
+                .filter(req => req && req.requester)
+                // 2. Sau đó mới map dữ liệu
+                .map(req => ({
+                    id: req.id,
+                    name: req.requester.fullName,
+                    avatar: req.requester.avatarUrl || '/img/default-avatar.png',
+                    mutualFriends: 0,
+                    timestamp: req.createdAt
+                }));
+            // ---------------------
+
             renderFriendRequests(friendRequests);
-            renderSidebarRequests(friendRequests.slice(0, 3));
+
+            // Cập nhật cả sidebar (QUAN TRỌNG để hiển thị bên phải)
+            if (typeof renderSidebarRequests === 'function') {
+                renderSidebarRequests(friendRequests.slice(0, 5));
+            }
+
             updateRequestsCount(friendRequests.length);
-        }, 800);
+
+        } catch (error) {
+            console.error("Lỗi tải danh sách:", error);
+        }
     }
 
     function renderFriendRequests(requests) {
@@ -286,48 +415,39 @@
         }
 
         friendRequestsGrid.innerHTML = requests.map(request => createRequestCard(request)).join('');
-        attachRequestCardListeners();
+        // attachRequestCardListeners();
     }
 
     function createRequestCard(request) {
         const timeAgo = getTimeAgo(request.timestamp);
-        const mutualText = request.mutualFriends > 0 
-            ? `${request.mutualFriends} bạn chung` 
+        const mutualText = request.mutualFriends > 0
+            ? `${request.mutualFriends} bạn chung`
             : 'Không có bạn chung';
 
         return `
-            <div class="friend-card friend-request-card" data-request-id="${request.id}">
-                <div class="friend-card-cover" style="background: ${request.coverGradient}"></div>
-                <div class="friend-card-avatar-wrapper">
-                    <img src="${request.avatar}" alt="${request.name}" class="friend-card-avatar">
+        <div class="friend-card friend-request-card" data-request-id="${request.id}">
+            <div class="friend-card-cover" style="background: ${request.coverGradient}"></div>
+            <div class="friend-card-avatar-wrapper">
+                <img src="${request.avatar}" alt="${request.name}" class="friend-card-avatar">
+            </div>
+            <div class="friend-card-body">
+                <h3 class="friend-card-name">${request.name}</h3>
+                <div class="friend-card-mutual">
+                    ${mutualText}
                 </div>
-                <div class="friend-card-body">
-                    <h3 class="friend-card-name">${request.name}</h3>
-                    <div class="friend-card-mutual">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-                        </svg>
-                        ${mutualText}
-                    </div>
-                    <div style="font-size: 13px; color: #65676b; margin-top: 4px;">${timeAgo}</div>
-                    <div class="friend-card-actions">
-                        <button class="friend-card-btn btn-accept btn-accept-request" data-request-id="${request.id}">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            Xác nhận
-                        </button>
-                        <button class="friend-card-btn btn-reject btn-reject-request" data-request-id="${request.id}">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                            Xóa
-                        </button>
-                    </div>
+                <div style="font-size: 13px; color: #65676b; margin-top: 4px;">${timeAgo}</div>
+                
+                <div class="friend-card-actions" style="position: relative; z-index: 10;">
+                    <button class="friend-card-btn btn-accept btn-accept-request" data-request-id="${request.id}">
+                        Xác nhận
+                    </button>
+                    <button class="friend-card-btn btn-reject btn-reject-request" data-request-id="${request.id}">
+                        Xóa
+                    </button>
                 </div>
             </div>
-        `;
+        </div>
+    `;
     }
 
     function renderSidebarRequests(requests) {
@@ -369,102 +489,184 @@
             `;
         }).join('');
 
-        attachSidebarRequestListeners();
+        // attachSidebarRequestListeners();
     }
 
     // ============================================
     // LOAD FRIEND SUGGESTIONS
     // ============================================
-    
-    function loadFriendSuggestions() {
-        console.log('📥 Loading friend suggestions...');
+
+    // Trong file FriendRequests.js
+    // Trong FriendRequests.js
+
+    async function loadFriendSuggestions() {
+        console.log('📥 Loading suggestions & sent requests...');
 
         if (suggestionsGrid) {
-            suggestionsGrid.innerHTML = `
-                <div class="friends-loading">
-                    <div class="loading-spinner"></div>
-                    <p>Đang tải gợi ý kết bạn...</p>
-                </div>
-            `;
+            suggestionsGrid.innerHTML = `<div class="friends-loading"><div class="loading-spinner"></div><p>Đang tải...</p></div>`;
         }
 
-        setTimeout(() => {
-            friendSuggestions = generateMockSuggestions(12);
+        // Query lấy cả "Lời mời đã gửi" và "Gợi ý người lạ"
+        const query = `
+        query {
+            getSentFriendRequests {
+                id
+                addressee {
+                    id
+                    fullName
+                    avatarUrl
+                }
+                createdAt
+            }
+            getFriendSuggestions {
+                id
+                fullName
+                avatarUrl
+            }
+        }
+    `;
+
+        try {
+            const result = await graphqlFetch(query);
+            if (result.errors) {
+                console.error("GraphQL Error:", result.errors);
+                return;
+            }
+
+            // 1. Danh sách ĐÃ GỬI (Chuyển đổi sang format thẻ)
+            const sentList = (result.data.getSentFriendRequests || []).map(f => ({
+                id: f.addressee.id,
+                name: f.addressee.fullName,
+                avatar: f.addressee.avatarUrl || '/img/default-avatar.png',
+                mutualFriends: 0,
+                reason: 'Đã gửi lời mời',
+                coverGradient: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)',
+
+                // QUAN TRỌNG: Đánh dấu đây là request đã gửi & lưu ID lời mời để hủy
+                isSent: true,
+                requestId: f.id
+            }));
+
+            // 2. Danh sách GỢI Ý (Người lạ)
+            const suggestionList = (result.data.getFriendSuggestions || []).map(u => ({
+                id: u.id,
+                name: u.fullName,
+                avatar: u.avatarUrl || '/img/default-avatar.png',
+                mutualFriends: 0,
+                reason: 'Gợi ý cho bạn',
+                coverGradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                isSent: false
+            }));
+
+            // 3. Gộp lại: Đưa người đã gửi lên đầu
+            friendSuggestions = [...sentList, ...suggestionList];
+
             renderFriendSuggestions(friendSuggestions);
-            renderSidebarSuggestions(friendSuggestions.slice(0, 5));
-        }, 800);
+
+        } catch (error) {
+            console.error("Lỗi tải dữ liệu:", error);
+        }
     }
+
+    // Trong file FriendRequests.js
 
     function renderFriendSuggestions(suggestions) {
         if (!suggestionsGrid) return;
 
-        if (suggestions.length === 0) {
+        // Lọc bỏ những người đã là bạn bè (để chắc chắn)
+        const friendIds = allFriends.map(f => String(f.id));
+        // Sửa dòng này: Chuyển logic lọc vào biến chính thức
+        const filteredSuggestions = suggestions.filter(s => !friendIds.includes(String(s.id)));
+
+        // Sửa check length bằng filteredSuggestions
+        if (filteredSuggestions.length === 0) {
             suggestionsGrid.innerHTML = `
-                <div class="friends-empty">
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                    <h3>Không có gợi ý kết bạn</h3>
-                    <p>Chúng tôi sẽ gợi ý kết bạn dựa trên bạn chung và sở thích</p>
-                </div>
-            `;
+            <div class="friends-empty">
+                <h3>Không có gợi ý kết bạn</h3>
+                <p>Chúng tôi sẽ gợi ý kết bạn dựa trên bạn chung và sở thích</p>
+            </div>
+        `;
             return;
         }
 
-        suggestionsGrid.innerHTML = suggestions.map(suggestion => createSuggestionCard(suggestion)).join('');
-        attachSuggestionCardListeners();
+        // Sửa map bằng filteredSuggestions
+        suggestionsGrid.innerHTML = filteredSuggestions.map(suggestion => createSuggestionCard(suggestion)).join('');
+
+        // Lưu ý: Nếu bạn muốn attach sự kiện click (hiện tại trong code bạn comment dòng này), hãy mở lại
+        // attachSuggestionCardListeners(); 
     }
 
+    // Trong file FriendRequests.js
+
     function createSuggestionCard(suggestion) {
-        const mutualText = suggestion.mutualFriends > 0 
-            ? `${suggestion.mutualFriends} bạn chung` 
+        const mutualText = suggestion.mutualFriends > 0
+            ? `${suggestion.mutualFriends} bạn chung`
             : suggestion.reason || 'Gợi ý cho bạn';
 
+        // === PHẦN LOGIC MỚI: Kiểm tra trạng thái để chọn nút hiển thị ===
+        let actionButtonHtml = '';
+
+        if (suggestion.isSent) {
+            // TRƯỜNG HỢP 1: Đã gửi lời mời -> Hiện nút HỦY
+            // Cần truyền requestId vào để biết đường mà xóa
+            actionButtonHtml = `
+            <button class="friend-card-btn btn-secondary btn-cancel-sent-request" 
+                    data-request-id="${suggestion.requestId}" 
+                    data-user-id="${suggestion.id}">
+                Hủy lời mời
+            </button>
+        `;
+        } else {
+            // TRƯỜNG HỢP 2: Chưa gửi -> Hiện nút THÊM BẠN BÈ (như cũ)
+            actionButtonHtml = `
+            <button class="friend-card-btn btn-primary btn-add-friend" data-user-id="${suggestion.id}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                </svg>
+                Thêm bạn bè
+            </button>
+        `;
+        }
+
+        // === RETURN HTML ===
         return `
-            <div class="friend-card suggestion-card" data-suggestion-id="${suggestion.id}">
-                <div class="friend-card-cover" style="background: ${suggestion.coverGradient}"></div>
-                <div class="friend-card-avatar-wrapper">
-                    <img src="${suggestion.avatar}" alt="${suggestion.name}" class="friend-card-avatar">
+        <div class="friend-card suggestion-card" data-suggestion-id="${suggestion.id}">
+            <div class="friend-card-cover" style="background: ${suggestion.coverGradient}"></div>
+            <div class="friend-card-avatar-wrapper">
+                <img src="${suggestion.avatar}" alt="${suggestion.name}" class="friend-card-avatar">
+            </div>
+            <div class="friend-card-body">
+                <h3 class="friend-card-name">${suggestion.name}</h3>
+                <div class="friend-card-mutual">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                    </svg>
+                    ${mutualText}
                 </div>
-                <div class="friend-card-body">
-                    <h3 class="friend-card-name">${suggestion.name}</h3>
-                    <div class="friend-card-mutual">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                
+                <div class="friend-card-actions" style="position: relative; z-index: 10;">
+                    
+                    ${actionButtonHtml} <button class="friend-card-btn btn-secondary btn-remove-suggestion" data-suggestion-id="${suggestion.id}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
-                        ${mutualText}
-                    </div>
-                    <div class="friend-card-actions">
-                        <button class="friend-card-btn btn-primary btn-add-friend" data-user-id="${suggestion.id}">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="8.5" cy="7" r="4"></circle>
-                                <line x1="20" y1="8" x2="20" y2="14"></line>
-                                <line x1="23" y1="11" x2="17" y2="11"></line>
-                            </svg>
-                            Thêm bạn bè
-                        </button>
-                        <button class="friend-card-btn btn-secondary btn-remove-suggestion" data-suggestion-id="${suggestion.id}">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
-                    </div>
+                    </button>
                 </div>
             </div>
-        `;
+        </div>
+    `;
     }
 
     function renderSidebarSuggestions(suggestions) {
         if (!sidebarSuggestionsList) return;
 
         sidebarSuggestionsList.innerHTML = suggestions.map(suggestion => {
-            const mutualText = suggestion.mutualFriends > 0 
-                ? `${suggestion.mutualFriends} bạn chung` 
+            const mutualText = suggestion.mutualFriends > 0
+                ? `${suggestion.mutualFriends} bạn chung`
                 : 'Gợi ý cho bạn';
             return `
                 <div class="sidebar-suggestion-item" data-suggestion-id="${suggestion.id}">
@@ -489,14 +691,14 @@
     // ============================================
     // FRIEND REQUEST ACTIONS
     // ============================================
-    
+
     function attachRequestCardListeners() {
         // Accept request buttons
         const acceptButtons = document.querySelectorAll('.btn-accept-request');
         console.log('🔘 Found accept buttons:', acceptButtons.length);
-        
+
         acceptButtons.forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 const requestId = this.getAttribute('data-request-id');
                 console.log('👆 Accept button clicked for request:', requestId);
@@ -507,9 +709,9 @@
         // Reject request buttons
         const rejectButtons = document.querySelectorAll('.btn-reject-request');
         console.log('🔘 Found reject buttons:', rejectButtons.length);
-        
+
         rejectButtons.forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 const requestId = this.getAttribute('data-request-id');
                 console.log('👆 Reject button clicked for request:', requestId);
@@ -521,7 +723,7 @@
     function attachSidebarRequestListeners() {
         // Accept request buttons in sidebar
         sidebarRequestsList.querySelectorAll('.btn-accept-request').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 const requestId = this.getAttribute('data-request-id');
                 acceptFriendRequest(requestId);
@@ -530,7 +732,7 @@
 
         // Reject request buttons in sidebar
         sidebarRequestsList.querySelectorAll('.btn-reject-request').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 const requestId = this.getAttribute('data-request-id');
                 rejectFriendRequest(requestId);
@@ -538,104 +740,148 @@
         });
     }
 
-    function acceptFriendRequest(requestId) {
-        console.log('✅ Accepting friend request:', requestId);
+    async function acceptFriendRequest(requestId) {
+        console.log('✅ Accepting friend request ID:', requestId);
 
-        const card = document.querySelector(`.friend-request-card[data-request-id="${requestId}"]`);
-        const sidebarItem = document.querySelector(`.sidebar-request-item[data-request-id="${requestId}"]`);
-
-        // Add animation class
-        if (card) {
-            card.classList.add('accepting');
-        }
-        if (sidebarItem) {
-            sidebarItem.style.opacity = '0';
-            sidebarItem.style.transform = 'translateX(-20px)';
-        }
-
-        // Simulate API call
-        setTimeout(() => {
-            // Remove from friend requests array
-            friendRequests = friendRequests.filter(r => r.id !== parseInt(requestId));
-            
-            // Re-render
-            renderFriendRequests(friendRequests);
-            renderSidebarRequests(friendRequests.slice(0, 3));
-            updateRequestsCount(friendRequests.length);
-
-            // Show success message (optional)
-            console.log('✅ Friend request accepted!');
-
-            // Reload friends list to include new friend
-            loadAllFriends();
-            
-            // Update all friends count
-            const allFriendsCount = document.getElementById('all-friends-count');
-            if (allFriendsCount) {
-                const currentCount = parseInt(allFriendsCount.textContent) || 0;
-                allFriendsCount.textContent = currentCount + 1;
+        // Gọi API Accept
+        const mutation = `
+            mutation($reqId: ID!) {
+                acceptFriendRequest(requestId: $reqId) {
+                    id
+                    status
+                }
             }
-        }, 600);
+        `;
+
+        try {
+            const result = await graphqlFetch(mutation, { reqId: requestId });
+
+            if (result.errors) {
+                alert("Lỗi: " + result.errors[0].message);
+                return;
+            }
+
+            // --- THÀNH CÔNG ---
+
+            // 1. Hiệu ứng ẩn dòng lời mời (UI)
+            const card = document.querySelector(`.friend-request-card[data-request-id="${requestId}"]`);
+            if (card) card.classList.add('accepting');
+
+            // 2. Cập nhật dữ liệu Frontend
+            setTimeout(() => {
+                // Xóa khỏi danh sách chờ
+                // Chuyển cả 2 về String để so sánh cho chắc chắn
+                friendRequests = friendRequests.filter(r => String(r.id) !== String(requestId));// ParseInt nếu ID là số
+
+                renderFriendRequests(friendRequests);
+                if (typeof renderSidebarRequests === 'function') {
+                    renderSidebarRequests(friendRequests.slice(0, 5));
+                }
+                updateRequestsCount(friendRequests.length);
+
+                // 3. QUAN TRỌNG: Tải lại danh sách bạn bè để hiện người mới
+                loadAllFriends();
+
+            }, 500);
+
+        } catch (error) {
+            console.error("Lỗi mạng:", error);
+        }
     }
 
-    function rejectFriendRequest(requestId) {
+    async function rejectFriendRequest(requestId) {
         console.log('❌ Rejecting friend request:', requestId);
 
+        // 1. Tạo hiệu ứng ẩn UI ngay lập tức cho mượt
         const card = document.querySelector(`.friend-request-card[data-request-id="${requestId}"]`);
         const sidebarItem = document.querySelector(`.sidebar-request-item[data-request-id="${requestId}"]`);
 
-        // Add animation class
-        if (card) {
-            card.classList.add('rejecting');
-        }
+        if (card) card.classList.add('rejecting');
         if (sidebarItem) {
             sidebarItem.style.opacity = '0';
             sidebarItem.style.transform = 'translateX(100%)';
         }
 
-        // Simulate API call
-        setTimeout(() => {
-            // Remove from friend requests array
-            friendRequests = friendRequests.filter(r => r.id !== parseInt(requestId));
-            
-            // Re-render
-            renderFriendRequests(friendRequests);
-            renderSidebarRequests(friendRequests.slice(0, 3));
-            updateRequestsCount(friendRequests.length);
+        // 2. Gọi API GraphQL xuống Server
+        const mutation = `
+        mutation($reqId: ID!) {
+            rejectFriendRequest(requestId: $reqId) 
+        }
+    `;
 
-            console.log('❌ Friend request rejected');
-        }, 600);
+        try {
+            const result = await graphqlFetch(mutation, { reqId: requestId });
+
+            if (result.errors) {
+                console.error("Lỗi từ chối kết bạn:", result.errors);
+                alert("Có lỗi xảy ra: " + result.errors[0].message);
+                // Nếu lỗi thì hiện lại UI (bỏ class ẩn)
+                if (card) card.classList.remove('rejecting');
+                if (sidebarItem) {
+                    sidebarItem.style.opacity = '1';
+                    sidebarItem.style.transform = 'none';
+                }
+                return;
+            }
+
+            // 3. Xử lý dữ liệu sau khi Server báo thành công
+            setTimeout(() => {
+                // Xóa khỏi mảng friendRequests hiện tại
+                friendRequests = friendRequests.filter(r => String(r.id) !== String(requestId));
+
+                // Render lại danh sách lời mời
+                renderFriendRequests(friendRequests);
+
+                // Cập nhật lại Sidebar (nếu có hàm này)
+                if (typeof renderSidebarRequests === 'function') {
+                    renderSidebarRequests(friendRequests.slice(0, 5));
+                }
+
+                // Cập nhật số lượng trên badge
+                updateRequestsCount(friendRequests.length);
+
+                // === QUAN TRỌNG: Cập nhật lại danh sách gợi ý ===
+                // Vì vừa từ chối xong, người đó có thể quay lại danh sách gợi ý
+                loadFriendSuggestions();
+
+                console.log('✅ Đã từ chối và cập nhật danh sách');
+            }, 500); // Đợi 0.5s để hiệu ứng CSS chạy xong
+
+        } catch (error) {
+            console.error("Lỗi mạng:", error);
+            alert("Lỗi kết nối đến máy chủ");
+        }
     }
 
     // ============================================
     // FRIEND SUGGESTIONS ACTIONS
     // ============================================
-    
-    function attachSuggestionCardListeners() {
-        // Add friend buttons
-        document.querySelectorAll('.btn-add-friend').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const userId = this.getAttribute('data-user-id');
-                sendFriendRequest(userId, this);
-            });
-        });
 
-        // Remove suggestion buttons
-        document.querySelectorAll('.btn-remove-suggestion').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const suggestionId = this.getAttribute('data-suggestion-id');
-                removeSuggestion(suggestionId);
-            });
-        });
-    }
+    // function attachSuggestionCardListeners() {
+    //     // Add friend buttons
+    //     document.querySelectorAll('.btn-add-friend').forEach(btn => {
+    //         btn.addEventListener('click', function (e) {
+    //             e.stopPropagation();
+    //             const userId = this.getAttribute('data-user-id');
+    //             sendFriendRequest(userId, this);
+    //         });
+    //     });
+
+    //     // Remove suggestion buttons
+    //     document.querySelectorAll('.btn-remove-suggestion').forEach(btn => {
+    //         btn.addEventListener('click', function (e) {
+    //             e.stopPropagation();
+    //             const suggestionId = this.getAttribute('data-suggestion-id');
+    //             removeSuggestion(suggestionId);
+    //         });
+    //     });
+    // }
 
     function attachSidebarSuggestionListeners() {
         if (!sidebarSuggestionsList) return;
 
         sidebarSuggestionsList.querySelectorAll('.btn-add-friend').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 const userId = this.getAttribute('data-user-id');
                 sendFriendRequest(userId, this);
@@ -643,48 +889,72 @@
         });
     }
 
-    function sendFriendRequest(userId, button) {
+    // Trong file FriendRequests.js
+
+    // Trong file FriendRequests.js
+
+    async function sendFriendRequest(userId, buttonElement) {
         console.log('📤 Sending friend request to:', userId);
 
-        // Update button state
-        button.disabled = true;
-        button.innerHTML = `
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-            Đã gửi
-        `;
-        button.classList.remove('btn-primary');
-        button.classList.add('btn-secondary');
+        // Tìm tất cả nút liên quan đến user này
+        const $allButtons = $(`.btn-add-friend[data-user-id="${userId}"]`);
 
-        // Simulate API call
-        setTimeout(() => {
-            console.log('✅ Friend request sent!');
-            
-            // Optionally remove from suggestions after a delay
-            setTimeout(() => {
-                const card = button.closest('.suggestion-card');
-                const sidebarItem = button.closest('.sidebar-suggestion-item');
-                
-                if (card) {
-                    card.style.opacity = '0';
-                    card.style.transform = 'scale(0.9)';
-                    setTimeout(() => card.remove(), 300);
-                }
-                
-                if (sidebarItem) {
-                    sidebarItem.style.opacity = '0';
-                    setTimeout(() => sidebarItem.remove(), 300);
-                }
-            }, 1500);
-        }, 500);
+        // 1. Hiệu ứng loading
+        $allButtons.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+        // Query phải lấy về ID để sau này còn dùng để Hủy
+        const mutation = `
+        mutation($targetId: ID!) {
+            sendFriendRequest(targetUserId: $targetId) {
+                id 
+                status
+            }
+        }
+    `;
+
+        try {
+            const result = await graphqlFetch(mutation, { targetId: userId });
+
+            if (result.errors) {
+                alert("Lỗi: " + result.errors[0].message);
+                // Reset lại nút nếu lỗi
+                $allButtons.prop('disabled', false).html('Thêm bạn bè');
+                return;
+            }
+
+            const newRequestId = result.data.sendFriendRequest.id;
+
+            // 2. THÀNH CÔNG -> Đổi thành nút HỦY LỜI MỜI
+            console.log('✅ Request sent! New Request ID:', newRequestId);
+
+            $allButtons.each(function () {
+                const $btn = $(this);
+
+                // Xóa class cũ
+                $btn.removeClass('btn-primary btn-add-friend');
+                // Thêm class mới (để xử lý sự kiện hủy) và màu đỏ (btn-danger) hoặc xám (btn-secondary)
+                $btn.addClass('btn-secondary btn-cancel-sent-request'); // Bạn có thể dùng btn-danger nếu muốn màu đỏ
+
+                // Đổi nội dung text
+                $btn.html('Hủy lời mời');
+
+                // Gắn ID lời mời vào nút để biết đường mà hủy
+                $btn.data('request-id', newRequestId);
+
+                // Bật lại nút để bấm được
+                $btn.prop('disabled', false);
+            });
+
+        } catch (error) {
+            console.error("Lỗi mạng:", error);
+            $allButtons.prop('disabled', false).text('Thử lại');
+        }
     }
-
     function removeSuggestion(suggestionId) {
         console.log('🗑️ Removing suggestion:', suggestionId);
 
         const card = document.querySelector(`.suggestion-card[data-suggestion-id="${suggestionId}"]`);
-        
+
         if (card) {
             card.style.opacity = '0';
             card.style.transform = 'scale(0.9)';
@@ -701,10 +971,10 @@
     // ============================================
     // UNFRIEND ACTION
     // ============================================
-    
+
     function attachFriendCardListeners() {
         document.querySelectorAll('.btn-unfriend').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 const friendId = this.getAttribute('data-friend-id');
                 if (confirm('Bạn có chắc muốn hủy kết bạn?')) {
@@ -714,26 +984,69 @@
         });
     }
 
-    function unfriend(friendId) {
-        console.log('💔 Unfriending:', friendId);
+    async function unfriend(targetUserId) {
+        console.log('💔 Đang hủy kết bạn với ID:', targetUserId);
 
-        const card = document.querySelector(`.friend-card[data-friend-id="${friendId}"]`);
-        
+        // 1. Hiệu ứng UI: Làm mờ thẻ ngay lập tức cho mượt
+        const card = document.querySelector(`.friend-card[data-friend-id="${targetUserId}"]`);
         if (card) {
-            card.style.opacity = '0';
-            card.style.transform = 'scale(0.9)';
-            setTimeout(() => {
-                allFriends = allFriends.filter(f => f.id !== parseInt(friendId));
-                renderAllFriends(allFriends);
-                updateFriendCount(allFriends.length);
-            }, 300);
+            card.style.opacity = '0.5';
+            card.style.pointerEvents = 'none'; // Khóa click
+        }
+
+        const mutation = `
+        mutation($targetId: ID!) {
+            unfriend(targetUserId: $targetId) 
+        }
+    `;
+
+        try {
+            const result = await graphqlFetch(mutation, { targetId: targetUserId });
+
+            if (result.errors) {
+                alert("Lỗi: " + result.errors[0].message);
+                // Nếu lỗi thì hồi phục lại UI
+                if (card) {
+                    card.style.opacity = '1';
+                    card.style.pointerEvents = 'auto';
+                }
+                return;
+            }
+
+            // 2. Thành công -> Xóa hẳn khỏi giao diện
+            if (card) {
+                card.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    card.remove();
+
+                    // Cập nhật mảng dữ liệu local
+                    allFriends = allFriends.filter(f => String(f.id) !== String(targetUserId));
+
+                    // Cập nhật số lượng hiển thị
+                    updateFriendCount(allFriends.length);
+
+                    // Nếu xóa hết thì hiện thông báo trống
+                    if (allFriends.length === 0) {
+                        renderAllFriends([]);
+                    }
+
+                    // Load lại gợi ý (vì người vừa xóa có thể trở thành gợi ý mới)
+                    loadFriendSuggestions();
+
+                }, 300);
+            }
+
+        } catch (error) {
+            console.error("Lỗi mạng:", error);
+            alert("Lỗi kết nối đến máy chủ");
+            if (card) card.style.opacity = '1';
         }
     }
 
     // ============================================
     // SEARCH FUNCTIONALITY
     // ============================================
-    
+
     function handleSearch(query) {
         console.log('🔍 Searching:', query);
 
@@ -752,17 +1065,17 @@
         const searchTerm = query.toLowerCase();
 
         if (currentTab === 'all-friends') {
-            const filtered = allFriends.filter(friend => 
+            const filtered = allFriends.filter(friend =>
                 friend.name.toLowerCase().includes(searchTerm)
             );
             renderAllFriends(filtered);
         } else if (currentTab === 'friend-requests') {
-            const filtered = friendRequests.filter(request => 
+            const filtered = friendRequests.filter(request =>
                 request.name.toLowerCase().includes(searchTerm)
             );
             renderFriendRequests(filtered);
         } else if (currentTab === 'suggestions') {
-            const filtered = friendSuggestions.filter(suggestion => 
+            const filtered = friendSuggestions.filter(suggestion =>
                 suggestion.name.toLowerCase().includes(searchTerm)
             );
             renderFriendSuggestions(filtered);
@@ -772,7 +1085,7 @@
     // ============================================
     // FILTER FUNCTIONALITY
     // ============================================
-    
+
     function applyFilter(filter) {
         console.log('🎯 Applying filter:', filter);
 
@@ -807,7 +1120,7 @@
     // ============================================
     // UPDATE COUNTS
     // ============================================
-    
+
     function updateFriendCount(count) {
         const countElement = document.getElementById('all-friends-count');
         if (countElement) {
@@ -818,7 +1131,7 @@
     function updateRequestsCount(count) {
         const countElement = document.getElementById('friend-requests-count');
         const subtitleElement = document.getElementById('requests-subtitle');
-        
+
         if (countElement) {
             countElement.textContent = count;
             if (count > 0) {
@@ -829,8 +1142,8 @@
         }
 
         if (subtitleElement) {
-            subtitleElement.textContent = count === 0 
-                ? 'Không có lời mời kết bạn' 
+            subtitleElement.textContent = count === 0
+                ? 'Không có lời mời kết bạn'
                 : `Bạn có ${count} lời mời kết bạn`;
         }
     }
@@ -838,18 +1151,44 @@
     // ============================================
     // WEBSOCKET CONNECTION
     // ============================================
-    
+
     function connectFriendWebSocket() {
-        console.log('🔌 Connecting to friend WebSocket...');
+        console.log('🔌 Connecting to WebSocket...');
+        const socket = new SockJS('/ws');
+        friendStompClient = Stomp.over(socket);
+        friendStompClient.debug = null; // Tắt log debug cho đỡ rối
 
-        // Reuse existing WebSocket connection if available
-        // Otherwise create new connection
-        // This is placeholder - actual implementation depends on backend
+        friendStompClient.connect({}, function (frame) {
+            console.log('✅ Connected WebSocket: ' + frame);
+            isFriendConnected = true;
 
-        // Example:
-        // const socket = new SockJS('/ws');
-        // friendStompClient = Stomp.over(socket);
-        // friendStompClient.connect({}, onFriendConnected, onFriendError);
+            // Subscribe
+            friendStompClient.subscribe('/user/queue/friend-requests', function (message) {
+                console.log("🔔 Có thông báo WebSocket mới:", message.body);
+
+                // Reload lại toàn bộ danh sách (Hàm loadFriendRequests ở trên đã sửa để update cả sidebar)
+                loadFriendRequests();
+
+                // Reload cả suggestions để loại bỏ người vừa gửi (nếu cần)
+                // loadFriendSuggestions(); 
+
+                // Hiển thị badge đỏ trên Header
+                updateHeaderNotificationCount();
+            });
+
+        }, function (error) {
+            console.error('❌ WebSocket error:', error);
+        });
+    }
+
+    // Thêm hàm update số lượng (Optional)
+    function updateHeaderNotificationCount() {
+        const countBadge = document.getElementById('friend-requests-count');
+        if (countBadge) {
+            let current = parseInt(countBadge.innerText) || 0;
+            countBadge.innerText = current + 1;
+            countBadge.style.display = 'inline-flex';
+        }
     }
 
     function onFriendConnected() {
@@ -862,7 +1201,7 @@
 
     function onFriendRequestReceived(message) {
         console.log('📬 New friend request received:', message);
-        
+
         // Parse and add to friend requests list
         // loadFriendRequests();
     }
@@ -875,7 +1214,7 @@
     // ============================================
     // MOCK DATA GENERATORS
     // ============================================
-    
+
     function generateMockFriends(count) {
         const friends = [];
         const names = [
@@ -988,7 +1327,7 @@
     // ============================================
     // UTILITY FUNCTIONS
     // ============================================
-    
+
     function getTimeAgo(timestamp) {
         const now = new Date();
         const past = new Date(timestamp);
@@ -1004,9 +1343,9 @@
     // ============================================
     // INITIALIZE ON DOM READY
     // ============================================
-    
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             setTimeout(init, 100);
         });
     } else {
@@ -1014,3 +1353,57 @@
     }
 
 })();
+async function cancelSentRequest(requestId, userId) {
+    console.log('undo ↩️ Hủy lời mời đã gửi:', requestId);
+
+    // Tìm nút đang bấm
+    const $buttons = $(`.btn-cancel-sent-request[data-request-id="${requestId}"]`);
+
+    // Loading...
+    $buttons.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+    // Dùng chung API reject (vì bản chất là xóa record trong DB)
+    const mutation = `
+        mutation($reqId: ID!) {
+            rejectFriendRequest(requestId: $reqId) 
+        }
+    `;
+
+    try {
+        const result = await graphqlFetch(mutation, { reqId: requestId });
+
+        if (result.errors) {
+            alert("Lỗi: " + result.errors[0].message);
+            $buttons.prop('disabled', false).html('Hủy lời mời');
+            return;
+        }
+
+        // THÀNH CÔNG -> Đổi ngược lại thành nút THÊM BẠN BÈ
+        $buttons.each(function () {
+            const $btn = $(this);
+
+            $btn.removeClass('btn-secondary btn-cancel-sent-request');
+            $btn.addClass('btn-primary btn-add-friend');
+
+            // Trả về icon và text cũ
+            $btn.html(`
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                </svg> Thêm bạn bè
+            `);
+
+            // Xóa data request id đi
+            $btn.removeData('request-id');
+            $btn.prop('disabled', false);
+        });
+
+        console.log("Đã hủy lời mời, quay về trạng thái chưa kết bạn");
+
+    } catch (error) {
+        console.error("Lỗi mạng:", error);
+        $buttons.prop('disabled', false).text('Lỗi');
+    }
+}

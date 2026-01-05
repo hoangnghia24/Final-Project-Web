@@ -33,11 +33,11 @@ public class Friendship {
 
     // --- QUAN HỆ ---
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "requester_id", nullable = false)
     private User requester; // Người gửi lời mời
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "addressee_id", nullable = false)
     private User addressee; // Người nhận lời mời
 }

@@ -1,15 +1,19 @@
 # =========================
 # 1. SCALARS & ENUMS
 # =========================
+enum FriendshipStatus {
+    PENDING
+    ACCEPTED
+    BLOCKED
+    DECLINED
+}
 
-# Định nghĩa các loại quyền riêng tư
 enum PrivacyLevel {
     PUBLIC
     FRIENDS_ONLY
     PRIVATE
 }
 
-# Định nghĩa loại file media (để Frontend biết hiển thị thẻ img hay video)
 enum MediaType {
     IMAGE
     VIDEO
@@ -36,7 +40,6 @@ type User {
     createdAt: String
 }
 
-# Dùng cho các query admin hoặc list user đơn giản
 type InfoUserForAdmin {
     id: ID!
     fullName: String!
@@ -48,45 +51,41 @@ type InfoUserForAdmin {
 }
 
 # =========================
-# 3. TYPES (Post & Interaction)
+# 3. TYPES (Post & Interaction & Friendship)
 # =========================
 
 type Post {
     id: ID!
     content: String
-    
-    # --- CÁC TRƯỜNG MEDIA MỚI ---
-    mediaUrl: String        # Đường dẫn file (vd: /uploads/abc.jpg)
-    mediaType: MediaType    # Loại file
-    feeling: String         # Cảm xúc (vd: "đang vui vẻ")
-    # ----------------------------
-
+    mediaUrl: String
+    mediaType: MediaType
+    feeling: String
     createdAt: String
     privacyLevel: PrivacyLevel
-    
-    # Quan hệ: Bài viết thuộc về 1 User
     user: User 
-    
-    # Số liệu thống kê
     likeCount: Int
     commentCount: Int
-    
-    # Danh sách comment (Lấy mẫu vài cái, nếu muốn full thì cần Query riêng)
     comments: [Comment]
-    
-    # Kiểm tra xem User đang đăng nhập đã like bài này chưa (để hiện nút xanh/xám)
     isLikedByMe: Boolean
 }
 
 type Comment {
     id: ID!
     content: String!
-    user: User!           # Người comment
+    user: User!
+    createdAt: String
+}
+
+type Friendship {
+    id: ID!
+    requester: User!
+    addressee: User!
+    status: FriendshipStatus!
     createdAt: String
 }
 
 # =========================
-# 4. INPUTS (Dữ liệu gửi lên)
+# 4. INPUTS
 # =========================
 
 input RegisterInput {
@@ -98,15 +97,10 @@ input RegisterInput {
 
 input CreatePostInput {
     content: String!
-    
-    # --- INPUT MỚI ---
     mediaUrl: String
     mediaType: MediaType
     feeling: String
-    # -----------------
-    
-    # Mặc định là PUBLIC nếu không truyền
-    privacyLevel: PrivacyLevel = PUBLIC 
+    privacyLevel: PrivacyLevel = PUBLIC
 }
 
 input CreateCommentInput {
@@ -124,7 +118,7 @@ input UpdatePostInput {
 }
 
 # =========================
-# 5. ROOT MUTATION (Ghi dữ liệu)
+# 5. ROOT MUTATION (GỘP TẤT CẢ VÀO ĐÂY)
 # =========================
 
 type Mutation {
@@ -137,16 +131,20 @@ type Mutation {
     updatePost(input: UpdatePostInput!): Post!
     deletePost(id: ID!): Boolean
     
-    # --- INTERACTION (Tương tác) ---
-    # Like/Unlike bài viết (Trả về true nếu đã like, false nếu đã unlike)
-    toggleLikePost(postId: ID!): Boolean 
-    
-    # Bình luận bài viết
+    # --- INTERACTION ---
+    toggleLikePost(postId: ID!): Boolean
     createComment(input: CreateCommentInput!): Comment!
+
+    # --- FRIENDSHIP (Đã chuyển vào trong) ---
+    sendFriendRequest(targetUserId: ID!): Friendship!
+    acceptFriendRequest(requestId: ID!): Friendship!
+    deleteFriendship(id: ID!): Boolean
+    rejectFriendRequest(requestId: ID!): String
+    unfriend(targetUserId: ID!): String
 }
 
 # =========================
-# 6. ROOT QUERY (Đọc dữ liệu)
+# 6. ROOT QUERY (GỘP TẤT CẢ VÀO ĐÂY)
 # =========================
 
 type Query {
@@ -157,6 +155,14 @@ type Query {
     # --- POST ---
     getAllPosts: [Post]
     getPostById(id: ID!): Post
-    
     getCommentsByPostId(postId: ID!): [Comment]
+
+    # --- FRIENDSHIP (Đã chuyển vào trong) ---
+    getMyFriendRequests: [Friendship]
+    
+    # Lưu ý: Sửa thành [User] nếu hàm Java trả về List<User>
+    getMyFriends: [User] 
+    
+    getFriendSuggestions: [User]
+    getSentFriendRequests: [Friendship]
 }

@@ -43,31 +43,41 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 3. Cắt bỏ chữ "Bearer " để lấy token gốc
         jwt = authHeader.substring(7);
 
-        // 4. Trích xuất username từ token
-        username = jwtService.extractUsername(jwt);
+        // --- BẮT ĐẦU SỬA TỪ ĐÂY ---
+        try {
+            // 4. Trích xuất username từ token (Dễ gây lỗi nếu token là "null" hoặc rác)
+            username = jwtService.extractUsername(jwt);
 
-        // 5. Nếu có username và chưa được xác thực trong SecurityContext
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            // 5. Nếu có username và chưa được xác thực trong SecurityContext
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            // Lấy thông tin user từ Database
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+                // Lấy thông tin user từ Database
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-            // 6. Kiểm tra tính hợp lệ của token
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+                // 6. Kiểm tra tính hợp lệ của token
+                if (jwtService.isTokenValid(jwt, userDetails)) {
 
-                // Tạo đối tượng xác thực
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
+                    // Tạo đối tượng xác thực
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities());
 
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request));
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // Lưu vào SecurityContext (Đăng nhập thành công)
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    // Lưu vào SecurityContext (Đăng nhập thành công)
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (Exception e) {
+            // Nếu token lỗi (hết hạn, sai định dạng, là chữ "null"...), ta chỉ log ra
+            // console
+            // và KHÔNG làm sập server. Request sẽ tiếp tục đi tiếp với tư cách "Khách"
+            // (Anonymous)
+            System.out.println("Lỗi xác thực JWT: " + e.getMessage());
         }
+        // --- KẾT THÚC SỬA ---
 
         // Chuyển tiếp request đi tiếp
         filterChain.doFilter(request, response);

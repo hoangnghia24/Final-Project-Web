@@ -1,6 +1,8 @@
 package com.vn.mxh.repository;
 
 import com.vn.mxh.domain.User;
+import com.vn.mxh.domain.enums.Role;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -22,4 +24,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     List<User> findAll();
+
+    List<User> findAllByRoleNotAndIdNot(Role role, Long id);
 }
