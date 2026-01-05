@@ -50,6 +50,7 @@
                         <div class="tab-item" data-tab="posts">BÀI ĐĂNG</div>
                     </div>
                 </div>
+
                 <div class="content-feed tab-content active" id="tab-overview">
                     <div class="overview-container" style="width: 100%;">
 
@@ -88,7 +89,8 @@
 
                     </div>
                 </div>
-                <div class="content-feed tab-content" id="tab-posts">
+
+                <div class="content-feed tab-content" id="tab-posts" style="display: none;">
                     <div id="profile-posts-container" style="width: 100%;">
                         <div class="text-center py-5">
                             <div class="spinner-border text-primary" role="status">
@@ -99,8 +101,11 @@
 
                     <div id="empty-posts-state" style="display: none; text-align: center; width: 100%;">
                         <div style="font-size: 40px; color: #ccc; margin-bottom: 10px;">📝</div>
-                        <h3>Bạn chưa có bài đăng nào</h3>
-                        <button class="feed-btn" data-bs-toggle="modal" data-bs-target="#createPostModal">
+
+                        <h3 id="empty-state-text">Bạn chưa có bài đăng nào</h3>
+
+                        <button id="empty-state-create-btn" class="feed-btn" data-bs-toggle="modal"
+                            data-bs-target="#createPostModal">
                             Tạo bài đăng mới
                         </button>
                     </div>
@@ -109,7 +114,7 @@
             </div>
 
             <div class="sidebar">
-                <div class="sidebar-card">
+                <div id="sidebar-create-post-btn" class="sidebar-card">
                     <div class="sidebar-content">
                         <button class="create-post-btn" data-bs-toggle="modal" data-bs-target="#createPostModal">
                             Tạo bài đăng mới
@@ -227,6 +232,7 @@
             </div>
         </div>
     </div>
+
     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow-lg">
@@ -267,6 +273,7 @@
             </div>
         </div>
     </div>
+
     <script th:src="@{/client/js/TimeUtils.js}"></script>
     <script th:src="@{/client/js/Header.js}"></script>
     <script th:src="@{/client/js/Notifications.js}"></script>

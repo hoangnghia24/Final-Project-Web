@@ -93,4 +93,9 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
+    public User getUserById(Long id) {
+        // Tìm trong DB, nếu không thấy thì trả về null (để Frontend xử lý lỗi)
+        return userRepository.findById(id).orElse(null);
+    }
 }

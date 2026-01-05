@@ -1,24 +1,96 @@
 $(document).ready(function () {
-    // --- BIẾN TOÀN CỤC ---
+    // =========================================================
+    // 1. KHỞI TẠO & CHECK AUTH
+    // =========================================================
     const accessToken = localStorage.getItem("accessToken");
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    const currentUserId = localStorage.getItem("currentUserId");
     // Lấy username từ object currentUser đã parse
     const currentUsername = currentUser ? currentUser.username : null;
 
     // Kiểm tra đăng nhập
     if (!accessToken) {
         window.location.href = "/login";
+        return;
     }
 
-    // Lấy username của profile đang xem từ URL
-    let profileUsername = currentUsername;
-    const pathParts = window.location.pathname.split('/');
-    if (pathParts.includes('u') && pathParts.length > 2) {
-        profileUsername = pathParts[pathParts.indexOf('u') + 1];
+    // =========================================================
+    // 2. XÁC ĐỊNH PROFILE ĐANG XEM (LOGIC MỚI)
+    // =========================================================
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramId = urlParams.get('id');
+
+    // Mặc định là xem chính mình
+    let targetUserId = currentUserId;
+    let isMe = true;
+
+    // Nếu trên URL có ID và ID đó KHÁC ID của mình -> Đang xem người khác
+    if (paramId && paramId !== currentUserId) {
+        targetUserId = paramId;
+        isMe = false;
     }
 
+    console.log("Viewing Profile ID:", targetUserId, "| isMe:", isMe);
+
+    // =========================================================
+    // 3. XỬ LÝ GIAO DIỆN (ẨN/HIỆN NÚT THEO QUYỀN)
+    // =========================================================
+    if (!isMe) {
+        // --- ẨN CÁC PHẦN CHỈ DÀNH CHO CHỦ TÀI KHOẢN ---
+        $("#btn-open-edit-profile").hide(); // Nút sửa profile chính
+        $(".edit-bio-btn").hide();          // Nút sửa bio nhỏ
+        $(".create-post-box").hide();       // Khung tạo bài viết ở giữa
+
+        // Ẩn nút tạo bài ở Sidebar phải (ID mới thêm trong HTML)
+        $("#sidebar-create-post-btn").hide();
+
+        // Ẩn nút tạo bài ở màn hình Empty State (ID mới thêm trong HTML)
+        $("#empty-state-create-btn").hide();
+
+        // Sửa câu thông báo Empty State
+        $("#empty-state-text").text("Người dùng này chưa có bài đăng nào");
+    } else {
+        // --- HIỆN NẾU LÀ CHÍNH MÌNH ---
+        $("#btn-open-edit-profile").show();
+        $(".create-post-box").show();
+        $("#sidebar-create-post-btn").show();
+        $("#empty-state-create-btn").show();
+        $("#empty-state-text").text("Bạn chưa có bài đăng nào");
+
+        // Chỉ setup modal user info nếu là mình (để hiện avatar mình trong modal đăng bài)
+        setupCreateModalUserInfo();
+    }
+
+    // =========================================================
+    // 4. XỬ LÝ CHUYỂN TAB (FIX LỖI TAB KHÔNG CHẠY)
+    // =========================================================
+    $('.tab-item').off('click').on('click', function () {
+        // 1. Xử lý class active cho Tab Menu
+        $('.tab-item').removeClass('active');
+        $(this).addClass('active');
+
+        // 2. Lấy tên tab (overview hoặc posts)
+        const tabName = $(this).data('tab');
+
+        // 3. Ẩn tất cả nội dung tab
+        $('.tab-content').removeClass('active').hide();
+
+        // 4. Hiện tab cần hiện (FadeIn cho mượt)
+        $('#tab-' + tabName).addClass('active').fadeIn();
+    });
+
+    // =========================================================
+    // 5. LOAD DỮ LIỆU CHÍNH
+    // =========================================================
+    // Gọi hàm load user theo ID -> Trong đó sẽ gọi tiếp loadUserPosts
+    loadUserProfile(targetUserId);
+
+
+    // =========================================================
+    // KHAI BÁO BIẾN CHO CÁC MODAL (GIỮ NGUYÊN)
+    // =========================================================
     // --- Create Modal Variables ---
-    const createPostModal = $('#createPostModal');
+    const createPostModal = new bootstrap.Modal(document.getElementById('createPostModal')); // Fix: Dùng new bootstrap.Modal để gọi .hide() chuẩn hơn
     const btnSubmitPost = $("#btnSubmitPost");
     const postContentInput = $("#postContentInput");
     const fileInput = $("#fileUploadInput");
@@ -28,7 +100,7 @@ $(document).ready(function () {
     const btnRemoveMedia = $("#btnRemoveMedia");
 
     // --- Update Modal Variables ---
-    const updatePostModal = $('#updatePostModal');
+    const updatePostModal = new bootstrap.Modal(document.getElementById('updatePostModal'));
     const btnUpdatePost = $("#btnUpdatePost");
     const updatePostContentInput = $("#updatePostContentInput");
     const updateMediaPreviewContainer = $("#updateMediaPreviewContainer");
@@ -41,11 +113,7 @@ $(document).ready(function () {
     let updateFile = null;
     let currentPosts = [];
 
-    // --- KHỞI TẠO ---
-    loadUserProfile(profileUsername);
-    loadUserPosts(profileUsername);
-    setupCreateModalUserInfo();
-    // --- VARIABLES CHO EDIT PROFILE ---
+    // --- Edit Profile Variables ---
     const editProfileModal = new bootstrap.Modal(document.getElementById('editProfileModal'));
     const btnOpenEditProfile = $("#btn-open-edit-profile");
     const editAvatarInput = $("#editAvatarInput");
@@ -55,32 +123,26 @@ $(document).ready(function () {
     const btnSaveProfile = $("#btn-save-profile");
     let newAvatarFile = null;
 
-    // --- 1. HIỂN THỊ NÚT EDIT NẾU LÀ CHÍNH CHỦ ---
-    // (Thêm đoạn này vào cuối hàm renderUserData)
-    /* Trong hàm renderUserData(user), thêm dòng này:
-       if (currentUser && currentUser.username === user.username) {
-           $("#btn-open-edit-profile").show();
-       } else {
-           $("#btn-open-edit-profile").hide();
-       }
-    */
 
-    // --- 2. MỞ MODAL & ĐIỀN DỮ LIỆU CŨ ---
+    // =========================================================
+    // 6. LOGIC EDIT PROFILE
+    // =========================================================
+
+    // MỞ MODAL & ĐIỀN DỮ LIỆU CŨ
     btnOpenEditProfile.click(function () {
-        // Lấy data user đang xem (biến window.viewingProfileUser đã lưu ở bước trước)
-        const user = window.viewingProfileUser;
+        const user = window.viewingProfileUser; // Lấy từ biến toàn cục đã lưu khi load profile
         if (!user) return;
 
         editFullnameInput.val(user.fullName);
         editBioInput.val(user.bio || "");
         editAvatarPreview.attr("src", user.avatarUrl || "/img/default-avatar.png");
-        newAvatarFile = null; // Reset file
+        newAvatarFile = null;
         editAvatarInput.val("");
 
         editProfileModal.show();
     });
 
-    // --- 3. XỬ LÝ CHỌN ẢNH AVATAR MỚI ---
+    // XỬ LÝ CHỌN ẢNH AVATAR MỚI
     editAvatarInput.change(function (e) {
         const file = e.target.files[0];
         if (file) {
@@ -90,7 +152,7 @@ $(document).ready(function () {
         }
     });
 
-    // --- 4. LƯU THAY ĐỔI (GỌI API) ---
+    // LƯU THAY ĐỔI PROFILE
     btnSaveProfile.click(async function () {
         const newName = editFullnameInput.val().trim();
         const newBio = editBioInput.val().trim();
@@ -105,13 +167,10 @@ $(document).ready(function () {
         try {
             let finalAvatarUrl = window.viewingProfileUser.avatarUrl;
 
-            // Nếu có chọn ảnh mới -> Upload lên server trước
             if (newAvatarFile) {
-                // Tận dụng hàm uploadMedia có sẵn trong Profile.js của bạn
                 finalAvatarUrl = await uploadMedia(newAvatarFile);
             }
 
-            // Gọi Mutation GraphQL để update
             const mutation = `
                 mutation UpdateProfile($input: UpdateProfileInput!) {
                     updateUserProfile(input: $input) {
@@ -136,7 +195,6 @@ $(document).ready(function () {
                     if (res.data && res.data.updateUserProfile) {
                         alert("Cập nhật thành công!");
                         editProfileModal.hide();
-                        // Reload lại trang để thấy thay đổi (hoặc gọi lại loadUserProfile)
                         location.reload();
                     } else {
                         alert("Lỗi: " + (res.errors ? res.errors[0].message : "Unknown"));
@@ -155,14 +213,16 @@ $(document).ready(function () {
             btnSaveProfile.prop("disabled", false).text("Lưu thay đổi");
         }
     });
+
+
     // =========================================================
-    // 1. LOGIC PROFILE (LOAD INFO, TABS)
+    // 7. HÀM LOAD PROFILE (Sửa dùng getUserById)
     // =========================================================
-    function loadUserProfile(username) {
-        // CẬP NHẬT QUERY: Thêm friendCount
+    function loadUserProfile(userId) {
+        // Query dùng ID
         const graphqlData = {
-            query: `query GetUserProfile($username: String!) {
-                getUserByUsername(username: $username) {
+            query: `query GetUserProfile($id: ID!) {
+                getUserById(id: $id) {
                     id 
                     username 
                     fullName 
@@ -171,10 +231,10 @@ $(document).ready(function () {
                     bio 
                     createdAt 
                     role
-                    friendCount  # <--- Mới thêm để lấy số lượng bạn bè
+                    friendCount
                 }
             }`,
-            variables: { username: username }
+            variables: { id: userId }
         };
 
         $.ajax({
@@ -182,23 +242,32 @@ $(document).ready(function () {
             headers: { "Authorization": "Bearer " + accessToken },
             data: JSON.stringify(graphqlData),
             success: function (response) {
-                if (response.data && response.data.getUserByUsername) {
-                    // Lưu user vào biến toàn cục để dùng cho nút Chỉnh sửa
-                    window.viewingProfileUser = response.data.getUserByUsername;
-                    renderUserData(response.data.getUserByUsername);
+                if (response.data && response.data.getUserById) {
+                    const user = response.data.getUserById;
+
+                    // Lưu user vào biến toàn cục
+                    window.viewingProfileUser = user;
+
+                    // Render thông tin
+                    renderUserData(user);
+
+                    // --- QUAN TRỌNG: Load bài viết của username vừa lấy được ---
+                    loadUserPosts(user.username);
                 } else {
                     alert("Không tìm thấy người dùng!");
+                    window.location.href = "/home";
                 }
+            },
+            error: function (err) {
+                console.error("Lỗi tải profile:", err);
             }
         });
     }
 
     function renderUserData(user) {
-        // --- 1. Hiển thị thông tin cơ bản ---
         const avatarUrl = user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`;
 
         $("#header-avatar").css("background-image", `url('${avatarUrl}')`);
-        // Nếu bạn có sidebar avatar
         $("#sidebar-avatar").css("background-image", `url('${avatarUrl}')`);
 
         $("#header-fullname").text(user.fullName);
@@ -206,12 +275,10 @@ $(document).ready(function () {
         $("#sidebar-fullname").text(user.fullName);
         $("#sidebar-tag").text("u/" + user.username);
 
-        // --- 2. Cập nhật Tab Tổng quan (Bio & FriendCount) ---
         const bioText = user.bio ? user.bio : "Người dùng này chưa viết giới thiệu.";
         $("#user-bio-display").text(bioText);
         $("#sidebar-bio").text(bioText);
 
-        // Hiển thị số lượng bạn bè (lấy từ backend)
         $("#user-friend-count").text(user.friendCount || 0);
 
         if (user.createdAt) {
@@ -220,28 +287,11 @@ $(document).ready(function () {
             $("#user-join-date").text(dateStr);
             $("#sidebar-created").text(date.toLocaleDateString("vi-VN"));
         }
-
-        // --- 3. LOGIC HIỂN THỊ NÚT CHỈNH SỬA (FIX LỖI) ---
-        // So sánh username của người đang đăng nhập (currentUser) và profile đang xem (user)
-        if (currentUsername === user.username) {
-            $("#btn-open-edit-profile").show();  // Hiện nút chỉnh sửa profile chính
-            $(".edit-bio-btn").show();           // Hiện nút sửa bio nhỏ (nếu có)
-        } else {
-            $("#btn-open-edit-profile").hide();
-            $(".edit-bio-btn").hide();
-        }
     }
 
-    $('.tab-item').on('click', function () {
-        $('.tab-item').removeClass('active');
-        $(this).addClass('active');
-        const tabName = $(this).data('tab');
-        $('.tab-content').removeClass('active');
-        $('#tab-' + tabName).addClass('active');
-    });
 
     // =========================================================
-    // 2. LOGIC BÀI VIẾT (LOAD, RENDER)
+    // 8. LOGIC BÀI VIẾT
     // =========================================================
 
     function setupCreateModalUserInfo() {
@@ -264,6 +314,7 @@ $(document).ready(function () {
             success: (res) => {
                 if (res.data && res.data.getAllPosts) {
                     const allPosts = res.data.getAllPosts;
+                    // Lọc bài viết của user đang xem
                     currentPosts = allPosts.filter(post => post.user.username === username);
                     renderUserPosts(currentPosts);
                 } else {
@@ -312,13 +363,12 @@ $(document).ready(function () {
                 }
             }
 
-            // Menu bài viết (Sửa/Xóa)
+            // Menu bài viết (Chỉ hiện nếu là bài của mình)
             let menuHtml = '';
             if (post.user.username === currentUsername) {
                 menuHtml = `<button class="post-menu-btn">...</button>`;
             }
 
-            // Avatar người đang login (cho ô comment)
             const myAvatar = currentUser.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`;
 
             const html = `
@@ -362,45 +412,34 @@ $(document).ready(function () {
             const postElement = $(html);
             container.append(postElement);
 
-            // GỌI HÀM LOAD COMMENT
             loadPostComments(post.id, postElement.find(".comments-list"));
         });
     }
 
     function loadPostComments(postId, container) {
-        // Thêm 'username' vào query để lấy seed cho avatar
         const query = `
             query GetComments($postId: ID!) {
                 getCommentsByPostId(postId: $postId) {
                     id
                     content
                     createdAt
-                    user {
-                        username 
-                        fullName
-                        avatarUrl
-                    }
+                    user { username fullName avatarUrl }
                 }
             }
         `;
 
         $.ajax({
-            url: "/graphql",
-            type: "POST",
-            contentType: "application/json",
+            url: "/graphql", type: "POST", contentType: "application/json",
             headers: { "Authorization": "Bearer " + accessToken },
             data: JSON.stringify({ query: query, variables: { postId: postId } }),
             success: function (response) {
                 container.empty();
-
                 if (response.data && response.data.getCommentsByPostId) {
                     const comments = response.data.getCommentsByPostId;
-
                     if (comments.length === 0) return;
 
                     comments.forEach(comment => {
                         const avatar = comment.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user.username}`;
-
                         const commentHtml = `
                             <div class="comment-item">
                                 <img src="${avatar}" class="comment-avatar" onerror="this.src='/resources/images/default-avatar.png'">
@@ -427,17 +466,163 @@ $(document).ready(function () {
     }
 
     // =========================================================
-    // 3. TƯƠNG TÁC BÀI VIẾT (LIKE & COMMENT)
+    // 9. EVENT LISTENERS (CREATE, UPDATE, DELETE, LIKE)
     // =========================================================
 
-    // --- LIKE BÀI VIẾT ---
+    function updatePostButtonState() {
+        const hasText = postContentInput.val().trim().length > 0;
+        const hasFile = currentFile !== null;
+        btnSubmitPost.prop("disabled", !(hasText || hasFile));
+    }
+    postContentInput.on("input", updatePostButtonState);
+
+    fileInput.on("change", function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        currentFile = file;
+        const objectUrl = URL.createObjectURL(file);
+        mediaPreviewContainer.fadeIn();
+        if (file.type.startsWith("video/")) {
+            imagePreview.hide(); videoPreview.attr("src", objectUrl).show();
+        } else {
+            videoPreview.hide(); imagePreview.attr("src", objectUrl).show();
+        }
+        updatePostButtonState();
+    });
+
+    btnRemoveMedia.on("click", function () {
+        currentFile = null; fileInput.val(""); mediaPreviewContainer.hide();
+        updatePostButtonState();
+    });
+
+    // CREATE POST
+    btnSubmitPost.click(async function () {
+        btnSubmitPost.text("Đang xử lý...").prop("disabled", true);
+        let finalMediaUrl = null;
+        try {
+            if (currentFile) finalMediaUrl = await uploadMedia(currentFile);
+
+            const content = postContentInput.val();
+            const privacy = $("#privacySelect").val();
+            let type = "NONE";
+            if (finalMediaUrl) type = (currentFile && currentFile.type.startsWith("video/")) ? "VIDEO" : "IMAGE";
+
+            const mutation = {
+                query: `mutation CreatePost($input: CreatePostInput!) { createPost(input: $input) { id } }`,
+                variables: { input: { content, mediaUrl: finalMediaUrl, mediaType: type, privacyLevel: privacy } }
+            };
+
+            sendGraphQLRequest(mutation, () => {
+                createPostModal.hide(); // Dùng .hide() của Bootstrap instance
+                resetForm();
+                // Reload bài viết của user đang xem (thường là mình)
+                if (window.viewingProfileUser) {
+                    loadUserPosts(window.viewingProfileUser.username);
+                }
+            });
+        } catch (error) {
+            alert("Lỗi: " + error.message);
+            btnSubmitPost.text("Đăng").prop("disabled", false);
+        }
+    });
+
+    // UPDATE POST
+    btnUpdatePost.click(async function () {
+        btnUpdatePost.text("Đang lưu...").prop("disabled", true);
+        const postId = $(this).data("id");
+        const oldPost = currentPosts.find(p => p.id == postId);
+
+        let finalMediaUrl = oldPost.mediaUrl || oldPost.imageUrl;
+        let finalMediaType = oldPost.mediaType;
+
+        try {
+            if (updateFile) {
+                finalMediaUrl = await uploadMedia(updateFile);
+                finalMediaType = updateFile.type.startsWith("video/") ? "VIDEO" : "IMAGE";
+            } else if (updateMediaPreviewContainer.is(":hidden")) {
+                finalMediaUrl = null;
+                finalMediaType = "NONE";
+            }
+
+            const mutation = {
+                query: `mutation UpdatePost($input: UpdatePostInput!) { updatePost(input: $input) { id } }`,
+                variables: {
+                    input: {
+                        id: postId,
+                        content: updatePostContentInput.val(),
+                        mediaUrl: finalMediaUrl,
+                        mediaType: finalMediaType,
+                        privacyLevel: $("#updatePrivacySelect").val()
+                    }
+                }
+            };
+
+            sendGraphQLRequest(mutation, () => {
+                updatePostModal.hide(); // Dùng .hide() của Bootstrap instance
+                if (window.viewingProfileUser) {
+                    loadUserPosts(window.viewingProfileUser.username);
+                }
+            }, () => btnUpdatePost.text("Lưu thay đổi").prop("disabled", false));
+
+        } catch (e) {
+            alert(e.message);
+            btnUpdatePost.text("Lưu thay đổi").prop("disabled", false);
+        }
+    });
+
+    // DELETE POST
+    $(document).on('click', '.delete-post-btn', function () {
+        const postId = $(this).data('id');
+        if (confirm("Bạn có chắc chắn muốn xóa?")) {
+            const mutation = { query: `mutation DeletePost($id: ID!) { deletePost(id: $id) }`, variables: { id: postId } };
+            sendGraphQLRequest(mutation, () => {
+                $(`.reddit-post-card[data-post-id="${postId}"]`).remove();
+                currentPosts = currentPosts.filter(p => p.id != postId);
+                if (currentPosts.length === 0) renderUserPosts([]);
+            });
+        }
+    });
+
+    // OPEN UPDATE MODAL
+    $(document).on('click', '.edit-post-btn', function () {
+        const postId = $(this).data('id');
+        const post = currentPosts.find(p => p.id == postId);
+        if (!post) return;
+
+        updatePostContentInput.val(post.content);
+        $("#updatePrivacySelect").val(post.privacyLevel);
+
+        if (currentUser) {
+            const avatar = currentUser.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`;
+            $("#updateModalUserAvatar").attr("src", avatar);
+            $("#updateModalUserName").text(currentUser.fullName);
+        }
+
+        updateFile = null;
+        updateFileInput.val("");
+        const mediaUrl = post.mediaUrl || post.imageUrl;
+        if (mediaUrl) {
+            updateMediaPreviewContainer.show();
+            if (post.mediaType === 'VIDEO' || mediaUrl.match(/\.(mp4|mov|avi)$/i)) {
+                updateImagePreview.hide(); updateVideoPreview.attr("src", mediaUrl).show();
+            } else {
+                updateVideoPreview.hide(); updateImagePreview.attr("src", mediaUrl).show();
+            }
+        } else {
+            updateMediaPreviewContainer.hide();
+        }
+
+        btnUpdatePost.data("id", postId);
+        updatePostModal.show();
+    });
+
+    // TOGGLE LIKE
     $(document).on("click", ".action-btn", function (e) {
-        if ($(this).index() === 0) { // Nút Thích
+        if ($(this).index() === 0) { // Like Button
             e.preventDefault();
             const btn = $(this);
             const card = btn.closest(".reddit-post-card");
             const postId = card.attr("data-post-id");
-
             if (!postId) return;
 
             const query = `mutation ToggleLikePost($postId: ID!) { toggleLikePost(postId: $postId) }`;
@@ -468,15 +653,12 @@ $(document).ready(function () {
         }
     });
 
-    // --- FOCUS Ô BÌNH LUẬN ---
+    // COMMENT INTERACTION
     $(document).on("click", ".action-btn:nth-child(2)", function (e) {
         e.preventDefault();
-        const card = $(this).closest(".reddit-post-card");
-        const input = card.find(".comment-input");
-        input.focus();
+        $(this).closest(".reddit-post-card").find(".comment-input").focus();
     });
 
-    // --- GỬI BÌNH LUẬN ---
     $(document).on("click", ".comment-send-btn", function (e) {
         e.preventDefault();
         const btn = $(this);
@@ -486,10 +668,8 @@ $(document).ready(function () {
         const content = input.val().trim();
 
         if (!content) return;
-
         btn.prop("disabled", true);
 
-        // Thêm username vào response
         const query = `
             mutation CreateComment($input: CreateCommentInput!) {
                 createComment(input: $input) {
@@ -511,9 +691,7 @@ $(document).ready(function () {
                 if (response.data && response.data.createComment) {
                     const newComment = response.data.createComment;
                     input.val("");
-
                     const avatar = newComment.user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${newComment.user.username}`;
-
                     const commentHtml = `
                         <div class="comment-item">
                             <img src="${avatar}" class="comment-avatar">
@@ -525,10 +703,10 @@ $(document).ready(function () {
                                 <div class="comment-actions">
                                     <span class="comment-time">Vừa xong</span>
                                     <span class="comment-action">Thích</span>
+                                    <span class="comment-action">Phản hồi</span>
                                 </div>
                             </div>
                         </div>`;
-
                     let list = card.find(".comments-list");
                     list.find(".loading-comments").remove();
                     list.prepend(commentHtml);
@@ -541,7 +719,6 @@ $(document).ready(function () {
         });
     });
 
-    // --- ENTER ĐỂ GỬI ---
     $(document).on("keypress", ".comment-input", function (e) {
         if (e.which === 13 && !e.shiftKey) {
             e.preventDefault();
@@ -549,67 +726,7 @@ $(document).ready(function () {
         }
     });
 
-    // =========================================================
-    // 4. CHỨC NĂNG ĐĂNG BÀI (CREATE POST)
-    // =========================================================
-    function updatePostButtonState() {
-        const hasText = postContentInput.val().trim().length > 0;
-        const hasFile = currentFile !== null;
-        btnSubmitPost.prop("disabled", !(hasText || hasFile));
-    }
-    postContentInput.on("input", updatePostButtonState);
-
-    fileInput.on("change", function (e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        currentFile = file;
-        const objectUrl = URL.createObjectURL(file);
-        mediaPreviewContainer.fadeIn();
-        if (file.type.startsWith("video/")) {
-            imagePreview.hide(); videoPreview.attr("src", objectUrl).show();
-        } else {
-            videoPreview.hide(); imagePreview.attr("src", objectUrl).show();
-        }
-        updatePostButtonState();
-    });
-
-    btnRemoveMedia.on("click", function () {
-        currentFile = null; fileInput.val(""); mediaPreviewContainer.hide();
-        updatePostButtonState();
-    });
-
-    btnSubmitPost.click(async function () {
-        btnSubmitPost.text("Đang xử lý...").prop("disabled", true);
-        let finalMediaUrl = null;
-        try {
-            if (currentFile) finalMediaUrl = await uploadMedia(currentFile);
-
-            const content = postContentInput.val();
-            const privacy = $("#privacySelect").val();
-            let type = "NONE";
-            if (finalMediaUrl) type = (currentFile && currentFile.type.startsWith("video/")) ? "VIDEO" : "IMAGE";
-
-            const mutation = {
-                query: `mutation CreatePost($input: CreatePostInput!) { createPost(input: $input) { id } }`,
-                variables: { input: { content, mediaUrl: finalMediaUrl, mediaType: type, privacyLevel: privacy } }
-            };
-
-            sendGraphQLRequest(mutation, () => {
-                createPostModal.modal('hide');
-                resetForm();
-                loadUserPosts(profileUsername); // Reload bài viết
-            });
-        } catch (error) {
-            alert("Lỗi: " + error.message);
-            btnSubmitPost.text("Đăng").prop("disabled", false);
-        }
-    });
-
-    // =========================================================
-    // 5. CHỨC NĂNG SỬA & XÓA BÀI (EDIT & DELETE)
-    // =========================================================
-
-    // Mở menu
+    // POST MENU DROPDOWN
     $(document).on('click', '.post-menu-btn', function (e) {
         e.stopPropagation();
         const postId = $(this).closest('.reddit-post-card').attr('data-post-id');
@@ -624,96 +741,7 @@ $(document).ready(function () {
 
     $(document).click(() => $('.post-menu-dropdown').remove());
 
-    // Xóa bài
-    $(document).on('click', '.delete-post-btn', function () {
-        const postId = $(this).data('id');
-        if (confirm("Bạn có chắc chắn muốn xóa?")) {
-            const mutation = { query: `mutation DeletePost($id: ID!) { deletePost(id: $id) }`, variables: { id: postId } };
-            sendGraphQLRequest(mutation, () => {
-                $(`.reddit-post-card[data-post-id="${postId}"]`).remove();
-                currentPosts = currentPosts.filter(p => p.id != postId);
-                if (currentPosts.length === 0) renderUserPosts([]);
-            });
-        }
-    });
-
-    // Sửa bài (Open Modal)
-    $(document).on('click', '.edit-post-btn', function () {
-        const postId = $(this).data('id');
-        const post = currentPosts.find(p => p.id == postId);
-        if (!post) return;
-
-        updatePostContentInput.val(post.content);
-        $("#updatePrivacySelect").val(post.privacyLevel);
-
-        if (currentUser) {
-            const avatar = currentUser.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`;
-            $("#updateModalUserAvatar").attr("src", avatar);
-            $("#updateModalUserName").text(currentUser.fullName);
-        }
-
-        updateFile = null;
-        updateFileInput.val("");
-        const mediaUrl = post.mediaUrl || post.imageUrl;
-        if (mediaUrl) {
-            updateMediaPreviewContainer.show();
-            if (post.mediaType === 'VIDEO' || mediaUrl.match(/\.(mp4|mov|avi)$/i)) {
-                updateImagePreview.hide(); updateVideoPreview.attr("src", mediaUrl).show();
-            } else {
-                updateVideoPreview.hide(); updateImagePreview.attr("src", mediaUrl).show();
-            }
-        } else {
-            updateMediaPreviewContainer.hide();
-        }
-
-        btnUpdatePost.data("id", postId);
-        updatePostModal.modal('show');
-    });
-
-    // Sửa bài (Submit) - ĐÃ FIX LỖI "Unknown field argument 'id'"
-    btnUpdatePost.click(async function () {
-        btnUpdatePost.text("Đang lưu...").prop("disabled", true);
-        const postId = $(this).data("id");
-        const oldPost = currentPosts.find(p => p.id == postId);
-
-        let finalMediaUrl = oldPost.mediaUrl || oldPost.imageUrl;
-        let finalMediaType = oldPost.mediaType;
-
-        try {
-            if (updateFile) {
-                finalMediaUrl = await uploadMedia(updateFile);
-                finalMediaType = updateFile.type.startsWith("video/") ? "VIDEO" : "IMAGE";
-            } else if (updateMediaPreviewContainer.is(":hidden")) {
-                finalMediaUrl = null;
-                finalMediaType = "NONE";
-            }
-
-            // Sửa lại structure mutation cho đúng schema
-            const mutation = {
-                query: `mutation UpdatePost($input: UpdatePostInput!) { updatePost(input: $input) { id } }`,
-                variables: {
-                    input: {
-                        id: postId, // ID nằm trong object input
-                        content: updatePostContentInput.val(),
-                        mediaUrl: finalMediaUrl,
-                        mediaType: finalMediaType,
-                        privacyLevel: $("#updatePrivacySelect").val()
-                    }
-                }
-            };
-
-            sendGraphQLRequest(mutation, () => {
-                updatePostModal.modal('hide');
-                loadUserPosts(profileUsername);
-            }, () => btnUpdatePost.text("Lưu thay đổi").prop("disabled", false));
-
-        } catch (e) {
-            alert(e.message);
-            btnUpdatePost.text("Lưu thay đổi").prop("disabled", false);
-        }
-    });
-
-    // Helpers
+    // HELPERS
     updateFileInput.on("change", function (e) {
         const file = e.target.files[0];
         if (!file) return;

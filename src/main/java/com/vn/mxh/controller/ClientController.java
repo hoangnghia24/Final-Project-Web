@@ -151,4 +151,10 @@ public class ClientController {
 
         return userService.updateUserProfile(principal.getName(), input);
     }
+
+    @QueryMapping
+    public User getUserById(@Argument Long id) {
+        // Gọi sang Service để tìm
+        return userService.getUserById(id);
+    }
 }

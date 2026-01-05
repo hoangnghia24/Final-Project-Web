@@ -331,14 +331,14 @@ async function graphqlFetch(query, variables = {}) {
                 
                 <div class="friend-card-actions" style="position: relative; z-index: 10;">
                     <button class="friend-card-btn btn-primary" onclick="window.location.href='/profile?id=${friend.id}'">
-                         Trang cá nhân
+                        Trang cá nhân
                     </button>
                     <button class="friend-card-btn btn-secondary btn-unfriend" data-friend-id="${friend.id}">
                          Hủy kết bạn
                     </button>
                 </div>
             </div>
-        </div>
+        </div>tơ
     `;
     }
 

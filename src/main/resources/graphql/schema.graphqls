@@ -172,4 +172,5 @@ type Query {
     
     getFriendSuggestions: [User]
     getSentFriendRequests: [Friendship]
+    getUserById(id: ID!): User
 }
