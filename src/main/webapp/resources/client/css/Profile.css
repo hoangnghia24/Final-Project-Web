@@ -282,13 +282,15 @@ body.dark-mode .tab-item:hover {
 
     border-radius: 12px;
     min-height: 300px;
+    /* Cho phép height tự động dãn theo nội dung bên trong */
+    height: auto;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    /* Bỏ align-items center để bài viết không bị co lại giữa */
+    align-items: stretch;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    padding: 40px;
+    /* Bỏ padding lớn để bài viết sát lề đẹp hơn */
+    padding: 20px;
     color: #050505;
 }
 
@@ -298,34 +300,43 @@ body.dark-mode .content-feed {
     color: #d7dadc;
 }
 
-.content-feed h3 {
+/* Sửa lại cho tiêu đề feed (nếu có) */
+.content-feed>h3 {
     color: #050505;
     margin-bottom: 8px;
     font-size: 20px;
     font-weight: 600;
+    text-align: center;
 }
 
-body.dark-mode .content-feed h3 {
+body.dark-mode .content-feed>h3 {
     color: #d7dadc;
 }
 
-.content-feed p {
+.content-feed>p {
     color: #65676b;
     font-size: 15px;
     line-height: 1.5;
+    text-align: center;
 }
 
-body.dark-mode .content-feed p {
+body.dark-mode .content-feed>p {
     color: #818384;
 }
 
 /* Tab Content Logic */
 .tab-content {
     display: none;
+    width: 100%;
+    /* Đảm bảo rộng full */
 }
 
 .tab-content.active {
     display: flex;
+    flex-direction: column;
+    /* Xếp chồng bài viết */
+    gap: 20px;
+    /* Khoảng cách giữa các bài */
 }
 
 .feed-btn {
@@ -342,6 +353,8 @@ body.dark-mode .content-feed p {
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
+    align-self: center;
+    /* Căn giữa nút này */
 }
 
 body.dark-mode .feed-btn {
@@ -500,6 +513,248 @@ body.dark-mode .user-text h1 {
 body.dark-mode .user-text span {
     color: #818384;
 }
+
+/* =================================================================
+   POST STYLES & INTERACTION FIXES (IMPORTED FROM HOME.CSS)
+   ================================================================= */
+
+/* Container bài viết: Nền trắng, bo tròn, shadow */
+.reddit-post-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: none;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+body.dark-mode .reddit-post-card {
+    background: #242526;
+    border: 1px solid #393a3b;
+    box-shadow: none;
+}
+
+/* Header bài viết */
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.post-user-info {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+    text-align: left;
+}
+
+.post-user-info b {
+    color: #050505;
+    font-size: 15px;
+}
+
+.post-user-info small {
+    color: #65676b;
+}
+
+body.dark-mode .post-user-info b {
+    color: #e4e6eb;
+}
+
+body.dark-mode .post-user-info small {
+    color: #b0b3b8;
+}
+
+.post-menu-btn {
+    background: none;
+    border: none;
+    color: #65676b;
+    cursor: pointer;
+}
+
+body.dark-mode .post-menu-btn {
+    color: #b0b3b8;
+}
+
+/* Nội dung bài viết */
+.post-body-text {
+    color: #050505;
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+body.dark-mode .post-body-text {
+    color: #e4e6eb;
+}
+
+.post-full-image {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid #f0f2f5;
+    margin-top: 5px;
+}
+
+body.dark-mode .post-full-image {
+    border-color: #393a3b;
+}
+
+/* Thanh hành động (Like, Comment...) */
+.post-action-buttons {
+    display: flex;
+    border-top: 1px solid #f0f2f5;
+    margin-top: 12px;
+    padding-top: 8px;
+}
+
+body.dark-mode .post-action-buttons {
+    border-top-color: #393a3b;
+}
+
+.action-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 8px;
+    font-weight: 600;
+    color: #65676b;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+body.dark-mode .action-btn {
+    color: #b0b3b8;
+}
+
+body.dark-mode .action-btn:hover {
+    background: #3a3b3c;
+}
+
+/* Light Mode Hover */
+body:not(.dark-mode) .action-btn:hover {
+    background: #f3e5f5;
+    /* Light Purple */
+    color: #4e54c8;
+}
+
+/* --- FIX NÚT THÍCH (LIKE) CHO PROFILE --- */
+/* Chữ Tím, Icon Vàng (Chỉ Light Mode) */
+body:not(.dark-mode) .action-btn.liked,
+body:not(.dark-mode) .post-action-btn.liked {
+    color: #4e54c8 !important;
+    /* Text Purple */
+}
+
+/* Force Icon Yellow */
+body:not(.dark-mode) .action-btn.liked svg,
+body:not(.dark-mode) .post-action-btn.liked svg,
+body:not(.dark-mode) .action-btn.liked i {
+    fill: #ffc107 !important;
+    stroke: #ffc107 !important;
+    color: #ffc107 !important;
+}
+
+/* --- KHUNG BÌNH LUẬN (COMMENTS) --- */
+.comment-input-wrapper {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.comment-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #eee;
+}
+
+/* Ô nhập liệu: Nền trắng, viền rõ */
+.comment-input-box,
+.comment-input {
+    flex: 1;
+    background-color: #ffffff !important;
+    border: 1px solid #c0c0c0 !important;
+    border-radius: 20px;
+    padding: 8px 16px;
+    color: #333;
+    display: flex;
+    align-items: center;
+}
+
+.comment-input:focus {
+    border-color: #4e54c8 !important;
+    box-shadow: 0 0 0 3px rgba(78, 84, 200, 0.2) !important;
+    outline: none;
+}
+
+/* Restore Input Dark Mode */
+body.dark-mode .comment-input-box,
+body.dark-mode .comment-input {
+    background-color: #3a3b3c !important;
+    border-color: #4a4a4c !important;
+    color: #e4e6eb !important;
+    box-shadow: none !important;
+}
+
+/* Nút Gửi: Gradient Tím */
+.comment-send-btn,
+.send-btn {
+    background: linear-gradient(135deg, #8f94fb 0%, #4e54c8 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(78, 84, 200, 0.3);
+}
+
+.comment-send-btn:hover {
+    transform: translateY(-2px);
+}
+
+body.dark-mode .comment-send-btn {
+    background: #6200ea !important;
+    box-shadow: none;
+}
+
+/* List Bình luận */
+.comment-item {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.comment-bubble {
+    background: #f0f2f5;
+    padding: 8px 12px;
+    border-radius: 12px;
+    text-align: left;
+}
+
+body.dark-mode .comment-bubble {
+    background: #3a3b3c;
+    color: #e4e6eb;
+}
+
+.comment-author {
+    font-weight: 600;
+    font-size: 13px;
+    color: #050505;
+}
+
+body.dark-mode .comment-author {
+    color: #e4e6eb;
+}
+
 
 /* Responsive giữ nguyên từ code cũ */
 @media (max-width: 768px) {
