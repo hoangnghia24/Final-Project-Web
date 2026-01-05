@@ -1,11 +1,20 @@
 package com.vn.mxh.controller;
 
+import com.vn.mxh.domain.Friendship;
 import com.vn.mxh.domain.Message;
 import com.vn.mxh.domain.User;
 import com.vn.mxh.service.MessageService;
+
+import com.vn.mxh.service.UserService;
+import com.vn.mxh.repository.FriendshipRepository;
+import com.vn.mxh.domain.Friendship;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -17,64 +26,86 @@ import java.util.Map;
 import java.util.UUID;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.stream.Collectors;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Controller
 public class ChatController {
-    
+
     private final MessageService messageService;
     private final SimpMessagingTemplate messagingTemplate;
-    
-    public ChatController(MessageService messageService, SimpMessagingTemplate messagingTemplate) {
+    private final UserService userService;
+    private final FriendshipRepository friendshipRepository;
+
+    public ChatController(MessageService messageService,
+            SimpMessagingTemplate messagingTemplate,
+            UserService userService,
+            FriendshipRepository friendshipRepository) {
         this.messageService = messageService;
         this.messagingTemplate = messagingTemplate;
+        this.userService = userService;
+        this.friendshipRepository = friendshipRepository;
     }
-    
+
     /**
      * WebSocket: Nhận tin nhắn từ client và gửi đến người nhận
      * Client sẽ gửi đến: /app/chat
      */
     @MessageMapping("/chat")
+    @Transactional
     public void sendMessage(@Payload ChatMessage chatMessage) {
         try {
-            // Lưu tin nhắn vào database
+            // 1. Lưu tin nhắn vào Database (Giữ nguyên)
             Message savedMessage = messageService.saveMessage(
-                chatMessage.getSenderId(), 
-                chatMessage.getReceiverId(), 
-                chatMessage.getContent()
-            );
-            
-            // Tạo response message
+                    chatMessage.getSenderId(),
+                    chatMessage.getReceiverId(),
+                    chatMessage.getContent());
+
+            // 2. Chuẩn bị dữ liệu trả về (Giữ nguyên)
             Map<String, Object> response = new HashMap<>();
             response.put("id", savedMessage.getId());
             response.put("senderId", savedMessage.getSender().getId());
             response.put("senderName", savedMessage.getSender().getFullName());
-            response.put("senderAvatar", savedMessage.getSender().getAvatarUrl());
+            String avatar = savedMessage.getSender().getAvatarUrl();
+            if (avatar == null || avatar.isEmpty()) {
+                avatar = "https://api.dicebear.com/9.x/avataaars/svg?seed=" + savedMessage.getSender().getUsername();
+            }
+            response.put("senderAvatar", avatar);
             response.put("receiverId", savedMessage.getReceiver().getId());
             response.put("content", savedMessage.getContent());
             response.put("sentAt", savedMessage.getSentAt().toString());
             response.put("isRead", savedMessage.getIsRead());
-            
-            // Gửi tin nhắn đến người nhận qua WebSocket
-            // Sẽ được gửi đến: /user/{receiverId}/queue/messages
-            messagingTemplate.convertAndSendToUser(
-                String.valueOf(chatMessage.getReceiverId()),
-                "/queue/messages",
-                response
-            );
-            
-            // Gửi lại cho người gửi để confirm
-            messagingTemplate.convertAndSendToUser(
-                String.valueOf(chatMessage.getSenderId()),
-                "/queue/messages",
-                response
-            );
-            
+
+            // --- ĐOẠN SỬA ĐỔI QUAN TRỌNG ---
+
+            // 3. Tìm thông tin người nhận để lấy Username
+            User receiver = userService.getUserById(chatMessage.getReceiverId());
+
+            if (receiver != null) {
+                // 4. Gửi tin nhắn tới Username (Thay vì ID)
+                // Spring Security quản lý session theo Username
+                messagingTemplate.convertAndSendToUser(
+                        receiver.getUsername(), // <--- Dùng Username
+                        "/queue/messages", // <--- Kênh chuẩn
+                        response);
+                System.out.println("✅ Đã gửi socket tới user: " + receiver.getUsername());
+            } else {
+                System.err.println("❌ Không tìm thấy người nhận với ID: " + chatMessage.getReceiverId());
+            }
+
+            // -------------------------------
+
         } catch (Exception e) {
-            System.err.println("Error sending message: " + e.getMessage());
+            System.err.println("Lỗi gửi tin nhắn: " + e.getMessage());
+            e.printStackTrace();
         }
     }
-    
+
     /**
      * REST API: Lấy lịch sử chat giữa 2 user
      */
@@ -84,9 +115,9 @@ public class ChatController {
     public List<Map<String, Object>> getConversation(
             @RequestParam Long userId1,
             @RequestParam Long userId2) {
-        
+
         List<Message> messages = messageService.getConversation(userId1, userId2);
-        
+
         return messages.stream().map(msg -> {
             Map<String, Object> map = new HashMap<>();
             map.put("id", msg.getId());
@@ -100,7 +131,7 @@ public class ChatController {
             return map;
         }).collect(Collectors.toList());
     }
-    
+
     /**
      * REST API: Lấy danh sách người đã chat
      */
@@ -109,17 +140,17 @@ public class ChatController {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getConversations(@RequestParam Long userId) {
         List<User> partners = messageService.getConversationPartners(userId);
-        
+
         return partners.stream().map(user -> {
             // Lấy tin nhắn cuối cùng giữa 2 người
             List<Message> conversation = messageService.getConversation(userId, user.getId());
             Message lastMessage = conversation.isEmpty() ? null : conversation.get(conversation.size() - 1);
-            
+
             // Đếm tin nhắn chưa đọc từ user này
             long unreadCount = conversation.stream()
-                .filter(m -> m.getSender().getId().equals(user.getId()) && !m.getIsRead())
-                .count();
-            
+                    .filter(m -> m.getSender().getId().equals(user.getId()) && !m.getIsRead())
+                    .count();
+
             Map<String, Object> map = new HashMap<>();
             map.put("id", user.getId());
             map.put("username", user.getUsername());
@@ -133,7 +164,7 @@ public class ChatController {
             return map;
         }).collect(Collectors.toList());
     }
-    
+
     /**
      * REST API: Đánh dấu tin nhắn đã đọc
      */
@@ -151,41 +182,48 @@ public class ChatController {
      */
     @PostMapping("/api/messages/upload-image")
     @ResponseBody
-    public Map<String, Object> uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
+    public Map<String, Object> uploadImage(@RequestParam("file") MultipartFile file) {
         Map<String, Object> resp = new HashMap<>();
-        if (file == null || file.isEmpty()) {
+        try {
+            if (file == null || file.isEmpty()) {
+                resp.put("success", false);
+                resp.put("error", "File rỗng");
+                return resp;
+            }
+
+            // 1. Tạo tên file
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+
+            // 2. Định nghĩa thư mục lưu (Sử dụng Path của Java NIO để an toàn hơn)
+            // Thư mục này sẽ nằm ngay tại root của project
+            Path uploadDir = Paths.get("uploads", "chat-images");
+
+            // 3. Tạo thư mục nếu chưa tồn tại
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+
+            // 4. Tạo đường dẫn TUYỆT ĐỐI đến file đích
+            // .toAbsolutePath() là chìa khóa để sửa lỗi "Temp folder"
+            File dest = uploadDir.resolve(fileName).toAbsolutePath().toFile();
+
+            // 5. Lưu file
+            System.out.println(">>> Đang lưu file vào: " + dest.getAbsolutePath()); // In ra để kiểm tra
+            file.transferTo(dest);
+
+            // 6. Trả về URL để hiển thị
+            resp.put("success", true);
+            resp.put("url", "/uploads/chat-images/" + fileName);
+            return resp;
+
+        } catch (Exception e) {
+            e.printStackTrace(); // In lỗi đầy đủ ra console server
             resp.put("success", false);
-            resp.put("error", "File rỗng");
+            resp.put("error", "Lỗi Server: " + e.getMessage());
             return resp;
         }
-
-        String contentType = file.getContentType();
-        if (contentType == null || !contentType.startsWith("image/")) {
-            resp.put("success", false);
-            resp.put("error", "Chỉ hỗ trợ định dạng ảnh");
-            return resp;
-        }
-
-        // Tạo thư mục lưu ảnh: uploads/chat-images
-        File dir = new File("uploads/chat-images");
-        if (!dir.exists()) dir.mkdirs();
-
-        // Tạo tên file duy nhất
-        String original = file.getOriginalFilename();
-        String ext = "";
-        if (original != null && original.contains(".")) {
-            ext = original.substring(original.lastIndexOf('.'));
-        }
-        String filename = UUID.randomUUID().toString().replaceAll("-", "") + ext;
-        File dest = new File(dir, filename);
-        file.transferTo(dest);
-
-        String url = "/uploads/chat-images/" + filename;
-        resp.put("success", true);
-        resp.put("url", url);
-        return resp;
     }
-    
+
     /**
      * DTO cho tin nhắn từ client
      */
@@ -193,14 +231,85 @@ public class ChatController {
         private Long senderId;
         private Long receiverId;
         private String content;
-        
-        public Long getSenderId() { return senderId; }
-        public void setSenderId(Long senderId) { this.senderId = senderId; }
-        
-        public Long getReceiverId() { return receiverId; }
-        public void setReceiverId(Long receiverId) { this.receiverId = receiverId; }
-        
-        public String getContent() { return content; }
-        public void setContent(String content) { this.content = content; }
+
+        public Long getSenderId() {
+            return senderId;
+        }
+
+        public void setSenderId(Long senderId) {
+            this.senderId = senderId;
+        }
+
+        public Long getReceiverId() {
+            return receiverId;
+        }
+
+        public void setReceiverId(Long receiverId) {
+            this.receiverId = receiverId;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public void setContent(String content) {
+            this.content = content;
+        }
+    }
+
+    // Thêm vào ChatController
+    @GetMapping("/api/messages/search-friends")
+    @ResponseBody
+    public List<Map<String, Object>> searchFriendsForChat(@RequestParam String query) {
+        // 1. Kiểm tra đầu vào
+        if (query == null || query.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        String keyword = query.toLowerCase().trim();
+
+        // 2. Lấy User hiện tại
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userService.getUserByUsername(currentUsername);
+
+        // 3. Lấy TOÀN BỘ danh sách bạn bè (Status = ACCEPTED)
+        // Hàm này đã có sẵn trong FriendshipRepository gốc của bạn
+        List<Friendship> allFriends = friendshipRepository.findAllAcceptedFriendships(currentUser.getId());
+
+        // 4. Lọc bằng Java (An toàn hơn SQL)
+        return allFriends.stream()
+                // Lấy ra đối tượng User bạn bè (không phải mình)
+                .map(f -> f.getRequester().getId().equals(currentUser.getId()) ? f.getAddressee() : f.getRequester())
+                // Kiểm tra điều kiện tìm kiếm
+                .filter(friend -> {
+                    String name = friend.getFullName() != null ? friend.getFullName().toLowerCase() : "";
+                    String username = friend.getUsername() != null ? friend.getUsername().toLowerCase() : "";
+                    // Tìm trong cả tên hiển thị VÀ tên đăng nhập
+                    return name.contains(keyword) || username.contains(keyword);
+                })
+                // Chuyển đổi sang Map để trả về JSON
+                .map(friend -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", friend.getId());
+                    map.put("fullName", friend.getFullName() != null ? friend.getFullName() : friend.getUsername()); // Nếu
+                                                                                                                     // không
+                                                                                                                     // có
+                                                                                                                     // tên
+                                                                                                                     // thật
+                                                                                                                     // thì
+                                                                                                                     // hiện
+                                                                                                                     // username
+                    map.put("username", friend.getUsername());
+
+                    // Xử lý avatar rỗng
+                    String avatar = friend.getAvatarUrl();
+                    if (avatar == null || avatar.isEmpty()) {
+                        avatar = "https://api.dicebear.com/9.x/avataaars/svg?seed=" + friend.getUsername();
+                    }
+                    map.put("avatarUrl", avatar);
+
+                    return map;
+                })
+                .collect(Collectors.toList());
     }
 }

@@ -37,4 +37,16 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     // Tìm danh sách lời mời mình đã gửi đi (Status = PENDING)
     @Query("SELECT f FROM Friendship f WHERE f.requester.id = :userId AND f.status = 'PENDING'")
     List<Friendship> findSentRequests(@Param("userId") Long userId);
+
+    // Tìm kiếm bạn bè theo Tên hiển thị (fullName) HOẶC Tên đăng nhập (username)
+    @Query("SELECT f FROM Friendship f " +
+            "WHERE (f.requester.id = :userId OR f.addressee.id = :userId) " +
+            "AND f.status = 'ACCEPTED' " +
+            "AND ( " +
+            "   (f.requester.id = :userId AND (LOWER(f.addressee.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(f.addressee.username) LIKE LOWER(CONCAT('%', :keyword, '%')))) OR "
+            +
+            "   (f.addressee.id = :userId AND (LOWER(f.requester.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(f.requester.username) LIKE LOWER(CONCAT('%', :keyword, '%')))) "
+            +
+            ")")
+    List<Friendship> searchFriends(@Param("userId") Long userId, @Param("keyword") String keyword);
 }

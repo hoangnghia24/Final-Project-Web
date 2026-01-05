@@ -1,16 +1,27 @@
 /**
  * Messages.js - Real-time Chat UI for MXH Social Network
- * Handles conversation list, active chat, and new message functionality
+ * Fixes: WebSocket Subscription & Real-time updates
  */
 
 $(document).ready(function () {
     console.log('Messages.js loaded - MXH Chat System');
+
+    // --- CẤU HÌNH TỰ ĐỘNG GỬI TOKEN ---
+    $.ajaxSetup({
+        beforeSend: function (xhr) {
+            const token = localStorage.getItem('accessToken');
+            if (token) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            }
+        }
+    });
 
     // State Management
     let currentChatUserId = null;
     let currentChatUserName = '';
     let conversations = [];
     let stompClient = null;
+    let searchTimeout = null;
 
     // DOM Elements
     const emptyState = $('#emptyState');
@@ -40,82 +51,74 @@ $(document).ready(function () {
      * Connect to WebSocket
      */
     function connectWebSocket() {
+        // Kiểm tra xem user đã đăng nhập chưa
         const currentUserId = localStorage.getItem('currentUserId');
-        console.log('🔌 Attempting to connect WebSocket for user:', currentUserId);
-
         if (!currentUserId) {
-            console.warn('⚠️ No user ID, skipping WebSocket connection');
+            console.warn("Chưa có User ID, không kết nối socket.");
             return;
         }
 
         const socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
-        stompClient.debug = null; // Tắt debug log
+        stompClient.debug = null; // Tắt log rác của thư viện Stomp
 
         stompClient.connect({}, function (frame) {
-            console.log('✅ WebSocket connected successfully for user:', currentUserId);
-            console.log('Subscribing to: /user/' + currentUserId + '/queue/messages');
+            console.log('✅ WebSocket connected');
 
-            // Subscribe để nhận tin nhắn
-            stompClient.subscribe('/user/' + currentUserId + '/queue/messages', function (message) {
+            // --- FIX QUAN TRỌNG: SỬA ĐƯỜNG DẪN SUBSCRIBE ---
+            // Thay vì dùng ID cứng (/user/3/...), ta dùng kênh chuẩn của Spring Security.
+            // Hệ thống sẽ tự động map tin nhắn tới session của user đang đăng nhập.
+            stompClient.subscribe('/user/queue/messages', function (message) {
                 const data = JSON.parse(message.body);
-                console.log('📬 Received real-time message from WebSocket:', data);
+                console.log("📩 Nhận tin nhắn Real-time:", data);
                 handleIncomingMessage(data);
             });
 
-            console.log('✅ Subscribed to message queue');
         }, function (error) {
             console.error('❌ WebSocket connection error:', error);
         });
     }
 
     /**
-     * Handle incoming message from WebSocket
+     * Handle incoming message
      */
     function handleIncomingMessage(messageData) {
         const currentUserId = parseInt(localStorage.getItem('currentUserId'));
-        console.log('📨 Received message from WebSocket:', messageData);
-        console.log('Current user ID:', currentUserId, 'Type:', typeof currentUserId);
-        console.log('Message senderId:', messageData.senderId, 'Type:', typeof messageData.senderId);
-        console.log('Message receiverId:', messageData.receiverId, 'Type:', typeof messageData.receiverId);
 
-        // Nếu đang chat với người gửi/người nhận, hiển thị ngay
+        // Xác định ID người "kia" trong cuộc hội thoại này
         const otherUserId = parseInt(messageData.senderId) === currentUserId
             ? parseInt(messageData.receiverId)
             : parseInt(messageData.senderId);
 
-        console.log('Current chat user ID:', currentChatUserId, 'Type:', typeof currentChatUserId);
-        console.log('Other user ID:', otherUserId, 'Type:', typeof otherUserId);
-
+        // 1. Nếu đang mở khung chat với đúng người này -> Hiện tin nhắn lên luôn
         if (parseInt(currentChatUserId) === parseInt(otherUserId)) {
-            console.log('✅ Displaying message in current chat');
+            // Kiểm tra để tránh lặp tin nhắn (nếu server gửi lại tin của chính mình)
+            // Nếu tin nhắn là của mình gửi và đã hiển thị rồi thì thôi (tùy logic backend)
+            // Ở đây ta cứ append, nhưng tốt nhất backend không nên gửi lại cho sender.
             appendMessage(messageData, currentUserId);
-        } else {
-            console.log('ℹ️ Message from different user, not displaying. Current:', currentChatUserId, 'Other:', otherUserId);
         }
 
-        // Cập nhật danh sách conversations sau một chút để tránh conflict
-        setTimeout(() => {
-            loadConversations();
-        }, 300);
+        // 2. Load lại danh sách bên trái để đưa cuộc hội thoại lên đầu (có thông báo mới)
+        // Chỉ reload nếu không đang gõ tìm kiếm
+        if (!searchInput.val().trim()) {
+            setTimeout(() => { loadConversations(); }, 500);
+        }
     }
 
     /**
-     * Append a single message to messages area
+     * Append message to UI
      */
     function appendMessage(msg, currentUserId) {
-        console.log('📩 Appending message:', msg);
-
         const isSent = msg.senderId == currentUserId;
         const messageClass = isSent ? 'sent' : 'received';
         const time = formatTime(msg.sentAt || msg.timestamp);
 
         let messageHtml = '<div class="message-group"><div class="message ' + messageClass + '">';
 
-        // Avatar cho tin nhắn nhận được
+        // Chỉ hiện avatar cho tin nhắn nhận được
         if (!isSent) {
             messageHtml += `<img src="${msg.senderAvatar || 'https://api.dicebear.com/9.x/avataaars/svg?seed=' + msg.senderId}" 
-                                 alt="${msg.senderName}" class="message-avatar">`;
+                                 class="message-avatar">`;
         }
 
         const contentHtml = renderMessageContent(msg.content);
@@ -125,53 +128,45 @@ $(document).ready(function () {
                 <span class="message-time">${time}</span>
             </div>
         `;
-
         messageHtml += '</div></div>';
 
         messagesArea.append(messageHtml);
-        console.log('✅ Message appended, scrolling to bottom...');
-
-        // Đảm bảo scroll sau khi DOM được render
-        setTimeout(() => {
-            scrollToBottom();
-        }, 50);
+        setTimeout(() => { scrollToBottom(); }, 50);
     }
 
     /**
      * Setup Event Listeners
      */
     function setupEventListeners() {
-        // Conversation item click
         conversationsList.on('click', '.conversation-item', function () {
-            const userId = $(this).data('user-id');
+            // Lấy ID và parse sang số nguyên để tránh lỗi so sánh
+            const rawId = $(this).attr("data-user-id");
+            const userId = parseInt(rawId);
             const userName = $(this).find('.conversation-name').text();
 
-            // Chỉ mở chat nếu khác chat hiện tại
-            if (currentChatUserId != userId) {
-                openChat(userId, userName);
-            } else {
-                console.log('ℹ️ Already in this chat');
+            if (isNaN(userId)) {
+                console.error("Lỗi: ID người dùng không hợp lệ:", rawId);
+                return;
             }
 
-            // Update active state
+            $('#chatUserName').text(userName);
+
+            if (currentChatUserId !== userId) {
+                openChat(userId, userName);
+                // Nếu đang tìm kiếm, xóa ô tìm kiếm để quay về list chat
+                if (searchInput.val().trim() !== "") {
+                    searchInput.val("");
+                    // Không loadConversations ngay để tránh giật, lần sau sẽ tự load
+                }
+            }
+
             $('.conversation-item').removeClass('active');
             $(this).addClass('active');
-
-            // Remove unread badge
             $(this).find('.unread-badge').fadeOut();
-            // Normalize preview style after opening
-            $(this).find('.conversation-preview').css({ fontWeight: '400', color: '#7c7c7c' });
         });
 
-        // New message button clicks
-        newMessageBtn.on('click', showNewMessageForm);
-        startNewMessageBtn.on('click', showNewMessageForm);
-        closeFormBtn.on('click', hideNewMessageForm);
-
-        // Send message button
+        // Nút gửi tin nhắn
         sendBtn.on('click', sendMessage);
-
-        // Enter key to send
         messageInput.on('keypress', function (e) {
             if (e.which === 13 && !e.shiftKey) {
                 e.preventDefault();
@@ -179,193 +174,132 @@ $(document).ready(function () {
             }
         });
 
-        // Send new message
-        sendNewMessageBtn.on('click', sendNewMessage);
+        // Search Sidebar (Gọi API)
+        searchInput.on('input', debounce(handleSidebarSearch, 300));
 
-        // Attach image flow
-        attachImageBtn.on('click', function () {
-            imageUploadInput.trigger('click');
-        });
+        // Các nút khác giữ nguyên logic
+        newMessageBtn.on('click', showNewMessageForm);
+        startNewMessageBtn.on('click', showNewMessageForm);
+        closeFormBtn.on('click', hideNewMessageForm);
+        attachImageBtn.on('click', function () { imageUploadInput.trigger('click'); });
         imageUploadInput.on('change', handleImageUpload);
 
-        // Emoji picker toggle and insert
+        // Emoji logic
         emojiBtn.on('click', function (e) {
             e.stopPropagation();
             const isShown = emojiPicker.is(':visible');
             $('.emoji-picker-visible').hide().removeClass('emoji-picker-visible');
-            if (!isShown) {
-                emojiPicker.show().addClass('emoji-picker-visible');
-            }
+            if (!isShown) emojiPicker.show().addClass('emoji-picker-visible');
         });
-        // Click outside closes picker
-        $(document).on('click', function () {
-            emojiPicker.hide().removeClass('emoji-picker-visible');
-        });
-        // Prevent closing when clicking inside
+        $(document).on('click', function () { emojiPicker.hide().removeClass('emoji-picker-visible'); });
         emojiPicker.on('click', function (e) { e.stopPropagation(); });
-        // Handle emoji click
         emojiPicker.on('click', 'span', function () {
-            const emoji = $(this).text();
-            insertAtCursor($('#messageInput')[0], emoji);
+            insertAtCursor($('#messageInput')[0], $(this).text());
         });
-
-        // Recipient input - search users
-        recipientInput.on('input', debounce(searchUsers, 300));
-
-        // Search conversations
-        searchInput.on('input', debounce(filterConversations, 300));
-
-        // Auto-scroll to bottom when new messages arrive
-        if (messagesArea.length) {
-            scrollToBottom();
-        }
-    }
-
-    function handleImageUpload() {
-        const file = this.files && this.files[0];
-        if (!file || !currentChatUserId) return;
-        const formData = new FormData();
-        formData.append('file', file);
-        $.ajax({
-            url: '/api/messages/upload-image',
-            method: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (resp) {
-                if (resp && resp.success && resp.url) {
-                    const now = new Date();
-                    const messageData = {
-                        senderId: parseInt(localStorage.getItem('currentUserId')),
-                        receiverId: parseInt(currentChatUserId),
-                        content: 'IMG::' + resp.url,
-                        timestamp: now.toISOString()
-                    };
-                    if (stompClient && stompClient.connected) {
-                        try { stompClient.send('/app/chat', {}, JSON.stringify(messageData)); } catch (e) { }
-                    }
-                    appendMessage({
-                        senderId: messageData.senderId,
-                        receiverId: messageData.receiverId,
-                        content: messageData.content,
-                        sentAt: messageData.timestamp
-                    }, messageData.senderId);
-                    setTimeout(() => {
-                        loadConversations();
-                    }, 300);
-                } else {
-                    alert('Tải ảnh thất bại');
-                }
-                imageUploadInput.val('');
-            },
-            error: function () {
-                alert('Lỗi khi tải ảnh');
-                imageUploadInput.val('');
-            }
-        });
-    }
-
-    function insertAtCursor(input, text) {
-        if (!input) return;
-        const start = input.selectionStart || 0;
-        const end = input.selectionEnd || 0;
-        const value = input.value || '';
-        input.value = value.substring(0, start) + text + value.substring(end);
-        const pos = start + text.length;
-        input.selectionStart = input.selectionEnd = pos;
-        input.focus();
-        $(input).trigger('input');
     }
 
     /**
-     * Load conversations from server
+     * Search Handler
      */
-    function loadConversations() {
-        // Lấy userId hiện tại từ localStorage (đã set khi login)
-        const currentUserId = localStorage.getItem('currentUserId');
-
-        console.log('=== Loading Conversations ===');
-        console.log('Current User ID:', currentUserId);
-        console.log('localStorage keys:', Object.keys(localStorage));
-
-        if (!currentUserId || currentUserId === 'null' || currentUserId === 'undefined') {
-            console.warn('No current user ID found in localStorage');
-            conversationsList.html(`
-                <div style="text-align: center; padding: 40px 20px; color: #e74c3c;">
-                    <p><strong>⚠️ Lỗi:</strong> Không tìm thấy thông tin đăng nhập.</p>
-                    <p>localStorage không có currentUserId</p>
-                    <p>Vui lòng <a href="/login" style="color: #3b82f6; text-decoration: underline;">đăng nhập lại</a></p>
-                </div>
-            `);
-            emptyState.show();
-            chatActive.hide();
+    function handleSidebarSearch() {
+        const query = searchInput.val().trim();
+        if (query === "") {
+            loadConversations();
             return;
         }
 
-        // Gọi API để lấy danh sách người đã chat
-        console.log('Fetching conversations from API...');
+        $.ajax({
+            url: '/api/messages/search-friends',
+            method: 'GET',
+            data: { query: query },
+            success: function (friends) {
+                // Bảo vệ: Đảm bảo friends là mảng
+                if (!Array.isArray(friends)) {
+                    console.error("API Search trả về dữ liệu không phải mảng:", friends);
+                    return;
+                }
+                renderSearchResults(friends);
+            },
+            error: function (xhr) {
+                console.error("Lỗi tìm kiếm:", xhr.status);
+            }
+        });
+    }
+
+    function renderSearchResults(friends) {
+        conversationsList.empty();
+        if (friends.length === 0) {
+            conversationsList.html('<div class="text-center p-3 text-muted">Không tìm thấy kết quả</div>');
+            return;
+        }
+
+        const html = friends.map(friend => {
+            const isActive = (parseInt(currentChatUserId) === friend.id) ? 'active' : '';
+            const avatarUrl = friend.avatarUrl || `https://api.dicebear.com/9.x/avataaars/svg?seed=${friend.username}`;
+
+            return `
+            <div class="conversation-item ${isActive}" data-user-id="${friend.id}">
+                <div class="conversation-avatar">
+                    <img src="${avatarUrl}" alt="${friend.fullName}">
+                </div>
+                <div class="conversation-content">
+                    <div class="conversation-header">
+                        <span class="conversation-name">${friend.fullName}</span>
+                    </div>
+                    <div class="conversation-preview" style="color:#2e89ff">Nhấn để nhắn tin</div>
+                </div>
+            </div>`;
+        }).join('');
+        conversationsList.html(html);
+    }
+
+    /**
+     * Load conversations list
+     */
+    function loadConversations() {
+        const currentUserId = localStorage.getItem('currentUserId');
+        if (!currentUserId) return;
+
         $.ajax({
             url: '/api/messages/conversations',
             method: 'GET',
             data: { userId: currentUserId },
             success: function (data) {
-                console.log('✅ Conversations loaded successfully:', data.length, 'conversations');
-                console.log('Data:', data);
+                // Kiểm tra dữ liệu trước khi dùng slice/sort
+                if (!Array.isArray(data)) {
+                    console.error("❌ LỖI DỮ LIỆU: API /conversations không trả về Mảng (List).", data);
+                    return;
+                }
                 conversations = data;
                 renderConversations(data);
             },
-            error: function (xhr, status, error) {
-                console.error('❌ Error loading conversations');
-                console.error('Status:', xhr.status);
-                console.error('Error:', error);
-                console.error('Response Text:', xhr.responseText);
-
-                let errorMsg = `Lỗi ${xhr.status}`;
-                if (xhr.status === 404) {
-                    errorMsg = 'API endpoint không tìm thấy';
-                } else if (xhr.status === 500) {
-                    errorMsg = 'Lỗi server - Kiểm tra database';
-                } else if (xhr.status === 0) {
-                    errorMsg = 'Không thể kết nối server';
-                }
-
-                conversationsList.html(`
-                    <div style="text-align: center; padding: 40px 20px; color: #e74c3c;">
-                        <p><strong>⚠️ ${errorMsg}</strong></p>
-                        <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                            ${xhr.responseText || error}
-                        </p>
-                        <button onclick="location.reload()" style="margin-top: 15px; padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">
-                            Thử lại
-                        </button>
-                    </div>
-                `);
+            error: function (xhr) {
+                console.error('Lỗi tải danh sách chat:', xhr.status);
             }
         });
     }
 
-    /**
-     * Render danh sách conversations
-     */
     function renderConversations(partners) {
+        if (!Array.isArray(partners)) return;
+
         if (partners.length === 0) {
-            conversationsList.html(`
-                <div style="text-align: center; padding: 40px 20px; color: #65676b;">
-                    <p>Chưa có tin nhắn nào</p>
-                </div>
-            `);
+            conversationsList.html('<div class="text-center p-4 text-muted">Chưa có tin nhắn nào.<br>Tìm kiếm bạn bè để bắt đầu!</div>');
             return;
         }
 
         const currentUserId = parseInt(localStorage.getItem('currentUserId'));
+
+        // Sắp xếp an toàn: tin nhắn mới nhất lên đầu
         const sorted = partners.slice().sort((a, b) => {
             const da = parseDate(a.lastMessageTime) || new Date(0);
             const db = parseDate(b.lastMessageTime) || new Date(0);
-            return db - da; // newest conversation first
+            return db - da;
         });
+
         const html = sorted.map(partner => {
             const hasUnread = (partner.unreadCount || 0) > 0;
             const isFromOther = partner.lastMessageSenderId && partner.lastMessageSenderId != currentUserId;
+            const isActive = (parseInt(currentChatUserId) === partner.id) ? 'active' : '';
 
             let timeStr = '';
             if (partner.lastMessageTime) {
@@ -374,16 +308,16 @@ $(document).ready(function () {
             }
 
             const rawText = partner.lastMessage || 'Bắt đầu trò chuyện...';
+            // Hiển thị "Bạn: ..." nếu mình là người gửi cuối
             const previewHtml = (partner.lastMessageSenderId == currentUserId)
                 ? `<span style="font-weight:700">Bạn:</span> ${escapeHtml(rawText)}`
                 : `${escapeHtml(rawText)}`;
             const msgStyle = (hasUnread && isFromOther) ? 'font-weight:700; color:#1c1c1c;' : 'font-weight:400; color:#7c7c7c;';
 
             return `
-            <div class="conversation-item" data-user-id="${partner.id}">
+            <div class="conversation-item ${isActive}" data-user-id="${partner.id}">
                 <div class="conversation-avatar">
-                    <img src="${partner.avatarUrl || 'https://api.dicebear.com/9.x/avataaars/svg?seed=' + (partner.username || partner.id)}" 
-                         alt="${partner.fullName}">
+                    <img src="${partner.avatarUrl || 'https://api.dicebear.com/9.x/avataaars/svg?seed=' + partner.id}" alt="">
                 </div>
                 <div class="conversation-content">
                     <div class="conversation-header">
@@ -400,115 +334,75 @@ $(document).ready(function () {
     }
 
     /**
-     * Open chat with specific user
+     * Open Chat Logic
      */
     function openChat(userId, userName) {
-        // Đảm bảo userId là number
-        userId = parseInt(userId);
-
-        const wasAlreadyOpen = (currentChatUserId === userId);
-
-        currentChatUserId = userId;
+        currentChatUserId = parseInt(userId);
         currentChatUserName = userName;
 
-        console.log('📂 Opening chat - User ID:', userId, 'Type:', typeof userId, 'Name:', userName);
-
-        // Hide empty state and new message form
         emptyState.hide();
         newMessageForm.hide();
-
-        // Show chat active
-        chatActive.show();
-
-        // Update chat header
+        chatActive.show().css('display', 'flex');
         $('#chatUserName').text(userName);
 
-        // Chỉ load messages nếu chưa mở chat này, hoặc cần refresh
-        if (!wasAlreadyOpen) {
-            console.log('🔄 Loading messages for new chat:', userName, 'ID:', userId);
-            loadMessages(userId);
-        } else {
-            console.log('ℹ️ Chat already open, not reloading');
-        }
-
-        // Mark unread as read on open
+        loadMessages(userId);
         markConversationAsRead(userId);
-
-        console.log('Opened chat with:', userName, 'ID:', userId);
     }
 
-    /**
-     * Load messages for specific user
-     */
     function loadMessages(userId) {
-        // Lấy userId hiện tại từ localStorage
         const currentUserId = localStorage.getItem('currentUserId');
+        messagesArea.html('<div class="text-center mt-4"><div class="spinner-border text-primary" role="status"></div></div>');
 
-        if (!currentUserId) {
-            messagesArea.html('<div class="no-messages">Vui lòng đăng nhập lại</div>');
-            return;
-        }
-
-        // Gọi API để lấy lịch sử chat
         $.ajax({
             url: '/api/messages/conversation',
             method: 'GET',
-            data: {
-                userId1: currentUserId,
-                userId2: userId
-            },
+            data: { userId1: currentUserId, userId2: userId },
             success: function (messages) {
+                messagesArea.empty();
+
+                if (!Array.isArray(messages)) {
+                    console.error("❌ LỖI DỮ LIỆU: API /conversation không trả về Mảng.", messages);
+                    return;
+                }
+
                 if (messages.length === 0) {
-                    messagesArea.html(`
-                        <div style="text-align: center; padding: 40px 20px; color: #65676b;">
-                            <p>Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!</p>
-                        </div>
-                    `);
+                    messagesArea.html('<div class="text-center p-4 text-muted">Hãy bắt đầu cuộc trò chuyện!</div>');
                 } else {
                     renderMessages(messages, currentUserId);
                 }
                 scrollToBottom();
-                // Refresh conversations to update last message and unread
-                loadConversations();
             },
-            error: function (error) {
-                console.error('Error loading messages:', error);
-                messagesArea.html('<div class="error-message">Không thể tải tin nhắn</div>');
+            error: function () {
+                messagesArea.html('<div class="text-center text-danger">Lỗi tải tin nhắn</div>');
             }
         });
     }
 
-    /**
-     * Render messages
-     */
     function renderMessages(messages, currentUserId) {
+        if (!Array.isArray(messages)) return;
+
+        // Sắp xếp tin nhắn: cũ nhất lên đầu (để hiển thị theo dòng thời gian từ trên xuống)
         const sorted = messages.slice().sort((a, b) => {
             const da = parseDate(a.sentAt || a.timestamp) || new Date(0);
             const db = parseDate(b.sentAt || b.timestamp) || new Date(0);
-            return da - db; // oldest first, newest last (at bottom)
+            return da - db;
         });
+
         const html = sorted.map(msg => {
             const isSent = msg.senderId == currentUserId;
             const messageClass = isSent ? 'sent' : 'received';
             const time = formatTime(msg.sentAt || msg.timestamp);
 
             let messageHtml = '<div class="message-group"><div class="message ' + messageClass + '">';
-
-            // Avatar cho tin nhắn nhận được
             if (!isSent) {
-                messageHtml += `<img src="${msg.senderAvatar || 'https://api.dicebear.com/9.x/avataaars/svg?seed=' + msg.senderId}" 
-                                     alt="${msg.senderName}" class="message-avatar">`;
+                messageHtml += `<img src="${msg.senderAvatar || 'https://api.dicebear.com/9.x/avataaars/svg?seed=' + msg.senderId}" class="message-avatar">`;
             }
-
             const contentHtml = renderMessageContent(msg.content);
             messageHtml += `
                 <div class="message-content">
                     <div class="message-bubble">${contentHtml}</div>
                     <span class="message-time">${time}</span>
-                </div>
-            `;
-
-            messageHtml += '</div></div>';
+                </div></div></div>`;
             return messageHtml;
         }).join('');
 
@@ -516,286 +410,189 @@ $(document).ready(function () {
     }
 
     /**
-     * Format timestamp
-     */
-    function formatTime(timestamp) {
-        const d = parseDate(timestamp);
-        if (!d) return '';
-        const hours = String(d.getHours()).padStart(2, '0');
-        const minutes = String(d.getMinutes()).padStart(2, '0');
-        return hours + ':' + minutes;
-    }
-
-    function parseDate(value) {
-        try {
-            if (!value) return null;
-            if (typeof value === 'string') {
-                return new Date(value.replace('T', ' '));
-            }
-            if (Array.isArray(value)) {
-                return new Date(
-                    value[0],
-                    (value[1] || 1) - 1,
-                    value[2] || 1,
-                    value[3] || 0,
-                    value[4] || 0,
-                    value[5] || 0
-                );
-            }
-            const d = new Date(value);
-            return isNaN(d.getTime()) ? null : d;
-        } catch (e) {
-            console.error('Error parsing date:', value, e);
-            return null;
-        }
-    }
-
-    function formatRelativeTime(date) {
-        const now = new Date();
-        const diffMs = now - date;
-        const diffMins = Math.floor(diffMs / 60000);
-        if (diffMins < 1) return 'Vừa xong';
-        if (diffMins < 60) return diffMins + ' phút';
-        if (diffMins < 1440) return Math.floor(diffMins / 60) + ' giờ';
-        if (diffMins < 10080) return Math.floor(diffMins / 1440) + ' ngày';
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
-    }
-
-    /**
-     * Send message
+     * Send Message Logic
      */
     function sendMessage() {
         const content = messageInput.val().trim();
+        if (!content || !currentChatUserId) return;
 
-        if (!content || !currentChatUserId) {
-            return;
-        }
-
+        const senderId = parseInt(localStorage.getItem('currentUserId'));
         const now = new Date();
+
         const messageData = {
-            senderId: parseInt(localStorage.getItem('currentUserId')),
-            receiverId: parseInt(currentChatUserId),
+            senderId: senderId,
+            receiverId: currentChatUserId,
             content: content,
             timestamp: now.toISOString()
         };
 
-        // Gửi qua WebSocket nếu có kết nối
+        // Gửi qua WebSocket
         if (stompClient && stompClient.connected) {
-            try {
-                stompClient.send('/app/chat', {}, JSON.stringify(messageData));
-                console.log('Sent message via WebSocket:', messageData);
-            } catch (e) {
-                console.error('Error sending via WebSocket:', e);
-            }
+            stompClient.send('/app/chat', {}, JSON.stringify(messageData));
         } else {
-            console.warn('WebSocket not connected; message will appear locally');
+            console.warn("⚠️ WebSocket chưa kết nối, tin nhắn có thể không gửi được real-time");
         }
 
-        // Hiển thị ngay tin nhắn gửi
+        // Hiển thị ngay lên giao diện của mình (Optimistic UI)
         appendMessage({
-            senderId: messageData.senderId,
-            receiverId: messageData.receiverId,
-            content: messageData.content,
+            senderId: senderId,
+            receiverId: currentChatUserId,
+            content: content,
             sentAt: messageData.timestamp
-        }, messageData.senderId);
+        }, senderId);
 
-        // Clear input
-        messageInput.val('');
+        messageInput.val(''); // Xóa ô nhập
 
-        // Refresh conversations sau một chút để cập nhật danh sách bên trái
-        setTimeout(() => {
-            loadConversations();
-        }, 300);
-    }
-
-    /**
-     * Show new message form
-     */
-    function showNewMessageForm() {
-        emptyState.hide();
-        chatActive.hide();
-        newMessageForm.show();
-        recipientInput.focus();
-    }
-
-    /**
-     * Hide new message form
-     */
-    function hideNewMessageForm() {
-        newMessageForm.hide();
-        emptyState.show();
-        recipientInput.val('');
-        $('#newMessageText').val('');
-        $('#recipientSuggestions').hide();
-    }
-
-    /**
-     * Send new message
-     */
-    function sendNewMessage() {
-        const recipient = recipientInput.val().trim();
-        const content = $('#newMessageText').val().trim();
-
-        if (!recipient || !content) {
-            alert('Vui lòng nhập người nhận và nội dung tin nhắn');
-            return;
-        }
-
-        // TODO: Send new message via API
-        console.log('Sending new message to:', recipient, 'Content:', content);
-
-        // Simulate success
-        alert('Tin nhắn đã được gửi!');
-        hideNewMessageForm();
-
-        // TODO: Add new conversation to list and open chat
-    }
-
-    /**
-     * Search users for recipient
-     */
-    function searchUsers() {
-        const query = recipientInput.val().trim();
-
-        if (query.length < 2) {
-            $('#recipientSuggestions').hide();
-            return;
-        }
-
-        // TODO: Replace with actual API call
-        const mockUsers = [
-            { id: 4, name: 'Phạm Thị D', avatar: 'user4' },
-            { id: 5, name: 'Hoàng Văn E', avatar: 'user5' },
-            { id: 6, name: 'Đỗ Thị F', avatar: 'user6' }
-        ];
-
-        const filtered = mockUsers.filter(u =>
-            u.name.toLowerCase().includes(query.toLowerCase())
-        );
-
-        if (filtered.length > 0) {
-            const suggestionsHtml = filtered.map(user => `
-                <div class="suggestion-item" data-user-id="${user.id}" data-user-name="${user.name}">
-                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=${user.avatar}" alt="Avatar" class="suggestion-avatar">
-                    <span class="suggestion-name">${user.name}</span>
-                </div>
-            `).join('');
-
-            $('#recipientSuggestions').html(suggestionsHtml).show();
-
-            // Handle suggestion click
-            $('.suggestion-item').on('click', function () {
-                const userName = $(this).data('user-name');
-                recipientInput.val(userName);
-                $('#recipientSuggestions').hide();
-            });
-        } else {
-            $('#recipientSuggestions').hide();
+        // Load lại list chat để cập nhật tin nhắn cuối cùng
+        if (!searchInput.val().trim()) {
+            setTimeout(() => { loadConversations(); }, 300);
         }
     }
 
     function markConversationAsRead(otherUserId) {
         const currentUserId = localStorage.getItem('currentUserId');
-        if (!currentUserId || !otherUserId) return;
-
-        $.ajax({
-            url: `/api/messages/conversation?userId1=${currentUserId}&userId2=${otherUserId}`,
-            type: 'GET',
-            success: function (messages) {
+        $.get(`/api/messages/conversation?userId1=${currentUserId}&userId2=${otherUserId}`, function (messages) {
+            if (Array.isArray(messages)) {
                 messages.forEach(msg => {
                     if (msg.senderId == otherUserId && !msg.isRead) {
-                        $.ajax({
-                            url: `/api/messages/read?messageId=${msg.id}`,
-                            type: 'POST',
-                            success: function () {
-                                // after marking read, refresh conversations
-                                loadConversations();
-                            },
-                            error: function (xhr, status, error) {
-                                console.error('Error marking message as read:', error);
-                            }
-                        });
+                        $.post(`/api/messages/read?messageId=${msg.id}`);
                     }
                 });
-            },
-            error: function (xhr, status, error) {
-                console.error('Error loading conversation for markAsRead:', error);
             }
         });
     }
 
-    /**
-     * Filter conversations by search
-     */
-    function filterConversations() {
-        const query = searchInput.val().trim().toLowerCase();
-
-        $('.conversation-item').each(function () {
-            const name = $(this).find('.conversation-name').text().toLowerCase();
-            const preview = $(this).find('.conversation-preview').text().toLowerCase();
-
-            if (name.includes(query) || preview.includes(query)) {
-                $(this).show();
-            } else {
-                $(this).hide();
-            }
-        });
-    }
-
-    /**
-     * Scroll messages to bottom
-     */
+    // --- Helpers ---
     function scrollToBottom() {
-        if (messagesArea.length) {
-            const element = messagesArea[0];
-            element.scrollTop = element.scrollHeight;
-            console.log('📜 Scrolled to bottom - scrollHeight:', element.scrollHeight, 'scrollTop:', element.scrollTop);
-        }
+        if (messagesArea.length) messagesArea[0].scrollTop = messagesArea[0].scrollHeight;
+    }
+
+    function parseDate(value) {
+        try { return value ? new Date(value) : null; } catch (e) { return null; }
+    }
+
+    function formatTime(timestamp) {
+        const d = parseDate(timestamp);
+        return d ? d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0') : '';
+    }
+
+    function formatRelativeTime(date) {
+        const now = new Date();
+        const diffMins = Math.floor((now - date) / 60000);
+        if (diffMins < 1) return 'Vừa xong';
+        if (diffMins < 60) return diffMins + ' phút';
+        if (diffMins < 1440) return Math.floor(diffMins / 60) + ' giờ';
+        return `${date.getDate()}/${date.getMonth() + 1}`;
     }
 
     function renderMessageContent(content) {
         if (!content) return '';
         if (typeof content === 'string' && content.startsWith('IMG::')) {
-            const url = content.substring(5);
-            return `<img src="${url}" alt="image" style="max-width:240px; border-radius:8px; display:block;" />`;
+            return `<img src="${content.substring(5)}" style="max-width:240px; border-radius:8px;">`;
         }
         return escapeHtml(content);
     }
 
-    /**
-     * Escape HTML to prevent XSS
-     */
     function escapeHtml(text) {
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return text.replace(/[&<>"']/g, m => map[m]);
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
-    /**
-     * Debounce function
-     */
     function debounce(func, wait) {
         let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
+        return function (...args) {
             clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
+            timeout = setTimeout(() => func.apply(this, args), wait);
         };
     }
 
-    // Auto-update conversation times using TimeUtils if available
-    if (typeof updateAllRelativeTimes === 'function') {
-        setInterval(updateAllRelativeTimes, 60000);
+    function insertAtCursor(input, text) {
+        if (!input) return;
+        const start = input.selectionStart || 0;
+        const end = input.selectionEnd || 0;
+        const value = input.value || '';
+        input.value = value.substring(0, start) + text + value.substring(end);
+        const pos = start + text.length;
+        input.selectionStart = input.selectionEnd = pos;
+        input.focus();
+        $(input).trigger('input');
     }
+
+    // Image Upload Logic
+    function handleImageUpload() {
+        const file = this.files && this.files[0];
+        if (!file) return;
+
+        if (!currentChatUserId) {
+            alert("Vui lòng chọn một người bạn để gửi ảnh!");
+            return;
+        }
+
+        console.log("📤 Đang upload ảnh...", file.name);
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const token = localStorage.getItem('accessToken');
+
+        $.ajax({
+            url: '/api/messages/upload-image',
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (resp) {
+                console.log("✅ Server phản hồi:", resp);
+
+                if (typeof resp === 'string' && resp.trim().startsWith('<')) {
+                    alert("Lỗi: Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
+                    return;
+                }
+
+                if (resp && resp.success && resp.url) {
+                    const now = new Date();
+                    const messageData = {
+                        senderId: parseInt(localStorage.getItem('currentUserId')),
+                        receiverId: parseInt(currentChatUserId),
+                        content: 'IMG::' + resp.url,
+                        timestamp: now.toISOString()
+                    };
+
+                    if (stompClient && stompClient.connected) {
+                        stompClient.send('/app/chat', {}, JSON.stringify(messageData));
+                    }
+
+                    appendMessage({
+                        senderId: messageData.senderId,
+                        receiverId: messageData.receiverId,
+                        content: messageData.content,
+                        sentAt: messageData.timestamp
+                    }, messageData.senderId);
+
+                    if (!searchInput.val().trim()) {
+                        setTimeout(() => { loadConversations(); }, 300);
+                    }
+                } else {
+                    alert('Lỗi: ' + (resp.error || "Server trả về dữ liệu không hợp lệ"));
+                }
+                imageUploadInput.val('');
+            },
+            error: function (xhr, status, error) {
+                console.error("❌ Lỗi upload:", status, error);
+                if (xhr.status === 404) {
+                    alert("Lỗi: API upload ảnh chưa có.");
+                } else if (xhr.status === 401 || xhr.status === 403) {
+                    alert("Lỗi: Hết hạn đăng nhập.");
+                } else {
+                    alert('Lỗi upload: ' + xhr.status);
+                }
+                imageUploadInput.val('');
+            }
+        });
+    }
+
+    function showNewMessageForm() { emptyState.hide(); chatActive.hide(); newMessageForm.show(); }
+    function hideNewMessageForm() { newMessageForm.hide(); emptyState.show(); }
 });
