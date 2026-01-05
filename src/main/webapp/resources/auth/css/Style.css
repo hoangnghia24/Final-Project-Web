@@ -252,3 +252,33 @@ body {
     transform: translateY(0) !important;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
 }
+
+/* --- CSS CHO NÚT ẨN/HIỆN MẬT KHẨU --- */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Icon con mắt */
+.toggle-password-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6c757d;
+    padding: 0;
+    z-index: 10;
+}
+
+.toggle-password-btn:hover {
+    color: #4e54c8;
+    /* Màu tím chủ đạo */
+}
+
+/* Đẩy text trong ô input sang trái để không đè lên icon */
+.password-wrapper input {
+    padding-right: 40px !important;
+}

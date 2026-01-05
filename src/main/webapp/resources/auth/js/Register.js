@@ -96,3 +96,18 @@ $(document).ready(function () {
         $errorAlert.removeClass("d-none");
     }
 });
+
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+
+    if (input.type === "password") {
+        input.type = "text"; // Hiện mật khẩu
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash'); // Đổi icon thành mắt gạch chéo
+    } else {
+        input.type = "password"; // Ẩn mật khẩu
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye'); // Đổi lại icon mắt thường
+    }
+}
