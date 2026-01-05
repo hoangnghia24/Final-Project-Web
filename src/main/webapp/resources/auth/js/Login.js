@@ -62,16 +62,24 @@ $(document).ready(function () {
                 if (response.errors && response.errors.length > 0) {
                     showErrorServer(response.errors[0].message);
                 }
-                // Check dữ liệu trả về (SỬA LẠI logic lấy data)
+                // Check dữ liệu trả về
                 else if (response.data && response.data.login) {
                     const payload = response.data.login;
+                    const user = payload.user;
 
-                    // --- QUAN TRỌNG: LƯU TOKEN ---
+                    // 1. Lưu các key chính
                     localStorage.setItem("accessToken", payload.token);
-                    localStorage.setItem("currentUser", JSON.stringify(payload.user));
+                    localStorage.setItem("currentUser", JSON.stringify(user));
+
+                    // 2. --- QUAN TRỌNG: Lưu thêm các key lẻ mà các file JS khác đang cần ---
+                    localStorage.setItem("username", user.username);           // Dùng cho Profile.js, EditAvatar
+                    localStorage.setItem("currentUserId", user.id);            // Dùng cho Messages.js, FriendRequests.js
+                    localStorage.setItem("currentUsername", user.username);    // Dùng cho PostInteractions.js
+                    // Avatar có thể null, nên cần check
+                    localStorage.setItem("userAvatarUrl", user.avatarUrl || "https://www.redditstatic.com/avatars/defaults/v2/avatar_default_2.png");
 
                     // Chuyển hướng
-                    window.location.href = "/"; // Hoặc /home tùy bạn
+                    window.location.href = "/";
                 } else {
                     showErrorServer("Tên đăng nhập hoặc mật khẩu không đúng.");
                 }

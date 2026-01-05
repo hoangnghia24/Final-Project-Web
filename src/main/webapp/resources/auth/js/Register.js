@@ -63,13 +63,20 @@ $(document).ready(function () {
                 }
                 else if (response.data && response.data.register) {
                     const payload = response.data.register;
+                    const user = payload.user;
 
-                    // --- TÍNH NĂNG MỚI: TỰ ĐỘNG ĐĂNG NHẬP ---
+                    // Lưu đầy đủ thông tin như bên Login
                     localStorage.setItem("accessToken", payload.token);
-                    localStorage.setItem("currentUser", JSON.stringify(payload.user));
+                    localStorage.setItem("currentUser", JSON.stringify(user));
+
+                    // --- BỔ SUNG ---
+                    localStorage.setItem("username", user.username);
+                    localStorage.setItem("currentUserId", user.id);
+                    localStorage.setItem("currentUsername", user.username);
+                    localStorage.setItem("userAvatarUrl", "https://www.redditstatic.com/avatars/defaults/v2/avatar_default_2.png"); // Avatar mặc định
 
                     alert("Đăng ký thành công!");
-                    window.location.href = "/"; // Vào thẳng trang chủ
+                    window.location.href = "/";
                 } else {
                     showError("Lỗi không xác định.");
                 }
