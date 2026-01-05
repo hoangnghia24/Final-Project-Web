@@ -338,7 +338,7 @@ async function graphqlFetch(query, variables = {}) {
                     </button>
                 </div>
             </div>
-        </div>tơ
+        </div>
     `;
     }
 
@@ -930,18 +930,15 @@ async function graphqlFetch(query, variables = {}) {
             $allButtons.each(function () {
                 const $btn = $(this);
 
-                // Xóa class cũ
                 $btn.removeClass('btn-primary btn-add-friend');
-                // Thêm class mới (để xử lý sự kiện hủy) và màu đỏ (btn-danger) hoặc xám (btn-secondary)
-                $btn.addClass('btn-secondary btn-cancel-sent-request'); // Bạn có thể dùng btn-danger nếu muốn màu đỏ
-
-                // Đổi nội dung text
+                $btn.addClass('btn-secondary btn-cancel-sent-request');
                 $btn.html('Hủy lời mời');
 
-                // Gắn ID lời mời vào nút để biết đường mà hủy
-                $btn.data('request-id', newRequestId);
+                // === SỬA DÒNG NÀY ===
+                // Cũ: $btn.data('request-id', newRequestId);
+                // Mới: Dùng attr để cập nhật HTML, giúp selector tìm thấy được nút này sau đó
+                $btn.attr('data-request-id', newRequestId);
 
-                // Bật lại nút để bấm được
                 $btn.prop('disabled', false);
             });
 
