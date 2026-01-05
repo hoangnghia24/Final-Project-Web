@@ -1,14 +1,14 @@
 // Header profile menu dropdown
-$(document).ready(function() {
+$(document).ready(function () {
     console.log('Header.js loaded');
-    
+
     // WebSocket connection for real-time messages
     let headerStompClient = null;
     let isConnected = false;
-    
+
     // Load user avatar from GraphQL
     loadUserAvatar();
-    
+
     const profileAvatar = document.getElementById('header-user-avatar');
     const profileDropdown = document.getElementById('profile-dropdown');
     const profileMenu = document.getElementById('profile-menu');
@@ -16,15 +16,16 @@ $(document).ready(function() {
     const messageIcon = document.getElementById('message-icon');
     const messagesPopup = document.getElementById('messages-popup');
     const chatWindow = document.getElementById('chat-window');
-    
+
     console.log('Profile avatar:', profileAvatar);
     console.log('Profile dropdown:', profileDropdown);
     console.log('Notification popup:', notificationPopup);
-    
+
     // Function to load user avatar
     function loadUserAvatar() {
-        const currentUsername = localStorage.getItem('username') || 'huynh.nguyen';
-        
+        const currentUserStr = localStorage.getItem("currentUser");
+        const currentUsername = currentUserStr ? JSON.parse(currentUserStr).username : null;
+
         const graphqlData = {
             query: `
                 query GetUserProfile($username: String!) {
@@ -39,18 +40,18 @@ $(document).ready(function() {
                 username: currentUsername
             }
         };
-        
+
         $.ajax({
             url: '/graphql',
             type: 'POST',
             contentType: 'application/json',
             dataType: 'json',
             data: JSON.stringify(graphqlData),
-            success: function(response) {
+            success: function (response) {
                 if (response.data && response.data.getUserByUsername) {
                     const user = response.data.getUserByUsername;
                     const avatarUrl = user.avatarUrl || 'https://www.redditstatic.com/avatars/defaults/v2/avatar_default_2.png';
-                    
+
                     // Update header avatar
                     const headerAvatar = document.getElementById('header-user-avatar');
                     if (headerAvatar) {
@@ -58,7 +59,7 @@ $(document).ready(function() {
                         headerAvatar.style.backgroundSize = 'cover';
                         headerAvatar.style.backgroundPosition = 'center';
                     }
-                    
+
                     // Update dropdown avatar
                     const dropdownAvatar = document.getElementById('dropdown-avatar');
                     if (dropdownAvatar) {
@@ -66,27 +67,27 @@ $(document).ready(function() {
                         dropdownAvatar.style.backgroundSize = 'cover';
                         dropdownAvatar.style.backgroundPosition = 'center';
                     }
-                    
+
                     // Update dropdown info
                     const dropdownFullname = document.getElementById('dropdown-fullname');
                     const dropdownUsername = document.getElementById('dropdown-username');
                     if (dropdownFullname) dropdownFullname.textContent = user.fullName;
                     if (dropdownUsername) dropdownUsername.textContent = 'u/' + user.username;
-                    
+
                     console.log('Avatar loaded:', avatarUrl);
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 console.error('Error loading user avatar:', error);
             }
         });
     }
-    
+
     if (profileAvatar && profileDropdown) {
         console.log('Profile menu elements found');
-        
+
         // Click vào avatar để toggle menu
-        profileAvatar.addEventListener('click', function(e) {
+        profileAvatar.addEventListener('click', function (e) {
             e.stopPropagation();
             profileDropdown.classList.toggle('show');
             // Đóng notification popup nếu đang mở
@@ -100,16 +101,16 @@ $(document).ready(function() {
             }
             console.log('Avatar clicked, dropdown show:', profileDropdown.classList.contains('show'));
         });
-        
+
         // Click bên ngoài để đóng menu
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (profileMenu && !profileMenu.contains(e.target)) {
                 profileDropdown.classList.remove('show');
             }
         });
-        
+
         // Ngăn dropdown đóng khi click vào nó
-        profileDropdown.addEventListener('click', function(e) {
+        profileDropdown.addEventListener('click', function (e) {
             e.stopPropagation();
         });
     } else {
@@ -121,26 +122,26 @@ $(document).ready(function() {
     const messagesPopupExpand = document.getElementById('messages-popup-expand');
     const minimizeChat = document.getElementById('minimize-chat');
     const closeChat = document.getElementById('close-chat');
-    
+
     console.log('Message icon:', messageIcon);
     console.log('Messages popup:', messagesPopup);
     console.log('Chat window:', chatWindow);
-    
+
     if (messageIcon && messagesPopup) {
         console.log('Messages popup elements found');
-        
+
         let currentChatUserId = null;
-        
+
         // Load conversation partners on popup open
         let conversationPartners = [];
-        
+
         // Connect WebSocket for real-time messages
         connectHeaderWebSocket();
-        
+
         // Click vào icon tin nhắn để toggle messages popup
-        messageIcon.addEventListener('click', function(e) {
+        messageIcon.addEventListener('click', function (e) {
             e.stopPropagation();
-            
+
             // Toggle messages popup
             if (messagesPopup.style.display === 'none' || messagesPopup.style.display === '') {
                 messagesPopup.style.display = 'grid';
@@ -149,7 +150,7 @@ $(document).ready(function() {
             } else {
                 messagesPopup.style.display = 'none';
             }
-            
+
             // Đóng các popup khác
             if (notificationPopup) {
                 notificationPopup.classList.remove('show');
@@ -160,94 +161,94 @@ $(document).ready(function() {
             if (chatWindow) {
                 chatWindow.classList.remove('show');
             }
-            
+
             console.log('Message icon clicked, messages popup display:', messagesPopup.style.display);
         });
-        
+
         // Đóng messages popup
         if (messagesPopupClose) {
-            messagesPopupClose.addEventListener('click', function(e) {
+            messagesPopupClose.addEventListener('click', function (e) {
                 e.stopPropagation();
                 messagesPopup.style.display = 'none';
             });
         }
-        
+
         // Mở rộng (navigate to full messages page)
         if (messagesPopupExpand) {
-            messagesPopupExpand.addEventListener('click', function(e) {
+            messagesPopupExpand.addEventListener('click', function (e) {
                 e.stopPropagation();
                 window.location.href = '/messages';
             });
         }
-        
+
         // Ngăn messages popup đóng khi click vào nó
-        messagesPopup.addEventListener('click', function(e) {
+        messagesPopup.addEventListener('click', function (e) {
             e.stopPropagation();
         });
-        
+
         // Click conversation item to show chat
         const messageItems = messagesPopup.querySelectorAll('.messages-popup-item');
         messageItems.forEach(item => {
-            item.addEventListener('click', function(e) {
+            item.addEventListener('click', function (e) {
                 e.stopPropagation();
-                
+
                 // Get user info
                 const userId = this.getAttribute('data-user-id');
                 const userName = this.getAttribute('data-user-name');
                 const avatarUrl = this.querySelector('.messages-popup-avatar img').src;
-                
+
                 // Update active state
                 messageItems.forEach(i => i.classList.remove('active'));
                 this.classList.add('active');
-                
+
                 // Load chat
                 loadChat(userId, userName, avatarUrl);
             });
         });
-        
+
         // Load chat function
         function loadChat(userId, userName, avatarUrl) {
             currentChatUserId = parseInt(userId);
             console.log('📂 Opening chat in header popup - User ID:', currentChatUserId, 'Type:', typeof currentChatUserId);
-            
+
             // Hide empty state, show chat view
             document.getElementById('messages-popup-empty').style.display = 'none';
             document.getElementById('messages-popup-chat-view').style.display = 'flex';
-            
+
             // Update header
             document.getElementById('messages-popup-chat-avatar').src = avatarUrl;
             document.getElementById('messages-popup-chat-name').textContent = userName;
-            
+
             // Load messages from server
             loadMessagesFromServer(userId);
         }
-        
+
         // Send message
         const sendButton = document.getElementById('messages-popup-send');
         const inputField = document.getElementById('messages-popup-input');
-        
+
         if (sendButton && inputField) {
-            sendButton.addEventListener('click', function() {
+            sendButton.addEventListener('click', function () {
                 sendMessage();
             });
-            
-            inputField.addEventListener('keypress', function(e) {
+
+            inputField.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
                     sendMessage();
                 }
             });
         }
-        
+
         function sendMessage() {
             const text = inputField.value.trim();
             if (!text || !currentChatUserId) return;
-            
+
             const currentUserId = localStorage.getItem('currentUserId');
             if (!currentUserId) {
                 console.error('Không tìm thấy currentUserId trong localStorage');
                 return;
             }
-            
+
             // Send via WebSocket
             if (headerStompClient && isConnected) {
                 const messageData = {
@@ -256,27 +257,27 @@ $(document).ready(function() {
                     content: text,
                     timestamp: new Date().toISOString()
                 };
-                
+
                 headerStompClient.send("/app/chat", {}, JSON.stringify(messageData));
                 console.log('Sent message via WebSocket:', messageData);
-                
+
                 // Display message immediately
                 displayMessageInPopup(messageData, true);
-                
+
                 // Clear input
                 inputField.value = '';
             } else {
                 console.error('WebSocket not connected');
             }
         }
-        
+
         // Helper function to escape HTML
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
-        
+
         // ===== WebSocket Functions =====
         function connectHeaderWebSocket() {
             const currentUserId = localStorage.getItem('currentUserId');
@@ -284,41 +285,41 @@ $(document).ready(function() {
                 console.warn('Chưa đăng nhập, không kết nối WebSocket');
                 return;
             }
-            
+
             console.log('Connecting WebSocket for header messages...');
-            
+
             const socket = new SockJS('/ws');
             headerStompClient = Stomp.over(socket);
-            
-            headerStompClient.connect({}, function(frame) {
+
+            headerStompClient.connect({}, function (frame) {
                 console.log('Header WebSocket connected:', frame);
                 isConnected = true;
-                
+
                 // Subscribe to user's message queue
-                headerStompClient.subscribe('/user/' + currentUserId + '/queue/messages', function(message) {
+                headerStompClient.subscribe('/user/' + currentUserId + '/queue/messages', function (message) {
                     console.log('Received message in header:', message.body);
                     const messageData = JSON.parse(message.body);
                     handleIncomingMessageInHeader(messageData);
                 });
-            }, function(error) {
+            }, function (error) {
                 console.error('Header WebSocket connection error:', error);
                 isConnected = false;
                 // Reconnect after 5 seconds
                 setTimeout(connectHeaderWebSocket, 5000);
             });
         }
-        
+
         function handleIncomingMessageInHeader(messageData) {
             console.log('📬 New message received in header popup:', messageData);
-            
+
             const currentUserId = parseInt(localStorage.getItem('currentUserId'));
-            const otherUserId = parseInt(messageData.senderId) === currentUserId 
-                ? parseInt(messageData.receiverId) 
+            const otherUserId = parseInt(messageData.senderId) === currentUserId
+                ? parseInt(messageData.receiverId)
                 : parseInt(messageData.senderId);
-            
+
             console.log('Current chat user ID:', currentChatUserId, 'Type:', typeof currentChatUserId);
             console.log('Other user ID:', otherUserId, 'Type:', typeof otherUserId);
-            
+
             // If chat is open with this user, display message
             if (parseInt(currentChatUserId) === parseInt(otherUserId)) {
                 console.log('✅ Displaying message in header popup');
@@ -326,27 +327,27 @@ $(document).ready(function() {
             } else {
                 console.log('ℹ️ Message from different user, not displaying in popup');
             }
-            
+
             // Update conversation list
             loadConversationPartners();
         }
-        
+
         function displayMessageInPopup(messageData, isSent) {
             const messagesContainer = document.getElementById('messages-popup-chat-messages');
             if (!messagesContainer) return;
-            
+
             const currentUserId = localStorage.getItem('currentUserId');
             const currentAvatar = localStorage.getItem('userAvatarUrl') || 'https://api.dicebear.com/9.x/avataaars/svg?seed=default';
-            
+
             // Get other user's avatar
             const messageItem = messagesPopup.querySelector(`.messages-popup-item[data-user-id="${currentChatUserId}"]`);
             const otherAvatar = messageItem ? messageItem.querySelector('.messages-popup-avatar img').src : 'https://www.redditstatic.com/avatars/defaults/v2/avatar_default_2.png';
-            
+
             const messageDiv = document.createElement('div');
             messageDiv.className = `message-bubble ${isSent ? 'sent' : 'received'}`;
-            
+
             const time = new Date(messageData.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-            
+
             messageDiv.innerHTML = `
                 <img src="${isSent ? currentAvatar : otherAvatar}" alt="Avatar" class="message-bubble-avatar">
                 <div class="message-bubble-content">
@@ -354,46 +355,46 @@ $(document).ready(function() {
                     <div class="message-bubble-time">${time}</div>
                 </div>
             `;
-            
+
             // Append newest at bottom (like Messages page)
             messagesContainer.appendChild(messageDiv);
-            
+
             // Scroll to bottom to show newest message
             setTimeout(() => {
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }, 50);
         }
-        
+
         function loadConversationPartners() {
             const currentUserId = localStorage.getItem('currentUserId');
             if (!currentUserId) {
                 console.error('Không tìm thấy currentUserId');
                 return;
             }
-            
+
             $.ajax({
                 url: `/api/messages/conversations?userId=${currentUserId}`,
                 type: 'GET',
-                success: function(partners) {
+                success: function (partners) {
                     console.log('Loaded conversation partners:', partners);
                     conversationPartners = partners;
                     displayConversationPartners(partners);
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('Error loading conversations:', error);
                 }
             });
         }
-        
+
         function displayConversationPartners(partners) {
             const container = messagesPopup.querySelector('.messages-popup-list');
             if (!container) return;
-            
+
             if (partners.length === 0) {
                 container.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">Chưa có tin nhắn nào</div>';
                 return;
             }
-            
+
             container.innerHTML = '';
             // Sort conversations by lastMessageTime (newest first)
             const sorted = partners.slice().sort((a, b) => {
@@ -401,7 +402,7 @@ $(document).ready(function() {
                     try {
                         if (!val) return new Date(0);
                         if (typeof val === 'string') return new Date(val.replace('T', ' '));
-                        if (Array.isArray(val)) return new Date(val[0], val[1]-1, val[2], val[3]||0, val[4]||0, val[5]||0);
+                        if (Array.isArray(val)) return new Date(val[0], val[1] - 1, val[2], val[3] || 0, val[4] || 0, val[5] || 0);
                         const d = new Date(val);
                         return isNaN(d.getTime()) ? new Date(0) : d;
                     } catch { return new Date(0); }
@@ -412,15 +413,15 @@ $(document).ready(function() {
                 const currentUserId = parseInt(localStorage.getItem('currentUserId'));
                 const hasUnread = partner.unreadCount > 0;
                 const isFromOther = partner.lastMessageSenderId && partner.lastMessageSenderId != currentUserId;
-                
+
                 const item = document.createElement('div');
                 item.className = 'messages-popup-item';
                 item.setAttribute('data-user-id', partner.id);
                 item.setAttribute('data-user-name', partner.fullName);
                 item.setAttribute('data-has-unread', hasUnread);
-                
+
                 const avatarUrl = partner.avatarUrl || 'https://www.redditstatic.com/avatars/defaults/v2/avatar_default_2.png';
-                
+
                 // Format time
                 let timeStr = '';
                 if (partner.lastMessageTime) {
@@ -433,8 +434,8 @@ $(document).ready(function() {
                         } else if (Array.isArray(partner.lastMessageTime)) {
                             // Nếu backend trả về array [year, month, day, hour, minute, second]
                             msgDate = new Date(
-                                partner.lastMessageTime[0], 
-                                partner.lastMessageTime[1] - 1, 
+                                partner.lastMessageTime[0],
+                                partner.lastMessageTime[1] - 1,
                                 partner.lastMessageTime[2],
                                 partner.lastMessageTime[3] || 0,
                                 partner.lastMessageTime[4] || 0,
@@ -443,12 +444,12 @@ $(document).ready(function() {
                         } else {
                             msgDate = new Date(partner.lastMessageTime);
                         }
-                        
+
                         if (!isNaN(msgDate.getTime())) {
                             const now = new Date();
                             const diffMs = now - msgDate;
                             const diffMins = Math.floor(diffMs / 60000);
-                            
+
                             if (diffMins < 1) {
                                 timeStr = 'Vừa xong';
                             } else if (diffMins < 60) {
@@ -470,10 +471,10 @@ $(document).ready(function() {
                         timeStr = '';
                     }
                 }
-                
+
                 // Message style: bold if unread from other person
                 const messageStyle = (hasUnread && isFromOther) ? 'font-weight: 700; color: #1c1c1c;' : 'font-weight: 400; color: #7c7c7c;';
-                
+
                 item.innerHTML = `
                     <div class="messages-popup-avatar">
                         <img src="${avatarUrl}" alt="${partner.fullName}">
@@ -485,14 +486,14 @@ $(document).ready(function() {
                     </div>
                     <div class="messages-popup-time">${timeStr}</div>
                 `;
-                
-                item.addEventListener('click', function(e) {
+
+                item.addEventListener('click', function (e) {
                     e.stopPropagation();
-                    
+
                     // Update active state
                     container.querySelectorAll('.messages-popup-item').forEach(i => i.classList.remove('active'));
                     this.classList.add('active');
-                    
+
                     // Mark as read (update style)
                     const messageDiv = this.querySelector('.messages-popup-message');
                     if (messageDiv) {
@@ -503,90 +504,90 @@ $(document).ready(function() {
                     if (badge) {
                         badge.remove();
                     }
-                    
+
                     // Mark unread messages as read in database
                     markConversationAsRead(partner.id);
-                    
+
                     // Load chat
                     loadChat(partner.id, partner.fullName, avatarUrl);
                 });
-                
+
                 container.appendChild(item);
             });
         }
-        
+
         function markConversationAsRead(otherUserId) {
             const currentUserId = localStorage.getItem('currentUserId');
             if (!currentUserId) return;
-            
+
             // Load conversation để lấy messageIds
             $.ajax({
                 url: `/api/messages/conversation?userId1=${currentUserId}&userId2=${otherUserId}`,
                 type: 'GET',
-                success: function(messages) {
+                success: function (messages) {
                     // Mark all unread messages from other user as read
                     messages.forEach(msg => {
                         if (msg.senderId == otherUserId && !msg.isRead) {
                             $.ajax({
                                 url: `/api/messages/read?messageId=${msg.id}`,
                                 type: 'POST',
-                                success: function() {
+                                success: function () {
                                     console.log('Marked message as read:', msg.id);
                                 },
-                                error: function(xhr, status, error) {
+                                error: function (xhr, status, error) {
                                     console.error('Error marking message as read:', error);
                                 }
                             });
                         }
                     });
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('Error loading conversation:', error);
                 }
             });
         }
-        
+
         function loadMessagesFromServer(userId) {
             const currentUserId = localStorage.getItem('currentUserId');
             if (!currentUserId) {
                 console.error('Không tìm thấy currentUserId');
                 return;
             }
-            
+
             $.ajax({
                 url: `/api/messages/conversation?userId1=${currentUserId}&userId2=${userId}`,
                 type: 'GET',
-                success: function(messages) {
+                success: function (messages) {
                     console.log('Loaded messages:', messages);
                     displayMessagesInPopup(messages, userId);
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('Error loading messages:', error);
                 }
             });
         }
-        
+
         function displayMessagesInPopup(messages, otherUserId) {
             const messagesContainer = document.getElementById('messages-popup-chat-messages');
             if (!messagesContainer) return;
-            
+
             const currentUserId = parseInt(localStorage.getItem('currentUserId'));
             const currentAvatar = localStorage.getItem('userAvatarUrl') || 'https://api.dicebear.com/9.x/avataaars/svg?seed=default';
-            
+
             // Get other user's avatar
             const messageItem = messagesPopup.querySelector(`.messages-popup-item[data-user-id="${otherUserId}"]`);
             const otherAvatar = messageItem ? messageItem.querySelector('.messages-popup-avatar img').src : 'https://www.redditstatic.com/avatars/defaults/v2/avatar_default_2.png';
-            
+
             messagesContainer.innerHTML = '';
             const sorted = messages.slice().sort((a, b) => {
                 const da = (() => {
                     if (typeof a.sentAt === 'string') return new Date(a.sentAt.replace('T', ' '));
-                    if (Array.isArray(a.sentAt)) return new Date(a.sentAt[0], a.sentAt[1]-1, a.sentAt[2], a.sentAt[3]||0, a.sentAt[4]||0, a.sentAt[5]||0);
+                    if (Array.isArray(a.sentAt)) return new Date(a.sentAt[0], a.sentAt[1] - 1, a.sentAt[2], a.sentAt[3] || 0, a.sentAt[4] || 0, a.sentAt[5] || 0);
                     return new Date(a.sentAt);
                 })();
                 const db = (() => {
                     if (typeof b.sentAt === 'string') return new Date(b.sentAt.replace('T', ' '));
-                    if (Array.isArray(b.sentAt)) return new Date(b.sentAt[0], b.sentAt[1]-1, b.sentAt[2], b.sentAt[3]||0, b.sentAt[4]||0, b.sentAt[5]||0);
+                    if (Array.isArray(b.sentAt)) return new Date(b.sentAt[0], b.sentAt[1] - 1, b.sentAt[2], b.sentAt[3] || 0, b.sentAt[4] || 0, b.sentAt[5] || 0);
                     return new Date(b.sentAt);
                 })();
                 return da - db; // oldest first, newest last (at bottom)
@@ -595,7 +596,7 @@ $(document).ready(function() {
                 const isSent = msg.senderId == currentUserId;
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message-bubble ${isSent ? 'sent' : 'received'}`;
-                
+
                 // Parse sentAt with proper handling
                 let time = 'N/A';
                 try {
@@ -616,14 +617,14 @@ $(document).ready(function() {
                     } else {
                         msgDate = new Date(msg.sentAt);
                     }
-                    
+
                     if (!isNaN(msgDate.getTime())) {
                         time = msgDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
                     }
                 } catch (e) {
                     console.error('Error parsing message date:', msg.sentAt, e);
                 }
-                
+
                 messageDiv.innerHTML = `
                     <img src="${isSent ? currentAvatar : otherAvatar}" alt="Avatar" class="message-bubble-avatar">
                     <div class="message-bubble-content">
@@ -631,10 +632,10 @@ $(document).ready(function() {
                         <div class="message-bubble-time">${time}</div>
                     </div>
                 `;
-                
+
                 messagesContainer.appendChild(messageDiv);
             });
-            
+
             // Scroll to bottom to show newest message (oldest first, newest at bottom)
             setTimeout(() => {
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -643,34 +644,34 @@ $(document).ready(function() {
     } else {
         console.log('Messages popup elements not found');
     }
-    
+
     // Old chat window functionality (if still exists)
     if (chatWindow) {
         // Thu nhỏ chat window
         if (minimizeChat) {
-            minimizeChat.addEventListener('click', function(e) {
+            minimizeChat.addEventListener('click', function (e) {
                 e.stopPropagation();
                 chatWindow.classList.toggle('minimized');
             });
         }
-        
+
         // Đóng chat window
         if (closeChat) {
-            closeChat.addEventListener('click', function(e) {
+            closeChat.addEventListener('click', function (e) {
                 e.stopPropagation();
                 chatWindow.classList.remove('show');
                 chatWindow.classList.remove('minimized');
             });
         }
-        
+
         // Ngăn chat window đóng khi click vào nó
-        chatWindow.addEventListener('click', function(e) {
+        chatWindow.addEventListener('click', function (e) {
             e.stopPropagation();
         });
     }
-    
+
     // Click bên ngoài để đóng tất cả popup
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         if (messagesPopup && !messagesPopup.contains(e.target) && e.target !== messageIcon) {
             messagesPopup.style.display = 'none';
         }
@@ -833,7 +834,7 @@ $(document).ready(function() {
 
     // Dark Mode Toggle
     const darkModeCheckbox = document.getElementById('dark-mode-checkbox');
-    
+
     // Kiểm tra dark mode từ localStorage
     if (localStorage.getItem('darkMode') === 'enabled') {
         document.body.classList.add('dark-mode');
@@ -841,10 +842,10 @@ $(document).ready(function() {
             darkModeCheckbox.checked = true;
         }
     }
-    
+
     // Xử lý toggle dark mode
     if (darkModeCheckbox) {
-        darkModeCheckbox.addEventListener('change', function() {
+        darkModeCheckbox.addEventListener('change', function () {
             if (this.checked) {
                 document.body.classList.add('dark-mode');
                 localStorage.setItem('darkMode', 'enabled');

@@ -1,8 +1,9 @@
 $(document).ready(function () {
     // --- BIẾN TOÀN CỤC ---
-    const currentUsername = localStorage.getItem("username"); // User đang đăng nhập
     const accessToken = localStorage.getItem("accessToken");
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    // Lấy username từ object currentUser đã parse
+    const currentUsername = currentUser ? currentUser.username : null;
 
     // Kiểm tra đăng nhập
     if (!accessToken) {
