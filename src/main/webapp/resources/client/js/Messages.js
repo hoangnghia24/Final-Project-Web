@@ -3,7 +3,7 @@
  * Handles conversation list, active chat, and new message functionality
  */
 
-$(document).ready(function() {
+$(document).ready(function () {
     console.log('Messages.js loaded - MXH Chat System');
 
     // State Management
@@ -42,7 +42,7 @@ $(document).ready(function() {
     function connectWebSocket() {
         const currentUserId = localStorage.getItem('currentUserId');
         console.log('🔌 Attempting to connect WebSocket for user:', currentUserId);
-        
+
         if (!currentUserId) {
             console.warn('⚠️ No user ID, skipping WebSocket connection');
             return;
@@ -52,19 +52,19 @@ $(document).ready(function() {
         stompClient = Stomp.over(socket);
         stompClient.debug = null; // Tắt debug log
 
-        stompClient.connect({}, function(frame) {
+        stompClient.connect({}, function (frame) {
             console.log('✅ WebSocket connected successfully for user:', currentUserId);
             console.log('Subscribing to: /user/' + currentUserId + '/queue/messages');
-            
+
             // Subscribe để nhận tin nhắn
-            stompClient.subscribe('/user/' + currentUserId + '/queue/messages', function(message) {
+            stompClient.subscribe('/user/' + currentUserId + '/queue/messages', function (message) {
                 const data = JSON.parse(message.body);
                 console.log('📬 Received real-time message from WebSocket:', data);
                 handleIncomingMessage(data);
             });
-            
+
             console.log('✅ Subscribed to message queue');
-        }, function(error) {
+        }, function (error) {
             console.error('❌ WebSocket connection error:', error);
         });
     }
@@ -80,13 +80,13 @@ $(document).ready(function() {
         console.log('Message receiverId:', messageData.receiverId, 'Type:', typeof messageData.receiverId);
 
         // Nếu đang chat với người gửi/người nhận, hiển thị ngay
-        const otherUserId = parseInt(messageData.senderId) === currentUserId 
-            ? parseInt(messageData.receiverId) 
+        const otherUserId = parseInt(messageData.senderId) === currentUserId
+            ? parseInt(messageData.receiverId)
             : parseInt(messageData.senderId);
-        
+
         console.log('Current chat user ID:', currentChatUserId, 'Type:', typeof currentChatUserId);
         console.log('Other user ID:', otherUserId, 'Type:', typeof otherUserId);
-        
+
         if (parseInt(currentChatUserId) === parseInt(otherUserId)) {
             console.log('✅ Displaying message in current chat');
             appendMessage(messageData, currentUserId);
@@ -105,19 +105,19 @@ $(document).ready(function() {
      */
     function appendMessage(msg, currentUserId) {
         console.log('📩 Appending message:', msg);
-        
+
         const isSent = msg.senderId == currentUserId;
         const messageClass = isSent ? 'sent' : 'received';
         const time = formatTime(msg.sentAt || msg.timestamp);
-        
+
         let messageHtml = '<div class="message-group"><div class="message ' + messageClass + '">';
-        
+
         // Avatar cho tin nhắn nhận được
         if (!isSent) {
             messageHtml += `<img src="${msg.senderAvatar || 'https://api.dicebear.com/9.x/avataaars/svg?seed=' + msg.senderId}" 
                                  alt="${msg.senderName}" class="message-avatar">`;
         }
-        
+
         const contentHtml = renderMessageContent(msg.content);
         messageHtml += `
             <div class="message-content">
@@ -125,12 +125,12 @@ $(document).ready(function() {
                 <span class="message-time">${time}</span>
             </div>
         `;
-        
+
         messageHtml += '</div></div>';
-        
+
         messagesArea.append(messageHtml);
         console.log('✅ Message appended, scrolling to bottom...');
-        
+
         // Đảm bảo scroll sau khi DOM được render
         setTimeout(() => {
             scrollToBottom();
@@ -142,21 +142,21 @@ $(document).ready(function() {
      */
     function setupEventListeners() {
         // Conversation item click
-        conversationsList.on('click', '.conversation-item', function() {
+        conversationsList.on('click', '.conversation-item', function () {
             const userId = $(this).data('user-id');
             const userName = $(this).find('.conversation-name').text();
-            
+
             // Chỉ mở chat nếu khác chat hiện tại
             if (currentChatUserId != userId) {
                 openChat(userId, userName);
             } else {
                 console.log('ℹ️ Already in this chat');
             }
-            
+
             // Update active state
             $('.conversation-item').removeClass('active');
             $(this).addClass('active');
-            
+
             // Remove unread badge
             $(this).find('.unread-badge').fadeOut();
             // Normalize preview style after opening
@@ -170,9 +170,9 @@ $(document).ready(function() {
 
         // Send message button
         sendBtn.on('click', sendMessage);
-        
+
         // Enter key to send
-        messageInput.on('keypress', function(e) {
+        messageInput.on('keypress', function (e) {
             if (e.which === 13 && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
@@ -183,13 +183,13 @@ $(document).ready(function() {
         sendNewMessageBtn.on('click', sendNewMessage);
 
         // Attach image flow
-        attachImageBtn.on('click', function() {
+        attachImageBtn.on('click', function () {
             imageUploadInput.trigger('click');
         });
         imageUploadInput.on('change', handleImageUpload);
 
         // Emoji picker toggle and insert
-        emojiBtn.on('click', function(e) {
+        emojiBtn.on('click', function (e) {
             e.stopPropagation();
             const isShown = emojiPicker.is(':visible');
             $('.emoji-picker-visible').hide().removeClass('emoji-picker-visible');
@@ -198,13 +198,13 @@ $(document).ready(function() {
             }
         });
         // Click outside closes picker
-        $(document).on('click', function() {
+        $(document).on('click', function () {
             emojiPicker.hide().removeClass('emoji-picker-visible');
         });
         // Prevent closing when clicking inside
-        emojiPicker.on('click', function(e) { e.stopPropagation(); });
+        emojiPicker.on('click', function (e) { e.stopPropagation(); });
         // Handle emoji click
-        emojiPicker.on('click', 'span', function() {
+        emojiPicker.on('click', 'span', function () {
             const emoji = $(this).text();
             insertAtCursor($('#messageInput')[0], emoji);
         });
@@ -232,7 +232,7 @@ $(document).ready(function() {
             data: formData,
             processData: false,
             contentType: false,
-            success: function(resp) {
+            success: function (resp) {
                 if (resp && resp.success && resp.url) {
                     const now = new Date();
                     const messageData = {
@@ -242,7 +242,7 @@ $(document).ready(function() {
                         timestamp: now.toISOString()
                     };
                     if (stompClient && stompClient.connected) {
-                        try { stompClient.send('/app/chat', {}, JSON.stringify(messageData)); } catch (e) {}
+                        try { stompClient.send('/app/chat', {}, JSON.stringify(messageData)); } catch (e) { }
                     }
                     appendMessage({
                         senderId: messageData.senderId,
@@ -258,7 +258,7 @@ $(document).ready(function() {
                 }
                 imageUploadInput.val('');
             },
-            error: function() {
+            error: function () {
                 alert('Lỗi khi tải ảnh');
                 imageUploadInput.val('');
             }
@@ -283,11 +283,11 @@ $(document).ready(function() {
     function loadConversations() {
         // Lấy userId hiện tại từ localStorage (đã set khi login)
         const currentUserId = localStorage.getItem('currentUserId');
-        
+
         console.log('=== Loading Conversations ===');
         console.log('Current User ID:', currentUserId);
         console.log('localStorage keys:', Object.keys(localStorage));
-        
+
         if (!currentUserId || currentUserId === 'null' || currentUserId === 'undefined') {
             console.warn('No current user ID found in localStorage');
             conversationsList.html(`
@@ -308,18 +308,18 @@ $(document).ready(function() {
             url: '/api/messages/conversations',
             method: 'GET',
             data: { userId: currentUserId },
-            success: function(data) {
+            success: function (data) {
                 console.log('✅ Conversations loaded successfully:', data.length, 'conversations');
                 console.log('Data:', data);
                 conversations = data;
                 renderConversations(data);
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 console.error('❌ Error loading conversations');
                 console.error('Status:', xhr.status);
                 console.error('Error:', error);
                 console.error('Response Text:', xhr.responseText);
-                
+
                 let errorMsg = `Lỗi ${xhr.status}`;
                 if (xhr.status === 404) {
                     errorMsg = 'API endpoint không tìm thấy';
@@ -328,7 +328,7 @@ $(document).ready(function() {
                 } else if (xhr.status === 0) {
                     errorMsg = 'Không thể kết nối server';
                 }
-                
+
                 conversationsList.html(`
                     <div style="text-align: center; padding: 40px 20px; color: #e74c3c;">
                         <p><strong>⚠️ ${errorMsg}</strong></p>
@@ -405,9 +405,9 @@ $(document).ready(function() {
     function openChat(userId, userName) {
         // Đảm bảo userId là number
         userId = parseInt(userId);
-        
+
         const wasAlreadyOpen = (currentChatUserId === userId);
-        
+
         currentChatUserId = userId;
         currentChatUserName = userName;
 
@@ -416,13 +416,13 @@ $(document).ready(function() {
         // Hide empty state and new message form
         emptyState.hide();
         newMessageForm.hide();
-        
+
         // Show chat active
         chatActive.show();
 
         // Update chat header
         $('#chatUserName').text(userName);
-        
+
         // Chỉ load messages nếu chưa mở chat này, hoặc cần refresh
         if (!wasAlreadyOpen) {
             console.log('🔄 Loading messages for new chat:', userName, 'ID:', userId);
@@ -430,7 +430,7 @@ $(document).ready(function() {
         } else {
             console.log('ℹ️ Chat already open, not reloading');
         }
-        
+
         // Mark unread as read on open
         markConversationAsRead(userId);
 
@@ -443,7 +443,7 @@ $(document).ready(function() {
     function loadMessages(userId) {
         // Lấy userId hiện tại từ localStorage
         const currentUserId = localStorage.getItem('currentUserId');
-        
+
         if (!currentUserId) {
             messagesArea.html('<div class="no-messages">Vui lòng đăng nhập lại</div>');
             return;
@@ -453,11 +453,11 @@ $(document).ready(function() {
         $.ajax({
             url: '/api/messages/conversation',
             method: 'GET',
-            data: { 
+            data: {
                 userId1: currentUserId,
-                userId2: userId 
+                userId2: userId
             },
-            success: function(messages) {
+            success: function (messages) {
                 if (messages.length === 0) {
                     messagesArea.html(`
                         <div style="text-align: center; padding: 40px 20px; color: #65676b;">
@@ -471,7 +471,7 @@ $(document).ready(function() {
                 // Refresh conversations to update last message and unread
                 loadConversations();
             },
-            error: function(error) {
+            error: function (error) {
                 console.error('Error loading messages:', error);
                 messagesArea.html('<div class="error-message">Không thể tải tin nhắn</div>');
             }
@@ -491,15 +491,15 @@ $(document).ready(function() {
             const isSent = msg.senderId == currentUserId;
             const messageClass = isSent ? 'sent' : 'received';
             const time = formatTime(msg.sentAt || msg.timestamp);
-            
+
             let messageHtml = '<div class="message-group"><div class="message ' + messageClass + '">';
-            
+
             // Avatar cho tin nhắn nhận được
             if (!isSent) {
                 messageHtml += `<img src="${msg.senderAvatar || 'https://api.dicebear.com/9.x/avataaars/svg?seed=' + msg.senderId}" 
                                      alt="${msg.senderName}" class="message-avatar">`;
             }
-            
+
             const contentHtml = renderMessageContent(msg.content);
             messageHtml += `
                 <div class="message-content">
@@ -507,7 +507,7 @@ $(document).ready(function() {
                     <span class="message-time">${time}</span>
                 </div>
             `;
-            
+
             messageHtml += '</div></div>';
             return messageHtml;
         }).join('');
@@ -569,7 +569,7 @@ $(document).ready(function() {
      */
     function sendMessage() {
         const content = messageInput.val().trim();
-        
+
         if (!content || !currentChatUserId) {
             return;
         }
@@ -659,7 +659,7 @@ $(document).ready(function() {
      */
     function searchUsers() {
         const query = recipientInput.val().trim();
-        
+
         if (query.length < 2) {
             $('#recipientSuggestions').hide();
             return;
@@ -672,7 +672,7 @@ $(document).ready(function() {
             { id: 6, name: 'Đỗ Thị F', avatar: 'user6' }
         ];
 
-        const filtered = mockUsers.filter(u => 
+        const filtered = mockUsers.filter(u =>
             u.name.toLowerCase().includes(query.toLowerCase())
         );
 
@@ -687,7 +687,7 @@ $(document).ready(function() {
             $('#recipientSuggestions').html(suggestionsHtml).show();
 
             // Handle suggestion click
-            $('.suggestion-item').on('click', function() {
+            $('.suggestion-item').on('click', function () {
                 const userName = $(this).data('user-name');
                 recipientInput.val(userName);
                 $('#recipientSuggestions').hide();
@@ -704,24 +704,24 @@ $(document).ready(function() {
         $.ajax({
             url: `/api/messages/conversation?userId1=${currentUserId}&userId2=${otherUserId}`,
             type: 'GET',
-            success: function(messages) {
+            success: function (messages) {
                 messages.forEach(msg => {
                     if (msg.senderId == otherUserId && !msg.isRead) {
                         $.ajax({
                             url: `/api/messages/read?messageId=${msg.id}`,
                             type: 'POST',
-                            success: function() {
+                            success: function () {
                                 // after marking read, refresh conversations
                                 loadConversations();
                             },
-                            error: function(xhr, status, error) {
+                            error: function (xhr, status, error) {
                                 console.error('Error marking message as read:', error);
                             }
                         });
                     }
                 });
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 console.error('Error loading conversation for markAsRead:', error);
             }
         });
@@ -733,7 +733,7 @@ $(document).ready(function() {
     function filterConversations() {
         const query = searchInput.val().trim().toLowerCase();
 
-        $('.conversation-item').each(function() {
+        $('.conversation-item').each(function () {
             const name = $(this).find('.conversation-name').text().toLowerCase();
             const preview = $(this).find('.conversation-preview').text().toLowerCase();
 

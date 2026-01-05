@@ -438,9 +438,17 @@ body.dark-mode .chat-user-name {
     background: #d0d2d5;
 }
 
-body.dark-mode .messages-area::-webkit-scrollbar-track { background: #1a1a1b; }
-body.dark-mode .messages-area::-webkit-scrollbar-thumb { background: #343536; }
-body.dark-mode .messages-area::-webkit-scrollbar-thumb:hover { background: #4a4a4b; }
+body.dark-mode .messages-area::-webkit-scrollbar-track {
+    background: #1a1a1b;
+}
+
+body.dark-mode .messages-area::-webkit-scrollbar-thumb {
+    background: #343536;
+}
+
+body.dark-mode .messages-area::-webkit-scrollbar-thumb:hover {
+    background: #4a4a4b;
+}
 
 /* Message Group */
 .message-group {
@@ -578,8 +586,14 @@ body.dark-mode .message-input {
     border: 1px solid #343536;
     color: #d7dadc;
 }
-body.dark-mode .message-input::placeholder { color: #818384; }
-body.dark-mode .message-input:focus { border-color: #2e89ff; }
+
+body.dark-mode .message-input::placeholder {
+    color: #818384;
+}
+
+body.dark-mode .message-input:focus {
+    border-color: #2e89ff;
+}
 
 .send-btn {
     width: 36px;
@@ -779,19 +793,19 @@ body.dark-mode .message-input:focus { border-color: #2e89ff; }
     .messages-wrapper {
         padding-left: 0;
     }
-    
+
     .messages-container {
         grid-template-columns: 1fr;
     }
-    
+
     .conversations-panel {
         display: none;
     }
-    
+
     .conversations-panel.mobile-show {
         display: flex;
     }
-    
+
     .chat-panel.mobile-show {
         display: flex;
     }

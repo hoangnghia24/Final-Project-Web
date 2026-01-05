@@ -3,7 +3,7 @@
  * TFT Social Network
  */
 
-(function() {
+(function () {
     'use strict';
 
     // State Management
@@ -24,13 +24,13 @@
     // Initialize
     function init() {
         console.log('🔔 Initializing Notification System...');
-        
+
         // Mock user ID for testing if not exists
         if (!localStorage.getItem('currentUserId')) {
             console.warn('⚠️ No currentUserId in localStorage, using mock ID');
             localStorage.setItem('currentUserId', '1');
         }
-        
+
         // Get DOM elements
         notificationIcon = document.getElementById('notification-icon');
         notificationPopup = document.getElementById('notification-popup');
@@ -55,26 +55,26 @@
 
         // Setup event listeners
         setupEventListeners();
-        
+
         // Load initial notifications
         loadNotifications();
-        
+
         // Connect to WebSocket
         connectNotificationWebSocket();
-        
+
         // Update relative times every minute
         setInterval(updateRelativeTimes, 60000);
-        
+
         console.log('✅ Notification system initialized successfully!');
     }
 
     // Setup Event Listeners
     function setupEventListeners() {
         console.log('🎯 Setting up event listeners...');
-        
+
         // Toggle notification popup
         if (notificationIcon) {
-            notificationIcon.addEventListener('click', function(e) {
+            notificationIcon.addEventListener('click', function (e) {
                 e.stopPropagation();
                 console.log('🔔 Notification icon clicked');
                 toggleNotificationPopup();
@@ -85,7 +85,7 @@
         }
 
         // Close popup when clicking outside
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (notificationPopup && !notificationPopup.contains(e.target) && e.target !== notificationIcon) {
                 closeNotificationPopup();
             }
@@ -93,7 +93,7 @@
 
         // Mark all as read
         if (markAllReadBtn) {
-            markAllReadBtn.addEventListener('click', function(e) {
+            markAllReadBtn.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 console.log('✅ Mark all as read clicked');
@@ -107,7 +107,7 @@
         // Filter tabs
         if (notificationTabs && notificationTabs.length > 0) {
             notificationTabs.forEach((tab, index) => {
-                tab.addEventListener('click', function(e) {
+                tab.addEventListener('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
                     const filter = this.getAttribute('data-filter');
@@ -128,7 +128,7 @@
             console.error('❌ Notification popup element not found!');
             return;
         }
-        
+
         if (notificationPopup.classList.contains('show')) {
             console.log('📪 Closing popup');
             closeNotificationPopup();
@@ -158,7 +158,7 @@
     // Load Notifications from Server (Mock Data for Frontend)
     function loadNotifications() {
         console.log('📥 Loading notifications...');
-        
+
         // Mock data for frontend demo
         const mockNotifications = [
             {
@@ -290,7 +290,7 @@
         `;
 
         // Add click handler
-        div.addEventListener('click', function(e) {
+        div.addEventListener('click', function (e) {
             // Don't navigate if clicking on action buttons
             if (e.target.classList.contains('notification-btn')) {
                 return;
@@ -303,7 +303,7 @@
             setTimeout(() => {
                 const acceptBtn = div.querySelector('.notification-btn.accept');
                 const declineBtn = div.querySelector('.notification-btn.decline');
-                
+
                 if (acceptBtn) {
                     acceptBtn.addEventListener('click', () => handleFriendRequest(notification.id, 'accept'));
                 }
@@ -356,10 +356,10 @@
         if (route) {
             // Close popup
             closeNotificationPopup();
-            
+
             // Navigate (uncomment when backend is ready)
             // window.location.href = route;
-            
+
             console.log('📍 Would navigate to:', route);
         }
     }
@@ -464,17 +464,17 @@
         notificationStompClient = Stomp.over(socket);
         notificationStompClient.debug = null; // Disable debug logs
 
-        notificationStompClient.connect({}, function(frame) {
+        notificationStompClient.connect({}, function (frame) {
             console.log('✅ Notification WebSocket connected:', currentUserId);
             isNotificationConnected = true;
 
             // Subscribe to user's notification queue
-            notificationStompClient.subscribe('/user/' + currentUserId + '/queue/notifications', function(message) {
+            notificationStompClient.subscribe('/user/' + currentUserId + '/queue/notifications', function (message) {
                 const notification = JSON.parse(message.body);
                 console.log('🔔 New notification received:', notification);
                 handleNewNotification(notification);
             });
-        }, function(error) {
+        }, function (error) {
             console.error('❌ Notification WebSocket connection error:', error);
             isNotificationConnected = false;
 
@@ -514,7 +514,7 @@
 
             const browserNotification = new Notification(title, options);
 
-            browserNotification.onclick = function() {
+            browserNotification.onclick = function () {
                 window.focus();
                 handleNotificationClick(notification);
                 browserNotification.close();
@@ -612,7 +612,7 @@
 
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             console.log('📄 DOM loaded, initializing notifications...');
             init();
         });
@@ -650,10 +650,10 @@
             }
         }
     `;
-    
+
     // Add styles after DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.head.appendChild(style);
         });
     } else {
