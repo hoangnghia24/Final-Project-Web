@@ -183,15 +183,23 @@ async function graphqlFetch(query, variables = {}) {
                 unfriend(friendId);
             }
         });
+        // Trong setupEventListeners()
+
         $(document).on('click', '.btn-cancel-sent-request', function (e) {
             e.preventDefault();
             e.stopPropagation();
 
-            const requestId = $(this).data('request-id');
-            const userId = $(this).data('user-id'); // ID của user kia (để hồi phục nút thêm bạn)
+            // === SỬA DÒNG NÀY ===
+            // Cũ: const requestId = $(this).data('request-id'); 
+            // Mới: Dùng attr để luôn lấy giá trị thực tế đang có trên nút
+            const requestId = $(this).attr('data-request-id');
 
-            // Gọi hàm hủy (dùng chung logic với reject nhưng xử lý UI khác)
-            cancelSentRequest(requestId, userId);
+            const userId = $(this).data('user-id'); // userId ít thay đổi nên dùng data cũng được
+
+            // Kiểm tra nếu không có requestId thì không gọi hàm (tránh lỗi)
+            if (requestId) {
+                cancelSentRequest(requestId, userId);
+            }
         });
         console.log('✅ Event listeners setup complete');
     }
@@ -1149,29 +1157,66 @@ async function graphqlFetch(query, variables = {}) {
     // WEBSOCKET CONNECTION
     // ============================================
 
+    // Trong FriendRequests.js
+
     function connectFriendWebSocket() {
         console.log('🔌 Connecting to WebSocket...');
         const socket = new SockJS('/ws');
         friendStompClient = Stomp.over(socket);
-        friendStompClient.debug = null; // Tắt log debug cho đỡ rối
+        friendStompClient.debug = null;
 
         friendStompClient.connect({}, function (frame) {
-            console.log('✅ Connected WebSocket: ' + frame);
+            console.log('✅ Connected WebSocket success');
             isFriendConnected = true;
 
-            // Subscribe
-            friendStompClient.subscribe('/user/queue/friend-requests', function (message) {
-                console.log("🔔 Có thông báo WebSocket mới:", message.body);
+            const myUserId = localStorage.getItem('currentUserId');
 
-                // Reload lại toàn bộ danh sách (Hàm loadFriendRequests ở trên đã sửa để update cả sidebar)
-                loadFriendRequests();
+            if (myUserId) {
+                // 1. LẮNG NGHE KÊNH CHUNG (Lời mời & Các lệnh Refresh)
+                friendStompClient.subscribe('/topic/friend-requests/' + myUserId, function (message) {
+                    console.log("🔔 TÍN HIỆU SOCKET:", message.body);
 
-                // Reload cả suggestions để loại bỏ người vừa gửi (nếu cần)
-                // loadFriendSuggestions(); 
+                    // === LOGIC PHÂN LOẠI TIN NHẮN ===
 
-                // Hiển thị badge đỏ trên Header
-                updateHeaderNotificationCount();
-            });
+                    if (message.body === 'REFRESH_FRIEND_REQUESTS') {
+                        // TRƯỜNG HỢP 1: Bên kia "Hủy lời mời" hoặc "Từ chối"
+                        // -> Load lại danh sách lời mời (để xóa dòng đó đi)
+                        // -> Load lại gợi ý (để nút "Hủy" đổi lại thành "Thêm bạn")
+                        console.log("♻️ Reloading requests & suggestions...");
+                        loadFriendRequests();
+                        loadFriendSuggestions();
+                    }
+                    else if (message.body === 'REFRESH_FRIENDS_LIST') {
+                        // TRƯỜNG HỢP 2: Bên kia "Hủy kết bạn" (Unfriend)
+                        // -> Load lại danh sách bạn bè (để xóa người đó đi)
+                        // -> Load lại gợi ý (để hiện lại nút "Thêm bạn")
+                        console.log("♻️ Reloading friends list...");
+                        loadAllFriends();
+                        loadFriendSuggestions();
+                    }
+                    else {
+                        // TRƯỜNG HỢP 3: Lời mời kết bạn MỚI (Message là text thông báo: "Bạn có lời mời...")
+                        console.log("➕ New request received");
+                        loadFriendRequests();
+
+                        // Chỉ tăng số lượng badge khi là lời mời mới
+                        let currentCount = parseInt($('#friend-requests-count').text() || 0);
+                        updateRequestsCount(currentCount + 1);
+
+                        // (Optional) Hiện Toast thông báo
+                        // showToast(message.body);
+                    }
+                });
+
+                // 2. ĐĂNG KÝ NHẬN THÔNG BÁO CHUNG (Ví dụ: được chấp nhận kết bạn)
+                friendStompClient.subscribe('/topic/notifications/' + myUserId, function (message) {
+                    console.log("🔔 THÔNG BÁO MỚI:", message.body);
+                    // Load lại ds bạn bè vì vừa có người đồng ý
+                    loadAllFriends();
+                    // Load lại gợi ý để xóa người đó khỏi danh sách gợi ý/đã gửi
+                    loadFriendSuggestions();
+                });
+            }
 
         }, function (error) {
             console.error('❌ WebSocket error:', error);
@@ -1376,24 +1421,39 @@ async function cancelSentRequest(requestId, userId) {
         }
 
         // THÀNH CÔNG -> Đổi ngược lại thành nút THÊM BẠN BÈ
+        // Trong hàm cancelSentRequest
+
+        // ... đoạn gọi API ...
+
+        // THÀNH CÔNG -> Đổi ngược lại thành nút THÊM BẠN BÈ
+        // Trong hàm cancelSentRequest (cuối file)
+
+        // ... đoạn code thành công ...
+        // ... (đoạn trên giữ nguyên) ...
+
+        // THÀNH CÔNG -> Đổi ngược lại thành nút THÊM BẠN BÈ
         $buttons.each(function () {
             const $btn = $(this);
 
             $btn.removeClass('btn-secondary btn-cancel-sent-request');
             $btn.addClass('btn-primary btn-add-friend');
 
-            // Trả về icon và text cũ
+            // === BẠN ĐANG THIẾU ĐOẠN CODE NÀY ===
+            // Khôi phục lại nội dung nút (Icon + Chữ)
             $btn.html(`
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                     <circle cx="8.5" cy="7" r="4"></circle>
                     <line x1="20" y1="8" x2="20" y2="14"></line>
                     <line x1="23" y1="11" x2="17" y2="11"></line>
-                </svg> Thêm bạn bè
+                </svg>
+                Thêm bạn bè
             `);
+            // ======================================
 
-            // Xóa data request id đi
-            $btn.removeData('request-id');
+            // Xóa hẳn attribute trên HTML
+            $btn.removeAttr('data-request-id');
+
             $btn.prop('disabled', false);
         });
 

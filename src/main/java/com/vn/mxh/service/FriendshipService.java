@@ -34,7 +34,6 @@ public class FriendshipService {
                         throw new RuntimeException("Không thể kết bạn với chính mình");
                 }
 
-                // Kiểm tra xem đã có quan hệ chưa
                 if (friendshipRepository.findFriendshipBetween(requester, addressee).isPresent()) {
                         throw new RuntimeException("Đã tồn tại mối quan hệ hoặc lời mời");
                 }
@@ -47,13 +46,10 @@ public class FriendshipService {
 
                 Friendship saved = friendshipRepository.save(friendship);
 
-                // --- WEBSOCKET NOTIFICATION ---
-                // Gửi thông báo đến user nhận (destination:
-                // /user/{username}/queue/friend-requests)
-                // Payload có thể là một DTO đơn giản
-                messagingTemplate.convertAndSendToUser(
-                                addressee.getUsername(),
-                                "/queue/friend-requests",
+                // --- GỬI THÔNG BÁO CHO NGƯỜI NHẬN ---
+                // Gửi vào Topic: /topic/friend-requests/{ID_NGƯỜI_NHẬN}
+                messagingTemplate.convertAndSend(
+                                "/topic/friend-requests/" + addressee.getId(),
                                 "Bạn có lời mời kết bạn mới từ " + requester.getFullName());
 
                 return saved;
@@ -71,11 +67,12 @@ public class FriendshipService {
                 friendship.setStatus(FriendshipStatus.ACCEPTED);
                 Friendship saved = friendshipRepository.save(friendship);
 
-                // Bắn thông báo ngược lại cho người gửi là đã được chấp nhận
-                messagingTemplate.convertAndSendToUser(
-                                friendship.getRequester().getUsername(),
-                                "/queue/notifications",
-                                currentUsername + " đã chấp nhận lời mời kết bạn!");
+                // --- GỬI THÔNG BÁO CHO NGƯỜI GỬI LỜI MỜI ---
+                // Gửi vào Topic: /topic/notifications/{ID_NGƯỜI_GỬI}
+                // Lúc này 'friendship.getRequester()' là người đã gửi lời mời ban đầu
+                messagingTemplate.convertAndSend(
+                                "/topic/notifications/" + friendship.getRequester().getId(),
+                                friendship.getAddressee().getFullName() + " đã chấp nhận lời mời kết bạn!");
 
                 return saved;
         }
@@ -127,26 +124,45 @@ public class FriendshipService {
         // Trong FriendshipService.java
         // Trong file FriendshipService.java
 
+        // Trong FriendshipService.java
+
         @Transactional
         public void rejectFriendRequest(Long requestId, String currentUsername) {
                 Friendship friendship = friendshipRepository.findById(requestId)
                                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lời mời!"));
 
-                // --- SỬA ĐOẠN NÀY ---
-                // Thay friendship.getFriend() bằng friendship.getAddressee()
                 boolean isRecipient = friendship.getAddressee().getUsername().equals(currentUsername);
-
-                // Thay friendship.getUser() bằng friendship.getRequester()
                 boolean isRequester = friendship.getRequester().getUsername().equals(currentUsername);
-                // ---------------------
 
                 if (!isRecipient && !isRequester) {
                         throw new RuntimeException("Bạn không có quyền xóa lời mời này!");
                 }
 
                 friendshipRepository.delete(friendship);
-                friendshipRepository.flush(); // Đẩy lệnh xóa xuống DB ngay lập tức
+                friendshipRepository.flush();
+
+                // === THÊM ĐOẠN NÀY: Bắn thông báo cập nhật UI ===
+                Long userToNotifyId;
+                if (isRequester) {
+                        // Trường hợp 1: Mình (Requester) HỦY lời mời đã gửi
+                        // -> Báo cho người nhận (Addressee) biết để họ load lại danh sách, mất thông
+                        // báo đỏ
+                        userToNotifyId = friendship.getAddressee().getId();
+                } else {
+                        // Trường hợp 2: Mình (Addressee) TỪ CHỐI lời mời
+                        // -> Báo cho người gửi (Requester) biết để nút của họ đổi lại thành "Thêm bạn
+                        // bè"
+                        userToNotifyId = friendship.getRequester().getId();
+                }
+
+                // Gửi tín hiệu "REFRESH" để bên kia tự load lại API
+                messagingTemplate.convertAndSend(
+                                "/topic/friend-requests/" + userToNotifyId,
+                                "REFRESH_FRIEND_REQUESTS");
+                // ================================================
         }
+        // Trong FriendshipService.java
+
         // Trong FriendshipService.java
 
         @Transactional
@@ -157,17 +173,26 @@ public class FriendshipService {
                 User targetUser = userRepository.findById(targetUserId)
                                 .orElseThrow(() -> new RuntimeException("Lỗi: Người bạn này không tồn tại"));
 
-                // Tìm mối quan hệ giữa 2 người (bất kể ai là người gửi trước đó)
                 Friendship friendship = friendshipRepository.findFriendshipBetween(currentUser, targetUser)
                                 .orElseThrow(() -> new RuntimeException(
                                                 "Hai bạn chưa kết bạn hoặc đã hủy kết bạn rồi!"));
 
                 friendshipRepository.delete(friendship);
-                friendshipRepository.flush(); // Xóa ngay lập tức
+                friendshipRepository.flush();
+
+                // === THÊM ĐOẠN NÀY: Bắn thông báo cập nhật UI ===
+                // Báo cho người bị hủy kết bạn biết
+                messagingTemplate.convertAndSend(
+                                "/topic/friend-requests/" + targetUserId,
+                                "REFRESH_FRIENDS_LIST");
+                // Lưu ý: Ta tận dụng kênh /topic/friend-requests/ để báo tin
+                // Vì Frontend đã lắng nghe kênh này và có hàm loadAllFriends() bên trong
+                // ================================================
         }
 
         // Trong FriendshipService.java
         public List<Friendship> getSentFriendRequests(Long currentUserId) {
                 return friendshipRepository.findSentRequests(currentUserId);
         }
+
 }
