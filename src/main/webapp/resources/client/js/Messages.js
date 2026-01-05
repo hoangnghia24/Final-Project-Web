@@ -1,6 +1,6 @@
 /**
  * Messages.js - Real-time Chat UI for MXH Social Network
- * Fixes: WebSocket Subscription & Real-time updates & Message Retraction
+ * Fixes: Avatar Header Update, Retract Message
  */
 
 $(document).ready(function () {
@@ -68,21 +68,11 @@ $(document).ready(function () {
             // Subscribe theo ID của mình
             stompClient.subscribe('/topic/chat/' + currentUserId, function (message) {
                 const data = JSON.parse(message.body);
-                console.log("📩 Socket Data:", data);
 
-                // --- XỬ LÝ TÍN HIỆU THU HỒI ---
+                // Xử lý tín hiệu thu hồi
                 if (data.type === 'RETRACT') {
-                    // Tìm thẻ tin nhắn trên màn hình
-                    const msgEl = $(`#msg-${data.messageId}`);
-                    if (msgEl.length > 0) {
-                        // Đổi nội dung
-                        msgEl.find('.message-bubble').html('<em style="color:#999; font-style:italic;">Tin nhắn đã bị thu hồi</em>');
-                        // Xóa nút thu hồi và ảnh (nếu có)
-                        msgEl.find('.btn-retract').remove();
-                        msgEl.find('img:not(.message-avatar)').remove();
-                    }
+                    handleRetractSignal(data);
                 } else {
-                    // Xử lý tin nhắn mới bình thường
                     handleIncomingMessage(data);
                 }
             });
@@ -93,63 +83,42 @@ $(document).ready(function () {
         });
     }
 
-    /**
-     * [MỚI] Xử lý hiển thị khi có tin nhắn bị thu hồi
-     */
     function handleRetractSignal(data) {
         const msgId = data.messageId;
         const msgElement = $(`#msg-${msgId}`);
-
         if (msgElement.length > 0) {
-            // 1. Tìm phần bubble chứa nội dung và đổi thành text thu hồi
             msgElement.find('.message-bubble').html('<em style="color:#999; font-size: 13px;">Tin nhắn đã bị thu hồi</em>');
-
-            // 2. Xóa nút thu hồi (nếu có)
             msgElement.find('.btn-retract').remove();
-
-            // 3. Xóa ảnh (nếu là tin nhắn ảnh)
-            msgElement.find('.message-content img').remove();
+            msgElement.find('img:not(.message-avatar)').remove();
         }
     }
 
-    /**
-     * Handle incoming message
-     */
     function handleIncomingMessage(messageData) {
         const currentUserId = parseInt(localStorage.getItem('currentUserId'));
-
         const otherUserId = parseInt(messageData.senderId) === currentUserId
             ? parseInt(messageData.receiverId)
             : parseInt(messageData.senderId);
 
-        // 1. Nếu đang chat với người này -> Hiện tin nhắn
         if (parseInt(currentChatUserId) === parseInt(otherUserId)) {
             appendMessage(messageData, currentUserId);
         }
 
-        // 2. Load lại danh sách conversation
         if (!searchInput.val().trim()) {
             setTimeout(() => { loadConversations(); }, 500);
         }
     }
 
-    /**
-     * [ĐÃ SỬA] Append message to UI
-     * Thêm ID vào thẻ cha và nút thu hồi
-     */
     function appendMessage(msg, currentUserId) {
         const isSent = msg.senderId == currentUserId;
         const messageClass = isSent ? 'sent' : 'received';
         const time = formatTime(msg.sentAt || msg.timestamp);
 
-        // Thêm ID để dễ tìm: id="msg-{id}"
         let messageHtml = `<div class="message-group"><div class="message ${messageClass}" id="msg-${msg.id}">`;
 
         if (!isSent) {
             messageHtml += `<img src="${msg.senderAvatar || 'https://api.dicebear.com/9.x/avataaars/svg?seed=' + msg.senderId}" class="message-avatar">`;
         }
 
-        // Kiểm tra nếu đã thu hồi thì hiện text khác
         let contentHtml = '';
         if (msg.isRetracted) {
             contentHtml = '<em style="color:#999; font-style:italic;">Tin nhắn đã bị thu hồi</em>';
@@ -158,20 +127,19 @@ $(document).ready(function () {
         }
 
         messageHtml += `
-        <div class="message-content">
-            <div class="message-bubble">${contentHtml}</div>
-            <div style="display:flex; align-items:center; gap:5px; font-size:11px; color:#65676b; margin-top:2px;">
-                <span class="message-time">${time}</span>
-                
-                ${(isSent && !msg.isRetracted) ?
+            <div class="message-content">
+                <div class="message-bubble">${contentHtml}</div>
+                <div class="message-meta" style="display:flex; align-items:center; gap:5px;">
+                    <span class="message-time">${time}</span>
+                    ${(isSent && !msg.isRetracted) ?
                 `<i class="fas fa-undo btn-retract" 
-                        onclick="window.retractMessage(${msg.id})" 
-                        title="Thu hồi tin nhắn" 
-                        style="cursor:pointer; margin-left:5px; color:#ccc;"></i>`
+                            onclick="window.retractMessage(${msg.id})" 
+                            title="Thu hồi" 
+                            style="cursor:pointer; font-size:10px; color:#ccc; margin-left: 5px;"></i>`
                 : ''}
+                </div>
             </div>
-        </div>
-    `;
+        `;
         messageHtml += '</div></div>';
 
         messagesArea.append(messageHtml);
@@ -187,12 +155,21 @@ $(document).ready(function () {
             const userId = parseInt(rawId);
             const userName = $(this).find('.conversation-name').text();
 
+            // [MỚI] Lấy src ảnh avatar từ item trong danh sách bên trái
+            let avatarUrl = $(this).find('.conversation-avatar img').attr('src');
+            // Fallback nếu không lấy được ảnh
+            if (!avatarUrl) {
+                avatarUrl = `https://api.dicebear.com/9.x/avataaars/svg?seed=${userName}`;
+            }
+
             if (isNaN(userId)) return;
 
+            // Cập nhật tên trên header ngay lập tức
             $('#chatUserName').text(userName);
 
             if (currentChatUserId !== userId) {
-                openChat(userId, userName);
+                // Truyền thêm avatarUrl vào hàm openChat
+                openChat(userId, userName, avatarUrl);
                 if (searchInput.val().trim() !== "") {
                     searchInput.val("");
                 }
@@ -232,9 +209,6 @@ $(document).ready(function () {
         });
     }
 
-    /**
-     * Search Handler
-     */
     function handleSidebarSearch() {
         const query = searchInput.val().trim();
         if (query === "") {
@@ -283,9 +257,6 @@ $(document).ready(function () {
         conversationsList.html(html);
     }
 
-    /**
-     * Load conversations list
-     */
     function loadConversations() {
         const currentUserId = localStorage.getItem('currentUserId');
         if (!currentUserId) return;
@@ -332,9 +303,12 @@ $(document).ready(function () {
                 if (d) timeStr = formatRelativeTime(d);
             }
 
-            // Xử lý hiển thị preview nếu tin nhắn bị thu hồi (nếu API có trả về flag isRetracted ở đây thì tốt)
             let rawText = partner.lastMessage || 'Bắt đầu trò chuyện...';
-            // Logic preview đơn giản
+            // Nếu tin nhắn là ảnh (bắt đầu bằng IMG::)
+            if (rawText.startsWith('IMG::')) {
+                rawText = '[Hình ảnh]';
+            }
+
             const previewHtml = (partner.lastMessageSenderId == currentUserId)
                 ? `<span style="font-weight:700">Bạn:</span> ${escapeHtml(rawText)}`
                 : `${escapeHtml(rawText)}`;
@@ -360,16 +334,24 @@ $(document).ready(function () {
     }
 
     /**
-     * Open Chat Logic
+     * [FIXED] Open Chat Logic: Update Avatar Header
      */
-    function openChat(userId, userName) {
+    function openChat(userId, userName, avatarUrl) {
         currentChatUserId = parseInt(userId);
         currentChatUserName = userName;
 
         emptyState.hide();
         newMessageForm.hide();
         chatActive.show().css('display', 'flex');
+
+        // Cập nhật Tên
         $('#chatUserName').text(userName);
+
+        // [MỚI] Cập nhật Avatar trên header chat
+        // Tìm thẻ img có class chat-avatar nằm trong chat-header
+        if (avatarUrl) {
+            $('.chat-header .chat-avatar').attr('src', avatarUrl);
+        }
 
         loadMessages(userId);
         markConversationAsRead(userId);
@@ -410,16 +392,12 @@ $(document).ready(function () {
             return da - db;
         });
 
-        // Sử dụng lại logic của appendMessage bằng cách lặp
-        messagesArea.empty(); // Clear loading spinner
+        messagesArea.empty();
         sorted.forEach(msg => {
             appendMessage(msg, currentUserId);
         });
     }
 
-    /**
-     * Send Message Logic
-     */
     function sendMessage() {
         const content = messageInput.val().trim();
         if (!content || !currentChatUserId) return;
@@ -440,7 +418,6 @@ $(document).ready(function () {
             console.warn("⚠️ WebSocket chưa kết nối");
         }
 
-        // Không appendMessage thủ công nữa vì Server sẽ gửi lại qua socket topic
         messageInput.val('');
 
         if (!searchInput.val().trim()) {
@@ -556,7 +533,6 @@ $(document).ready(function () {
                     if (stompClient && stompClient.connected) {
                         stompClient.send('/app/chat', {}, JSON.stringify(messageData));
                     }
-                    // Socket sẽ tự append
                 } else {
                     alert('Lỗi: ' + (resp.error || "Server trả về dữ liệu không hợp lệ"));
                 }
@@ -573,8 +549,7 @@ $(document).ready(function () {
     function hideNewMessageForm() { newMessageForm.hide(); emptyState.show(); }
 });
 
-// --- [MỚI] GLOBAL FUNCTION CHO NÚT THU HỒI ---
-// Phải để ở window scope để onclick trong HTML string gọi được
+// GLOBAL FUNCTION CHO NÚT THU HỒI
 window.retractMessage = function (messageId) {
     if (!confirm("Bạn có chắc chắn muốn thu hồi tin nhắn này không?")) return;
 
@@ -587,7 +562,6 @@ window.retractMessage = function (messageId) {
         },
         success: function (resp) {
             console.log("Đã yêu cầu thu hồi:", resp);
-            // Không cần làm gì thêm ở UI vì Socket sẽ trả về tín hiệu RETRACT
         },
         error: function (err) {
             console.error("Lỗi thu hồi:", err);
@@ -595,24 +569,3 @@ window.retractMessage = function (messageId) {
         }
     });
 };
-
-// Hàm gọi API thu hồi
-window.retractMessage = function (messageId) {
-    if (!confirm("Bạn muốn thu hồi tin nhắn này?")) return;
-
-    $.ajax({
-        url: "/api/messages/retract",
-        type: "POST",
-        data: { messageId: messageId },
-        headers: {
-            "Authorization": "Bearer " + localStorage.getItem("accessToken")
-        },
-        success: function (response) {
-            console.log("Đã gửi yêu cầu thu hồi.");
-            // Không cần làm gì thêm, Socket sẽ lo phần cập nhật giao diện
-        },
-        error: function (xhr) {
-            alert("Lỗi: " + xhr.responseText);
-        }
-    });
-};  
