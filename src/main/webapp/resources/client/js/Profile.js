@@ -45,15 +45,133 @@ $(document).ready(function () {
     loadUserProfile(profileUsername);
     loadUserPosts(profileUsername);
     setupCreateModalUserInfo();
+    // --- VARIABLES CHO EDIT PROFILE ---
+    const editProfileModal = new bootstrap.Modal(document.getElementById('editProfileModal'));
+    const btnOpenEditProfile = $("#btn-open-edit-profile");
+    const editAvatarInput = $("#editAvatarInput");
+    const editAvatarPreview = $("#edit-avatar-preview");
+    const editFullnameInput = $("#edit-fullname-input");
+    const editBioInput = $("#edit-bio-input");
+    const btnSaveProfile = $("#btn-save-profile");
+    let newAvatarFile = null;
 
+    // --- 1. HIỂN THỊ NÚT EDIT NẾU LÀ CHÍNH CHỦ ---
+    // (Thêm đoạn này vào cuối hàm renderUserData)
+    /* Trong hàm renderUserData(user), thêm dòng này:
+       if (currentUser && currentUser.username === user.username) {
+           $("#btn-open-edit-profile").show();
+       } else {
+           $("#btn-open-edit-profile").hide();
+       }
+    */
+
+    // --- 2. MỞ MODAL & ĐIỀN DỮ LIỆU CŨ ---
+    btnOpenEditProfile.click(function () {
+        // Lấy data user đang xem (biến window.viewingProfileUser đã lưu ở bước trước)
+        const user = window.viewingProfileUser;
+        if (!user) return;
+
+        editFullnameInput.val(user.fullName);
+        editBioInput.val(user.bio || "");
+        editAvatarPreview.attr("src", user.avatarUrl || "/img/default-avatar.png");
+        newAvatarFile = null; // Reset file
+        editAvatarInput.val("");
+
+        editProfileModal.show();
+    });
+
+    // --- 3. XỬ LÝ CHỌN ẢNH AVATAR MỚI ---
+    editAvatarInput.change(function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            newAvatarFile = file;
+            const objectUrl = URL.createObjectURL(file);
+            editAvatarPreview.attr("src", objectUrl);
+        }
+    });
+
+    // --- 4. LƯU THAY ĐỔI (GỌI API) ---
+    btnSaveProfile.click(async function () {
+        const newName = editFullnameInput.val().trim();
+        const newBio = editBioInput.val().trim();
+
+        if (!newName) {
+            alert("Tên không được để trống!");
+            return;
+        }
+
+        btnSaveProfile.prop("disabled", true).text("Đang lưu...");
+
+        try {
+            let finalAvatarUrl = window.viewingProfileUser.avatarUrl;
+
+            // Nếu có chọn ảnh mới -> Upload lên server trước
+            if (newAvatarFile) {
+                // Tận dụng hàm uploadMedia có sẵn trong Profile.js của bạn
+                finalAvatarUrl = await uploadMedia(newAvatarFile);
+            }
+
+            // Gọi Mutation GraphQL để update
+            const mutation = `
+                mutation UpdateProfile($input: UpdateProfileInput!) {
+                    updateUserProfile(input: $input) {
+                        id fullName bio avatarUrl
+                    }
+                }
+            `;
+
+            const variables = {
+                input: {
+                    fullName: newName,
+                    bio: newBio,
+                    avatarUrl: finalAvatarUrl
+                }
+            };
+
+            $.ajax({
+                url: "/graphql", type: "POST", contentType: "application/json",
+                headers: { "Authorization": "Bearer " + accessToken },
+                data: JSON.stringify({ query: mutation, variables: variables }),
+                success: function (res) {
+                    if (res.data && res.data.updateUserProfile) {
+                        alert("Cập nhật thành công!");
+                        editProfileModal.hide();
+                        // Reload lại trang để thấy thay đổi (hoặc gọi lại loadUserProfile)
+                        location.reload();
+                    } else {
+                        alert("Lỗi: " + (res.errors ? res.errors[0].message : "Unknown"));
+                    }
+                    btnSaveProfile.prop("disabled", false).text("Lưu thay đổi");
+                },
+                error: function () {
+                    alert("Lỗi kết nối server");
+                    btnSaveProfile.prop("disabled", false).text("Lưu thay đổi");
+                }
+            });
+
+        } catch (error) {
+            console.error(error);
+            alert("Lỗi khi upload ảnh hoặc cập nhật");
+            btnSaveProfile.prop("disabled", false).text("Lưu thay đổi");
+        }
+    });
     // =========================================================
     // 1. LOGIC PROFILE (LOAD INFO, TABS)
     // =========================================================
     function loadUserProfile(username) {
+        // CẬP NHẬT QUERY: Thêm friendCount
         const graphqlData = {
             query: `query GetUserProfile($username: String!) {
                 getUserByUsername(username: $username) {
-                    id username fullName email avatarUrl bio createdAt role
+                    id 
+                    username 
+                    fullName 
+                    email 
+                    avatarUrl 
+                    bio 
+                    createdAt 
+                    role
+                    friendCount  # <--- Mới thêm để lấy số lượng bạn bè
                 }
             }`,
             variables: { username: username }
@@ -65,6 +183,8 @@ $(document).ready(function () {
             data: JSON.stringify(graphqlData),
             success: function (response) {
                 if (response.data && response.data.getUserByUsername) {
+                    // Lưu user vào biến toàn cục để dùng cho nút Chỉnh sửa
+                    window.viewingProfileUser = response.data.getUserByUsername;
                     renderUserData(response.data.getUserByUsername);
                 } else {
                     alert("Không tìm thấy người dùng!");
@@ -74,16 +194,41 @@ $(document).ready(function () {
     }
 
     function renderUserData(user) {
+        // --- 1. Hiển thị thông tin cơ bản ---
         const avatarUrl = user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`;
+
         $("#header-avatar").css("background-image", `url('${avatarUrl}')`);
+        // Nếu bạn có sidebar avatar
         $("#sidebar-avatar").css("background-image", `url('${avatarUrl}')`);
-        $("#header-fullname, #sidebar-fullname").text(user.fullName);
-        $("#header-username, #sidebar-tag").text("u/" + user.username);
-        $("#sidebar-bio").text(user.bio || "Người dùng này chưa viết giới thiệu.");
+
+        $("#header-fullname").text(user.fullName);
+        $("#header-username").text("u/" + user.username);
+        $("#sidebar-fullname").text(user.fullName);
+        $("#sidebar-tag").text("u/" + user.username);
+
+        // --- 2. Cập nhật Tab Tổng quan (Bio & FriendCount) ---
+        const bioText = user.bio ? user.bio : "Người dùng này chưa viết giới thiệu.";
+        $("#user-bio-display").text(bioText);
+        $("#sidebar-bio").text(bioText);
+
+        // Hiển thị số lượng bạn bè (lấy từ backend)
+        $("#user-friend-count").text(user.friendCount || 0);
 
         if (user.createdAt) {
             const date = new Date(user.createdAt);
+            const dateStr = "tháng " + (date.getMonth() + 1) + " năm " + date.getFullYear();
+            $("#user-join-date").text(dateStr);
             $("#sidebar-created").text(date.toLocaleDateString("vi-VN"));
+        }
+
+        // --- 3. LOGIC HIỂN THỊ NÚT CHỈNH SỬA (FIX LỖI) ---
+        // So sánh username của người đang đăng nhập (currentUser) và profile đang xem (user)
+        if (currentUsername === user.username) {
+            $("#btn-open-edit-profile").show();  // Hiện nút chỉnh sửa profile chính
+            $(".edit-bio-btn").show();           // Hiện nút sửa bio nhỏ (nếu có)
+        } else {
+            $("#btn-open-edit-profile").hide();
+            $(".edit-bio-btn").hide();
         }
     }
 

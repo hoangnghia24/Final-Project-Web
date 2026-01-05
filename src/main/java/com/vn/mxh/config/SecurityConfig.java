@@ -59,7 +59,8 @@ public class SecurityConfig {
                                                                 "/search/**", // Trang tìm kiếm
                                                                 "/*.html", // Các file html lẻ
                                                                 "/friends",
-                                                                "/edit-avatar")
+                                                                "/edit-avatar",
+                                                                "/user-profile")
                                                 .permitAll()
 
                                                 // ============================================================

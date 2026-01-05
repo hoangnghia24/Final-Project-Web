@@ -1,10 +1,12 @@
 package com.vn.mxh.controller;
 
 import com.vn.mxh.domain.User;
+import com.vn.mxh.domain.dto.UpdateProfileInput;
 import com.vn.mxh.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -136,5 +140,15 @@ public class ClientController {
             response.put("message", "Lỗi: " + e.getMessage());
         }
         return response;
+    }
+
+    @MutationMapping
+    public User updateUserProfile(@Argument UpdateProfileInput input, Principal principal) {
+        // Lấy username từ Security Context (Người đang đăng nhập)
+        if (principal == null) {
+            throw new RuntimeException("Bạn chưa đăng nhập!");
+        }
+
+        return userService.updateUserProfile(principal.getName(), input);
     }
 }

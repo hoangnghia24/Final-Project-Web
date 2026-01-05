@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.annotations.Formula;
+
 @Entity
 @Table(name = "users")
 @Data
@@ -45,6 +47,9 @@ public class User implements UserDetails { // THÊM implements UserDetails
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @Formula("(SELECT count(*) FROM friendships f WHERE (f.requester_id = id OR f.addressee_id = id) AND f.status = 'ACCEPTED')")
+    private Integer friendCount;
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)

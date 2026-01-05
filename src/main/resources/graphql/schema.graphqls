@@ -38,6 +38,7 @@ type User {
     bio: String
     role: String
     createdAt: String
+    friendCount: Int
 }
 
 type InfoUserForAdmin {
@@ -116,7 +117,11 @@ input UpdatePostInput {
     feeling: String
     privacyLevel: PrivacyLevel
 }
-
+input UpdateProfileInput {
+    fullName: String
+    bio: String
+    avatarUrl: String
+}
 # =========================
 # 5. ROOT MUTATION (GỘP TẤT CẢ VÀO ĐÂY)
 # =========================
@@ -141,6 +146,8 @@ type Mutation {
     deleteFriendship(id: ID!): Boolean
     rejectFriendRequest(requestId: ID!): String
     unfriend(targetUserId: ID!): String
+
+    updateUserProfile(input: UpdateProfileInput!): User!
 }
 
 # =========================

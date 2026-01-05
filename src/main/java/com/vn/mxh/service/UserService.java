@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
 import com.vn.mxh.domain.User;
 import com.vn.mxh.domain.dto.InfoUserForAdmin;
+import com.vn.mxh.domain.dto.UpdateProfileInput;
 import com.vn.mxh.repository.UserRepository;
 
 @Service
@@ -33,20 +34,20 @@ public class UserService {
     }
 
     // public List<InfoUserForAdmin> getAllUsers() {
-    //     List<InfoUserForAdmin> infoUserForAdmins = this.getAllUsers().stream()
-    //             .map(user -> new InfoUserForAdmin(
-    //                     user.id(),
-    //                     user.fullName(),
-    //                     user.email(),
-    //                     user.fullName(),
-    //                     user.role()))
-    //             .toList();
-    //     return infoUserForAdmins;
+    // List<InfoUserForAdmin> infoUserForAdmins = this.getAllUsers().stream()
+    // .map(user -> new InfoUserForAdmin(
+    // user.id(),
+    // user.fullName(),
+    // user.email(),
+    // user.fullName(),
+    // user.role()))
+    // .toList();
+    // return infoUserForAdmins;
     // }
 
     public List<InfoUserForAdmin> getAllUsers() {
         List<User> users = this.userRepository.findAll();
-        
+
         return users.stream().map(user -> new InfoUserForAdmin(
                 user.getId(),
                 user.getUsername(),
@@ -55,8 +56,7 @@ public class UserService {
                 user.getRole().toString(),
                 user.getAvatarUrl(),
                 user.getBio(),
-                (user.getCreatedAt() != null) ? user.getCreatedAt().toString() : ""
-        )).collect(Collectors.toList());
+                (user.getCreatedAt() != null) ? user.getCreatedAt().toString() : "")).collect(Collectors.toList());
     }
 
     public User updateUserAvatar(String username, String avatarUrl) {
@@ -68,4 +68,29 @@ public class UserService {
         return null;
     }
 
+    // Trong file UserService.java
+
+    public User updateUserProfile(String username, UpdateProfileInput input) {
+        User user = getUserByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("Người dùng không tồn tại!");
+        }
+
+        // --- SỬA CÁC DÒNG NÀY (Bỏ chữ 'get') ---
+
+        if (input.fullName() != null && !input.fullName().isEmpty()) {
+            user.setFullName(input.fullName());
+        }
+
+        if (input.bio() != null) {
+            user.setBio(input.bio());
+        }
+
+        if (input.avatarUrl() != null && !input.avatarUrl().isEmpty()) {
+            user.setAvatarUrl(input.avatarUrl());
+        }
+        // ----------------------------------------
+
+        return userRepository.save(user);
+    }
 }
