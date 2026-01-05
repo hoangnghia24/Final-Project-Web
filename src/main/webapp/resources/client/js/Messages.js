@@ -50,9 +50,15 @@ $(document).ready(function () {
     /**
      * Connect to WebSocket
      */
+    // Trong file Messages.js
+
+    /**
+     * Connect to WebSocket
+     */
     function connectWebSocket() {
-        // Kiểm tra xem user đã đăng nhập chưa
+        // Lấy ID của chính mình
         const currentUserId = localStorage.getItem('currentUserId');
+
         if (!currentUserId) {
             console.warn("Chưa có User ID, không kết nối socket.");
             return;
@@ -60,15 +66,14 @@ $(document).ready(function () {
 
         const socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
-        stompClient.debug = null; // Tắt log rác của thư viện Stomp
+        stompClient.debug = null;
 
         stompClient.connect({}, function (frame) {
             console.log('✅ WebSocket connected');
 
-            // --- FIX QUAN TRỌNG: SỬA ĐƯỜNG DẪN SUBSCRIBE ---
-            // Thay vì dùng ID cứng (/user/3/...), ta dùng kênh chuẩn của Spring Security.
-            // Hệ thống sẽ tự động map tin nhắn tới session của user đang đăng nhập.
-            stompClient.subscribe('/user/queue/messages', function (message) {
+            // --- SỬA ĐOẠN NÀY: SUBSCRIBE THEO ID CỦA MÌNH ---
+            // Lắng nghe kênh: /topic/chat/{ID_CỦA_TÔI}
+            stompClient.subscribe('/topic/chat/' + currentUserId, function (message) {
                 const data = JSON.parse(message.body);
                 console.log("📩 Nhận tin nhắn Real-time:", data);
                 handleIncomingMessage(data);
@@ -76,6 +81,8 @@ $(document).ready(function () {
 
         }, function (error) {
             console.error('❌ WebSocket connection error:', error);
+            // Tự động kết nối lại sau 5s nếu mất mạng
+            setTimeout(connectWebSocket, 5000);
         });
     }
 
@@ -412,6 +419,8 @@ $(document).ready(function () {
     /**
      * Send Message Logic
      */
+    // Trong file Messages.js
+
     function sendMessage() {
         const content = messageInput.val().trim();
         if (!content || !currentChatUserId) return;
@@ -433,22 +442,26 @@ $(document).ready(function () {
             console.warn("⚠️ WebSocket chưa kết nối, tin nhắn có thể không gửi được real-time");
         }
 
-        // Hiển thị ngay lên giao diện của mình (Optimistic UI)
+        // === XÓA HOẶC COMMENT ĐOẠN NÀY ĐI ===
+        // Lý do: Backend đã được cấu hình để gửi ngược lại tin nhắn cho người gửi (/topic/chat/{senderId}).
+        // Nếu giữ đoạn này, tin nhắn sẽ hiện 2 lần.
+        /*
         appendMessage({
             senderId: senderId,
             receiverId: currentChatUserId,
             content: content,
             sentAt: messageData.timestamp
         }, senderId);
+        */
+        // =====================================
 
         messageInput.val(''); // Xóa ô nhập
 
-        // Load lại list chat để cập nhật tin nhắn cuối cùng
+        // Load lại list chat (để cập nhật tin nhắn cuối cùng)
         if (!searchInput.val().trim()) {
             setTimeout(() => { loadConversations(); }, 300);
         }
     }
-
     function markConversationAsRead(otherUserId) {
         const currentUserId = localStorage.getItem('currentUserId');
         $.get(`/api/messages/conversation?userId1=${currentUserId}&userId2=${otherUserId}`, function (messages) {

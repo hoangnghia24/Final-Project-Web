@@ -56,11 +56,13 @@ public class ChatController {
      * WebSocket: Nhận tin nhắn từ client và gửi đến người nhận
      * Client sẽ gửi đến: /app/chat
      */
+    // Trong file ChatController.java
+
     @MessageMapping("/chat")
     @Transactional
     public void sendMessage(@Payload ChatMessage chatMessage) {
         try {
-            // 1. Lưu tin nhắn vào Database (Giữ nguyên)
+            // 1. Lưu tin nhắn (Giữ nguyên)
             Message savedMessage = messageService.saveMessage(
                     chatMessage.getSenderId(),
                     chatMessage.getReceiverId(),
@@ -81,24 +83,20 @@ public class ChatController {
             response.put("sentAt", savedMessage.getSentAt().toString());
             response.put("isRead", savedMessage.getIsRead());
 
-            // --- ĐOẠN SỬA ĐỔI QUAN TRỌNG ---
+            // --- SỬA ĐOẠN NÀY: GỬI THEO ID NGƯỜI NHẬN ---
 
-            // 3. Tìm thông tin người nhận để lấy Username
-            User receiver = userService.getUserById(chatMessage.getReceiverId());
+            // Gửi thẳng vào topic: /topic/chat/{ID_NGƯỜI_NHẬN}
+            // Frontend của người nhận sẽ lắng nghe topic này
+            messagingTemplate.convertAndSend(
+                    "/topic/chat/" + chatMessage.getReceiverId(),
+                    response);
 
-            if (receiver != null) {
-                // 4. Gửi tin nhắn tới Username (Thay vì ID)
-                // Spring Security quản lý session theo Username
-                messagingTemplate.convertAndSendToUser(
-                        receiver.getUsername(), // <--- Dùng Username
-                        "/queue/messages", // <--- Kênh chuẩn
-                        response);
-                System.out.println("✅ Đã gửi socket tới user: " + receiver.getUsername());
-            } else {
-                System.err.println("❌ Không tìm thấy người nhận với ID: " + chatMessage.getReceiverId());
-            }
+            // (Tùy chọn) Gửi lại cho chính người gửi để cập nhật UI nếu họ mở nhiều tab
+            messagingTemplate.convertAndSend(
+                    "/topic/chat/" + chatMessage.getSenderId(),
+                    response);
 
-            // -------------------------------
+            System.out.println("✅ Đã gửi socket tới receiver ID: " + chatMessage.getReceiverId());
 
         } catch (Exception e) {
             System.err.println("Lỗi gửi tin nhắn: " + e.getMessage());
