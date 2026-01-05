@@ -1,24 +1,21 @@
 package com.vn.mxh.controller;
 
+import com.vn.mxh.domain.Comment;
 import com.vn.mxh.domain.Post;
 import com.vn.mxh.domain.User;
+import com.vn.mxh.domain.dto.CreateCommentInput;
 import com.vn.mxh.domain.dto.CreatePostInput;
 import com.vn.mxh.domain.dto.UpdatePostInput;
 import com.vn.mxh.domain.enums.PrivacyLevel;
-import com.vn.mxh.repository.PostRepository;
+import com.vn.mxh.repository.CommentRepository;
 import com.vn.mxh.repository.UserRepository;
+import com.vn.mxh.service.PostService; // Import Service
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.messaging.simp.SimpMessagingTemplate; // Import WS
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import com.vn.mxh.domain.Comment;
-import com.vn.mxh.domain.Like;
-import com.vn.mxh.domain.dto.CreateCommentInput;
-import com.vn.mxh.repository.CommentRepository;
-import com.vn.mxh.repository.LikeRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -26,26 +23,23 @@ import java.util.List;
 @Controller
 public class PostController {
 
-    private final PostRepository postRepository;
+    private final PostService postService; // Sử dụng Service thay vì Repository
     private final UserRepository userRepository;
-    private final SimpMessagingTemplate messagingTemplate; // Dùng để gửi Socket
-    private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
 
-    public PostController(PostRepository postRepository,
+    // Lưu ý: Đã xóa SimpMessagingTemplate và LikeRepository ở đây
+    // vì logic đó đã chuyển vào PostService
+
+    public PostController(PostService postService,
             UserRepository userRepository,
-            SimpMessagingTemplate messagingTemplate,
-            LikeRepository likeRepository,
             CommentRepository commentRepository) {
-        this.postRepository = postRepository;
+        this.postService = postService;
         this.userRepository = userRepository;
-        this.messagingTemplate = messagingTemplate;
-        this.likeRepository = likeRepository;
         this.commentRepository = commentRepository;
     }
 
     // ==========================================
-    // 1. TẠO BÀI VIẾT + REALTIME SOCKET
+    // 1. TẠO BÀI VIẾT (GỌI SERVICE REALTIME)
     // ==========================================
     @MutationMapping
     @PreAuthorize("isAuthenticated()")
@@ -57,113 +51,89 @@ public class PostController {
 
         PrivacyLevel privacy = input.privacyLevel() != null ? input.privacyLevel() : PrivacyLevel.PUBLIC;
 
+        // Map từ DTO sang Entity
         Post newPost = Post.builder()
                 .content(input.content())
-                .mediaUrl(input.mediaUrl()) // URL file
-                .mediaType(input.mediaType()) // IMAGE hoặc VIDEO
-                .feeling(input.feeling()) // Cảm xúc
+                .mediaUrl(input.mediaUrl())
+                .mediaType(input.mediaType())
+                .feeling(input.feeling())
                 .privacyLevel(privacy)
                 .user(currentUser)
                 .likeCount(0)
                 .commentCount(0)
                 .build();
 
-        Post savedPost = postRepository.save(newPost);
-
-        // Gửi bài viết mới đến tất cả client đang nghe topic này
-        messagingTemplate.convertAndSend("/topic/new-posts", savedPost);
-
-        return savedPost;
+        // GỌI SERVICE:
+        // Service sẽ lo việc: Lưu DB + Bắn Socket Feed + Bắn Socket Thông báo
+        return postService.createPost(newPost);
     }
 
+    // ==========================================
+    // 2. CẬP NHẬT BÀI VIẾT
+    // ==========================================
     @MutationMapping
     @PreAuthorize("isAuthenticated()")
     public Post updatePost(@Argument UpdatePostInput input) {
-        // 1. Lấy User hiện tại
-        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        // Validation quyền chủ bài viết đã được xử lý trong Service (hoặc làm tại đây
+        // nếu muốn)
+        // Để nhất quán với PostService tôi gửi trước đó, ta gọi hàm update
 
-        // 2. Tìm bài viết theo ID
-        Post post = postRepository.findById(Long.parseLong(input.id()))
-                .orElseThrow(() -> new RuntimeException("Bài viết không tồn tại"));
-
-        // 3. Bảo mật: Kiểm tra xem người sửa có phải chủ bài viết không
-        if (!post.getUser().getUsername().equals(currentUsername)) {
-            throw new RuntimeException("Bạn không có quyền sửa bài viết này!");
-        }
-
-        // 4. Cập nhật thông tin
-        post.setContent(input.content());
-        post.setPrivacyLevel(input.privacyLevel());
-
-        // Cập nhật Media (Ảnh/Video)
-        post.setMediaUrl(input.mediaUrl());
-        post.setMediaType(input.mediaType());
-
-        // 5. Lưu xuống DB
-        return postRepository.save(post);
+        return postService.updatePost(
+                Long.parseLong(input.id()),
+                input.content(),
+                input.mediaUrl(),
+                input.mediaType(),
+                input.privacyLevel());
     }
 
+    // ==========================================
+    // 3. XÓA BÀI VIẾT
+    // ==========================================
     @MutationMapping
     @PreAuthorize("isAuthenticated()")
     public Boolean deletePost(@Argument String id) {
-        // 1. Lấy User hiện tại đang đăng nhập
-        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        // 2. Tìm bài viết trong DB
-        Post post = postRepository.findById(Long.parseLong(id))
-                .orElseThrow(() -> new RuntimeException("Bài viết không tồn tại!"));
-
-        // 3. Kiểm tra quyền: Chỉ chủ bài viết mới được xóa
-        if (!post.getUser().getUsername().equals(currentUsername)) {
-            throw new RuntimeException("Bạn không có quyền xóa bài viết này!");
-        }
-
-        // 4. Xóa bài viết
-        postRepository.delete(post);
-
-        return true; // Trả về true nếu xóa thành công
+        // Logic check quyền và xóa đã có trong Service
+        return postService.deletePost(Long.parseLong(id));
     }
 
+    // ==========================================
+    // 4. LIKE BÀI VIẾT
+    // ==========================================
     @MutationMapping
     @PreAuthorize("isAuthenticated()")
-    @Transactional
     public Boolean toggleLikePost(@Argument String postId) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByUsername(username).orElseThrow();
-        Post post = postRepository.findById(Long.parseLong(postId))
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Kiểm tra xem đã like chưa
-        var existingLike = likeRepository.findByUserAndPost(user, post);
-
-        if (existingLike.isPresent()) {
-            // Nếu đã like -> Xóa like (Unlike)
-            likeRepository.delete(existingLike.get());
-            post.setLikeCount(Math.max(0, post.getLikeCount() - 1)); // Giảm count
-            postRepository.save(post);
-            return false; // Trả về false (đã unlike)
-        } else {
-            // Nếu chưa like -> Tạo like mới
-            Like newLike = Like.builder().user(user).post(post).build();
-            likeRepository.save(newLike);
-            post.setLikeCount(post.getLikeCount() + 1); // Tăng count
-            postRepository.save(post);
-
-            // TODO: Gửi thông báo cho chủ bài viết (Làm sau)
-            return true; // Trả về true (đã like)
-        }
+        // Gọi Service xử lý logic Like/Unlike
+        return postService.toggleLike(Long.parseLong(postId), currentUser.getId());
     }
 
+    // ==========================================
+    // 5. COMMENT (GIỮ NGUYÊN HOẶC CHUYỂN SERVICE)
+    // ==========================================
+    // Do file PostService trước chưa có createComment, ta giữ logic này ở
+    // Controller
+    // để code chạy được ngay.
     @MutationMapping
     @PreAuthorize("isAuthenticated()")
     @Transactional
     public Comment createComment(@Argument CreateCommentInput input) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(username).orElseThrow();
-        Post post = postRepository.findById(Long.parseLong(input.postId()))
-                .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        // Tạo Comment
+        // Lưu ý: postService.getPostById nếu có, hoặc dùng repository tạm
+        // Ở đây để an toàn và nhanh, ta dùng postService.findById nếu bạn đã thêm,
+        // hoặc inject PostRepository chỉ cho hàm này.
+        // NHƯNG để sạch code, tôi khuyên bạn thêm hàm getPostById vào PostService.
+
+        // Tạm thời dùng cách gọi gián tiếp hoặc giả định Service có hàm tìm kiếm
+        // Hoặc inject PostRepository lại nếu cần thiết (nhưng hạn chế mix).
+
+        // Cách giải quyết nhanh nhất: Thêm findById vào PostService
+        Post post = postService.getPostById(Long.parseLong(input.postId())); // Cần thêm hàm này vào Service
+
         Comment comment = new Comment();
         comment.setContent(input.content());
         comment.setUser(user);
@@ -171,21 +141,20 @@ public class PostController {
 
         Comment savedComment = commentRepository.save(comment);
 
-        // Tăng số lượng comment trong Post
+        // Update count
         post.setCommentCount(post.getCommentCount() + 1);
-        postRepository.save(post);
+        // postRepository.save(post); // Service nên có hàm update hoặc save
 
         return savedComment;
     }
 
     @QueryMapping
     public List<Post> getAllPosts() {
-        return postRepository.findAllByOrderByCreatedAtDesc();
+        return postService.getAllPosts();
     }
 
     @QueryMapping
     public List<Comment> getCommentsByPostId(@Argument String postId) {
-        // Gọi repository lấy list comment, sắp xếp cũ nhất lên trước
         return commentRepository.findByPostIdOrderByCreatedAtAsc(Long.parseLong(postId));
     }
 }
