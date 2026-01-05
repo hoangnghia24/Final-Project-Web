@@ -35,4 +35,8 @@ public class Message {
     @Column(nullable = false)
     @Builder.Default
     private Boolean isRead = false; // Đã đọc chưa
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isRetracted = false; // Mặc định là false (chưa thu hồi)
 }

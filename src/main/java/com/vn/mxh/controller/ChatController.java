@@ -110,12 +110,8 @@ public class ChatController {
     @GetMapping("/api/messages/conversation")
     @ResponseBody
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> getConversation(
-            @RequestParam Long userId1,
-            @RequestParam Long userId2) {
-
+    public List<Map<String, Object>> getConversation(@RequestParam Long userId1, @RequestParam Long userId2) {
         List<Message> messages = messageService.getConversation(userId1, userId2);
-
         return messages.stream().map(msg -> {
             Map<String, Object> map = new HashMap<>();
             map.put("id", msg.getId());
@@ -123,7 +119,15 @@ public class ChatController {
             map.put("senderName", msg.getSender().getFullName());
             map.put("senderAvatar", msg.getSender().getAvatarUrl());
             map.put("receiverId", msg.getReceiver().getId());
-            map.put("content", msg.getContent());
+
+            if (Boolean.TRUE.equals(msg.getIsRetracted())) {
+                map.put("content", "Tin nhắn đã bị thu hồi");
+                map.put("isRetracted", true);
+            } else {
+                map.put("content", msg.getContent());
+                map.put("isRetracted", false);
+            }
+
             map.put("sentAt", msg.getSentAt().toString());
             map.put("isRead", msg.getIsRead());
             return map;
@@ -309,5 +313,30 @@ public class ChatController {
                     return map;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @PostMapping("/api/messages/retract")
+    @ResponseBody
+    public Map<String, Object> retractMessage(@RequestParam Long messageId) {
+        // 1. Lấy user đang đăng nhập
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userService.getUserByUsername(currentUsername);
+
+        // 2. Gọi Service xử lý DB
+        Message msg = messageService.retractMessage(messageId, currentUser.getId());
+
+        // 3. Tạo thông báo Socket
+        Map<String, Object> socketPayload = new HashMap<>();
+        socketPayload.put("type", "RETRACT"); // Loại tín hiệu: Thu hồi
+        socketPayload.put("messageId", msg.getId());
+
+        // 4. Gửi tín hiệu tới cả 2 người (để giao diện tự cập nhật)
+        messagingTemplate.convertAndSend("/topic/chat/" + msg.getReceiver().getId(), socketPayload);
+        messagingTemplate.convertAndSend("/topic/chat/" + msg.getSender().getId(), socketPayload);
+
+        // 5. Trả về kết quả cho AJAX
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        return response;
     }
 }

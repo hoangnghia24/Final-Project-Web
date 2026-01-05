@@ -9,6 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <link th:href="@{/client/css/ModernUI.css}" rel="stylesheet" />
     <link th:href="@{/client/css/ModernPost.css}" rel="stylesheet" />
     <link th:href="@{/client/css/Profile.css}" rel="stylesheet" />
@@ -30,16 +33,13 @@
     <script th:src="@{/client/js/RedditInteractions.js}"></script>
     <script th:src="@{/client/js/PostInteractions.js}"></script>
 
-    <!-- Include header fragment -->
     <div th:replace="~{fragments/Header :: user-header}"></div>
 
     <div class="all-container">
 
-        <!-- Include left sidebar fragment -->
         <div th:replace="~{fragments/Sidebar :: Sidebar}"></div>
 
         <main class="main-feed">
-            <!-- Quick Stats Section -->
             <div class="quick-stats-section">
                 <div class="quick-stat-card">
                     <div class="quick-stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -70,7 +70,6 @@
                 </div>
             </div>
 
-            <!-- Sort & Filter Section -->
             <div class="sort-filter-section">
                 <div class="filter-tabs-unified" style="flex: 1; margin-bottom: 0;">
                     <button class="filter-tab-btn active" data-filter="hot">
@@ -103,7 +102,6 @@
                 </div>
             </div>
 
-            <!-- All Post 1 -->
             <div class="reddit-post-card" data-post-id="a1">
                 <div class="post-header">
                     <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=DeveloperGuide" alt="Dev"
@@ -189,7 +187,6 @@
                 </div>
             </div>
 
-            <!-- All Post 2 -->
             <div class="reddit-post-card" data-post-id="a2">
                 <div class="post-header">
                     <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Traveler2025" alt="Traveler"
@@ -276,7 +273,6 @@
                 </div>
             </div>
 
-            <!-- All Post 3 -->
             <div class="reddit-post-card" data-post-id="a3">
                 <div class="post-vote-section">
                     <button class="vote-btn upvote">
@@ -340,15 +336,12 @@
                 </div>
             </div>
 
-            <!-- Load More -->
             <div class="load-more-section">
                 <button class="load-more-btn">Xem thêm bài viết</button>
             </div>
         </main>
 
-        <!-- Right Sidebar -->
         <div class="right-sidebar">
-            <!-- Latest Activity Widget -->
             <div class="widget-card">
                 <div class="widget-header">
                     <h3 class="widget-title-text">Hoạt động gần đây</h3>
@@ -384,82 +377,6 @@
                 </div>
             </div>
 
-            <!-- Suggested Users Widget -->
-            <div class="widget-card">
-                <div class="widget-header">
-                    <h3 class="widget-title-text">Gợi ý cho bạn</h3>
-                    <a href="#" class="widget-more">Xem tất cả</a>
-                </div>
-                <div class="suggested-user">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=John" alt="Avatar"
-                        class="suggested-avatar">
-                    <div class="suggested-info">
-                        <div class="suggested-name">
-                            John Smith
-                            <svg viewBox="0 0 24 24">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                            </svg>
-                        </div>
-                        <div class="suggested-mutual">15 bạn chung</div>
-                    </div>
-                    <button class="suggested-follow-btn">Theo dõi</button>
-                </div>
-                <div class="suggested-user">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Maria" alt="Avatar"
-                        class="suggested-avatar">
-                    <div class="suggested-info">
-                        <div class="suggested-name">Maria Garcia</div>
-                        <div class="suggested-mutual">10 bạn chung</div>
-                    </div>
-                    <button class="suggested-follow-btn">Theo dõi</button>
-                </div>
-                <div class="suggested-user">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Kevin" alt="Avatar"
-                        class="suggested-avatar">
-                    <div class="suggested-info">
-                        <div class="suggested-name">Kevin Lee</div>
-                        <div class="suggested-mutual">7 bạn chung</div>
-                    </div>
-                    <button class="suggested-follow-btn">Theo dõi</button>
-                </div>
-            </div>
-
-            <!-- Popular Content Widget -->
-            <div class="widget-card">
-                <div class="widget-header">
-                    <h3 class="widget-title-text">Nội dung được yêu thích</h3>
-                    <a href="#" class="widget-more">Xem tất cả</a>
-                </div>
-                <div class="event-item">
-                    <div class="event-date">
-                        <div class="event-month">🏆</div>
-                    </div>
-                    <div class="event-details">
-                        <div class="event-title">Top Post của tuần</div>
-                        <div class="event-meta">5.2K reactions • 1.8K comments</div>
-                    </div>
-                </div>
-                <div class="event-item">
-                    <div class="event-date">
-                        <div class="event-month">⭐</div>
-                    </div>
-                    <div class="event-details">
-                        <div class="event-title">Trending Video</div>
-                        <div class="event-meta">125K views • 3.5K shares</div>
-                    </div>
-                </div>
-                <div class="event-item">
-                    <div class="event-date">
-                        <div class="event-month">📸</div>
-                    </div>
-                    <div class="event-details">
-                        <div class="event-title">Photo of the Day</div>
-                        <div class="event-meta">89K likes • 2.1K saves</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Community Stats Widget -->
             <div class="widget-card">
                 <div class="widget-header">
                     <h3 class="widget-title-text">Thống kê cộng đồng</h3>
@@ -487,7 +404,6 @@
                 </div>
             </div>
 
-            <!-- Sponsored Content Widget -->
             <div class="widget-card sponsored-card">
                 <div class="sponsored-label">Được tài trợ</div>
                 <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=400" alt="Sponsored"
@@ -496,8 +412,7 @@
                 <div class="sponsored-description">1000+ vị trí đang chờ ứng viên tài năng</div>
                 <a href="#" class="sponsored-link">topitjobs.vn</a>
             </div>
-        </div><!-- End right-sidebar -->
-
+        </div>
     </div>
 
     <script>
