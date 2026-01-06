@@ -6,6 +6,11 @@ $(document).ready(function () {
     const currentUser = currentUserStr ? JSON.parse(currentUserStr) : null;
     const currentUserId = currentUser ? currentUser.id : null;
 
+    if (currentUser && currentUser.role === "ADMIN") {
+        // Hiện nút Admin và đường kẻ (đã thêm trong HTML ở bước trước)
+        $('#admin-dashboard-link').show(); // Hoặc .css('display', 'flex');
+        $('#admin-divider').show();
+    }
     // 1. Khởi tạo dữ liệu
     loadUserAvatar();
     loadMyNotifications();
@@ -193,7 +198,10 @@ $(document).ready(function () {
 
     function loadUserAvatar() {
         if (!currentUser) return;
+
+        // [QUAN TRỌNG] TRẢ VỀ QUERY GỐC (Bỏ phần roles đi để tránh lỗi "Đang tải...")
         const query = `query { getUserByUsername(username: "${currentUser.username}") { avatarUrl fullName } }`;
+
         $.ajax({
             url: '/graphql', type: 'POST', contentType: 'application/json',
             data: JSON.stringify({ query: query }),
@@ -203,7 +211,13 @@ $(document).ready(function () {
                     const url = u.avatarUrl || 'https://www.redditstatic.com/avatars/defaults/v2/avatar_default_2.png';
                     $('#header-user-avatar, #dropdown-avatar').css('background-image', `url('${url}')`);
                     $('#dropdown-fullname').text(u.fullName);
+
+                    // Xóa hết logic check role ở đây vì đã làm ở trên đầu rồi
                 }
+            },
+            // Thêm log lỗi để dễ debug nếu vẫn bị xoay
+            error: function (err) {
+                console.log("Lỗi tải Avatar:", err);
             }
         });
     }
@@ -222,5 +236,28 @@ $(document).ready(function () {
     $('#dark-mode-checkbox').on('change', function () {
         document.body.classList.toggle('dark-mode', this.checked);
         localStorage.setItem('darkMode', this.checked ? 'enabled' : 'disabled');
+    });
+
+    $(document).on('click', '#logout-link', function (e) {
+        e.preventDefault(); // Ngăn chặn chuyển trang mặc định
+
+        if (confirm("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?")) {
+
+            // 1. Ngắt kết nối WebSocket (Nếu đang chạy)
+            if (stompClient) {
+                try {
+                    stompClient.disconnect();
+                } catch (err) {
+                    console.log("Lỗi khi ngắt kết nối socket: ", err);
+                }
+            }
+
+            // 2. Xóa Token và thông tin User
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("currentUser");
+
+            // 3. Chuyển hướng về trang Đăng nhập
+            window.location.href = "/login";
+        }
     });
 });

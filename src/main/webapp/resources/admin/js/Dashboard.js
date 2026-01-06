@@ -141,7 +141,20 @@ $(document).ready(function () {
     window.viewDetail = function (id) {
         alert("Xem chi tiết user ID: " + id);
     };
+    // NEW: XỬ LÝ ĐĂNG XUẤT (LOGOUT)
+    // ================================================================
+    $("#btnLogout").click(function (e) {
+        e.preventDefault(); // Ngăn chặn hành động chuyển trang mặc định của thẻ <a>
 
+        if (confirm("Bạn có chắc chắn muốn đăng xuất khỏi Admin Dashboard?")) {
+            // 1. Xóa Token và thông tin User trong LocalStorage
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("currentUser");
+
+            // 2. Chuyển hướng về trang Đăng nhập
+            window.location.href = "/login";
+        }
+    });
     // ================================================================
     // 4. CHỨC NĂNG XÓA USER (GỌI GRAPHQL MUTATION)
     // ================================================================

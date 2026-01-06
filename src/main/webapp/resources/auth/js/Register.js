@@ -59,21 +59,28 @@ $(document).ready(function () {
 
             success: function (response) {
                 if (response.errors && response.errors.length > 0) {
-                    showError(response.errors[0].message);
+                    // [SỬA TẠI ĐÂY] Lấy tin nhắn lỗi từ server
+                    const errorMsg = response.errors[0].message.toLowerCase();
+
+                    // Kiểm tra xem lỗi có phải do trùng lặp không (check các từ khóa thường gặp)
+                    if (errorMsg.includes("exist") || errorMsg.includes("duplicate") || errorMsg.includes("already")) {
+                        showError("Đã có tài khoản này");
+                    } else {
+                        // Nếu là lỗi khác (ví dụ mật khẩu ngắn), hiển thị nguyên văn hoặc tùy chỉnh tiếp
+                        showError(response.errors[0].message);
+                    }
                 }
                 else if (response.data && response.data.register) {
                     const payload = response.data.register;
                     const user = payload.user;
 
-                    // Lưu đầy đủ thông tin như bên Login
+                    // ... (Đoạn lưu localStorage giữ nguyên) ...
                     localStorage.setItem("accessToken", payload.token);
                     localStorage.setItem("currentUser", JSON.stringify(user));
-
-                    // --- BỔ SUNG ---
                     localStorage.setItem("username", user.username);
                     localStorage.setItem("currentUserId", user.id);
                     localStorage.setItem("currentUsername", user.username);
-                    localStorage.setItem("userAvatarUrl", "https://www.redditstatic.com/avatars/defaults/v2/avatar_default_2.png"); // Avatar mặc định
+                    localStorage.setItem("userAvatarUrl", "https://www.redditstatic.com/avatars/defaults/v2/avatar_default_2.png");
 
                     alert("Đăng ký thành công!");
                     window.location.href = "/";

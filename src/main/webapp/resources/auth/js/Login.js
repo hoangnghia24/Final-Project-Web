@@ -60,28 +60,26 @@ $(document).ready(function () {
             success: function (response) {
                 // Check lỗi GraphQL
                 if (response.errors && response.errors.length > 0) {
-                    showErrorServer(response.errors[0].message);
+                    // [SỬA TẠI ĐÂY] Luôn báo lỗi chung chung để bảo mật và đúng yêu cầu
+                    showErrorServer("Sai thông tin đăng nhập");
                 }
                 // Check dữ liệu trả về
                 else if (response.data && response.data.login) {
                     const payload = response.data.login;
                     const user = payload.user;
 
-                    // 1. Lưu các key chính
+                    // ... (Đoạn lưu localStorage giữ nguyên không đổi) ...
                     localStorage.setItem("accessToken", payload.token);
                     localStorage.setItem("currentUser", JSON.stringify(user));
-
-                    // 2. --- QUAN TRỌNG: Lưu thêm các key lẻ mà các file JS khác đang cần ---
-                    localStorage.setItem("username", user.username);           // Dùng cho Profile.js, EditAvatar
-                    localStorage.setItem("currentUserId", user.id);            // Dùng cho Messages.js, FriendRequests.js
-                    localStorage.setItem("currentUsername", user.username);    // Dùng cho PostInteractions.js
-                    // Avatar có thể null, nên cần check
+                    localStorage.setItem("username", user.username);
+                    localStorage.setItem("currentUserId", user.id);
+                    localStorage.setItem("currentUsername", user.username);
                     localStorage.setItem("userAvatarUrl", user.avatarUrl || "https://www.redditstatic.com/avatars/defaults/v2/avatar_default_2.png");
 
-                    // Chuyển hướng
                     window.location.href = "/";
                 } else {
-                    showErrorServer("Tên đăng nhập hoặc mật khẩu không đúng.");
+                    // [SỬA TẠI ĐÂY] Cập nhật thông báo ở đây luôn
+                    showErrorServer("Sai thông tin đăng nhập");
                 }
             },
             error: function (xhr) {
