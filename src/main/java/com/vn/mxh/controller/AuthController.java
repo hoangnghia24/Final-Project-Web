@@ -2,14 +2,18 @@ package com.vn.mxh.controller;
 
 import com.vn.mxh.domain.User;
 import com.vn.mxh.domain.dto.AuthPayload; // Import class AuthPayload bạn vừa tạo
+import com.vn.mxh.domain.dto.ForgotPasswordRequest;
 import com.vn.mxh.domain.dto.RegisterInput;
+import com.vn.mxh.domain.dto.ResetPasswordRequest;
 import com.vn.mxh.domain.enums.Role;
 import com.vn.mxh.exception.DuplicateRecordException;
 import com.vn.mxh.repository.UserRepository;
 import com.vn.mxh.security.JwtService; // Import JwtService
+import com.vn.mxh.service.UserService;
 
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,13 +21,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 public class AuthController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
+    private final UserService userService;
     // 1. THÊM 2 BIẾN NÀY
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -33,11 +39,13 @@ public class AuthController {
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
-            AuthenticationManager authenticationManager) {
+            AuthenticationManager authenticationManager,
+            UserService userService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
+        this.userService = userService;
     }
 
     // Các đường dẫn View MVC (Giữ nguyên nếu bạn vẫn dùng Thymeleaf)
@@ -109,5 +117,30 @@ public class AuthController {
 
         // Trả về AuthPayload
         return new AuthPayload(token, savedUser);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        try {
+            userService.sendForgotPasswordEmail(request.getEmail());
+            return ResponseEntity.ok()
+                    .header("Content-Type", "text/plain; charset=UTF-8")
+                    .body("Mã xác nhận đã được gửi đến email của bạn.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .header("Content-Type", "text/plain; charset=UTF-8")
+                    .body(e.getMessage());
+        }
+    }
+
+    // API 2: Đổi mật khẩu mới (Kèm mã OTP)
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+        try {
+            userService.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword());
+            return ResponseEntity.ok("Đổi mật khẩu thành công. Vui lòng đăng nhập lại.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

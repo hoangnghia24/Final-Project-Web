@@ -5,7 +5,17 @@ $(document).ready(function () {
     const clientError = $("#client-error");
     const errorAlert = $("#error-alert");
     const btnLogin = $("#btnLogin");
+    const step1Form = $("#step1Form");
+    const step2Form = $("#step2Form");
+    const forgotEmail = $("#forgotEmail");
+    const displayEmail = $("#displayEmail");
+    const otpInput = $("#otpInput");
+    const newPassForgot = $("#newPassForgot");
 
+    const btnSendOtp = $("#btnSendOtp");
+    const btnConfirmReset = $("#btnConfirmReset");
+    const btnBackStep1 = $("#btnBackStep1");
+    const forgotAlert = $("#forgot-alert");
     loginForm.on("submit", function (event) {
         event.preventDefault();
 
@@ -91,7 +101,79 @@ $(document).ready(function () {
             }
         });
     });
+    step1Form.on("submit", function (e) {
+        e.preventDefault();
 
+        forgotAlert.addClass("d-none").removeClass("alert-danger alert-success");
+        const originalText = btnSendOtp.html();
+        btnSendOtp.html('<span class="spinner-border spinner-border-sm"></span> Đang gửi...').prop("disabled", true);
+
+        const emailVal = forgotEmail.val().trim();
+
+        // Gọi API Backend: @PostMapping("/forgot-password")
+        $.ajax({
+            url: "/forgot-password",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ email: emailVal }), // Mapping với ForgotPasswordRequest
+            success: function (response) {
+                // Thành công -> Chuyển sang Bước 2
+                displayEmail.val(emailVal); // Hiển thị email sang bước 2
+                step1Form.addClass("d-none");
+                step2Form.removeClass("d-none");
+                forgotAlert.text(response).addClass("alert-success").removeClass("d-none");
+            },
+            error: function (xhr) {
+                let msg = xhr.responseText || "Lỗi kết nối server.";
+                forgotAlert.text(msg).addClass("alert-danger").removeClass("d-none");
+            },
+            complete: function () {
+                btnSendOtp.html(originalText).prop("disabled", false);
+            }
+        });
+    });
+
+    // Xử lý Bước 2: Xác nhận đổi mật khẩu
+    step2Form.on("submit", function (e) {
+        e.preventDefault();
+
+        forgotAlert.addClass("d-none");
+        const originalText = btnConfirmReset.html();
+        btnConfirmReset.html('<span class="spinner-border spinner-border-sm"></span> Đang xử lý...').prop("disabled", true);
+
+        // Gọi API Backend: @PostMapping("/reset-password")
+        const payload = {
+            email: displayEmail.val(),
+            otp: otpInput.val().trim(),
+            newPassword: newPassForgot.val()
+        };
+
+        $.ajax({
+            url: "/reset-password",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(payload), // Mapping với ResetPasswordRequest
+            success: function (response) {
+                // Thành công -> Reset form và đóng modal
+                alert("Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
+                window.location.reload();
+            },
+            error: function (xhr) {
+                let msg = xhr.responseText || "Mã OTP không đúng hoặc lỗi hệ thống.";
+                forgotAlert.text(msg).addClass("alert-danger").removeClass("d-none");
+            },
+            complete: function () {
+                btnConfirmReset.html(originalText).prop("disabled", false);
+            }
+        });
+    });
+
+    // Nút Quay lại (Từ bước 2 về bước 1)
+    btnBackStep1.click(function () {
+        step2Form.addClass("d-none");
+        step1Form.removeClass("d-none");
+        forgotAlert.addClass("d-none");
+    });
     function showErrorServer(msg) {
         errorAlert.text(msg);
         errorAlert.removeClass('d-none');

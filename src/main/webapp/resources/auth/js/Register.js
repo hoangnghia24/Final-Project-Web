@@ -13,12 +13,102 @@ $(document).ready(function () {
         const username = $("#username").val();
         const password = $("#password").val();
         const confirmPassword = $("#confirm_password").val();
-
+        const $passwordInput = $("#password");
+        const $strengthBox = $("#password-strength-box");
+        const $strengthBar = $("#password-strength-bar");
+        const $strengthText = $("#password-strength-text");
         if (password !== confirmPassword) {
             showError("Mật khẩu xác nhận không khớp!");
             return;
         }
+        $passwordInput.on("input", function () {
+            const val = $(this).val();
 
+            // Nếu ô trống thì ẩn thanh đánh giá
+            if (val.length === 0) {
+                $strengthBox.addClass("d-none");
+                return;
+            } else {
+                $strengthBox.removeClass("d-none");
+            }
+
+            const result = checkPasswordStrength(val);
+            updateStrengthUI(result);
+        });
+
+        // Hàm tính điểm độ mạnh
+        function checkPasswordStrength(password) {
+            let score = 0;
+
+            if (!password) return 0;
+
+            // Tiêu chí 1: Độ dài > 8 ký tự
+            if (password.length >= 8) score += 1;
+
+            // Tiêu chí 2: Có chữ thường
+            if (/[a-z]/.test(password)) score += 1;
+
+            // Tiêu chí 3: Có chữ hoa
+            if (/[A-Z]/.test(password)) score += 1;
+
+            // Tiêu chí 4: Có số
+            if (/[0-9]/.test(password)) score += 1;
+
+            // Tiêu chí 5: Có ký tự đặc biệt
+            if (/[^A-Za-z0-9]/.test(password)) score += 1;
+
+            return score;
+        }
+
+        // Hàm cập nhật giao diện dựa trên điểm
+        function updateStrengthUI(score) {
+            let width = 0;
+            let colorClass = "";
+            let text = "";
+
+            switch (score) {
+                case 0:
+                case 1:
+                    width = 20;
+                    colorClass = "bg-danger"; // Đỏ
+                    text = "Rất yếu (Cần thêm ký tự, số hoặc chữ hoa)";
+                    break;
+                case 2:
+                    width = 40;
+                    colorClass = "bg-warning"; // Vàng cam
+                    text = "Yếu";
+                    break;
+                case 3:
+                    width = 60;
+                    colorClass = "bg-info"; // Xanh dương nhạt
+                    text = "Trung bình";
+                    break;
+                case 4:
+                    width = 80;
+                    colorClass = "bg-primary"; // Xanh dương
+                    text = "Tốt";
+                    break;
+                case 5:
+                    width = 100;
+                    colorClass = "bg-success"; // Xanh lá
+                    text = "Tuyệt vời";
+                    break;
+            }
+
+            // Reset class màu cũ
+            $strengthBar.removeClass("bg-danger bg-warning bg-info bg-primary bg-success");
+
+            // Add class mới
+            $strengthBar.addClass(colorClass);
+            $strengthBar.css("width", width + "%");
+            $strengthText.text(text);
+
+            // Đổi màu chữ thông báo cho đồng bộ
+            $strengthText.removeClass("text-danger text-warning text-info text-primary text-success text-muted");
+            if (score < 2) $strengthText.addClass("text-danger");
+            else if (score === 5) $strengthText.addClass("text-success");
+            else $strengthText.addClass("text-muted");
+        }
         // --- SỬA GraphQL Query ---
         // Đổi tên mutation thành 'register' và lấy về token
         const graphqlData = {

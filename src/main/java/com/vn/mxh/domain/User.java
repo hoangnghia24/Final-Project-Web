@@ -64,6 +64,12 @@ public class User implements UserDetails { // THÊM implements UserDetails
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;
+
+    @Column(name = "token_expiration_time")
+    private LocalDateTime tokenExpirationTime;
+
     // ============================================================
     // CÁC HÀM BẮT BUỘC TỪ USERDETAILS
     // ============================================================

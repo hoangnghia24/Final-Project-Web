@@ -1,7 +1,13 @@
 package com.vn.mxh.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
+
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
 import com.vn.mxh.domain.User;
@@ -24,6 +30,8 @@ public class UserService {
     private final CommentRepository commentRepository; // Mới
     private final FriendshipRepository friendshipRepository;
     private final NotificationRepository notificationRepository; // Mới
+    private final JavaMailSender mailSender;
+    private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
             PostRepository postRepository,
@@ -31,7 +39,9 @@ public class UserService {
             LikeRepository likeRepository,
             CommentRepository commentRepository,
             FriendshipRepository friendshipRepository,
-            NotificationRepository notificationRepository) {
+            NotificationRepository notificationRepository,
+            JavaMailSender mailSender,
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.postRepository = postRepository;
         this.messageRepository = messageRepository;
@@ -39,6 +49,8 @@ public class UserService {
         this.commentRepository = commentRepository;
         this.friendshipRepository = friendshipRepository;
         this.notificationRepository = notificationRepository;
+        this.mailSender = mailSender;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public boolean isUsernameExists(String username) {
@@ -143,5 +155,58 @@ public class UserService {
 
         // 4. Cuối cùng: Ẩn User
         userRepository.softDeleteUser(userId);
+    }
+
+    // ============================================================
+    // THÊM CÁC HÀM MỚI CHO QUÊN MẬT KHẨU
+    // ============================================================
+
+    // 1. Gửi OTP
+    public void sendForgotPasswordEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại trong hệ thống"));
+
+        // Tạo OTP 6 số
+        String otp = String.valueOf(new Random().nextInt(900000) + 100000);
+
+        // Lưu vào DB (Hết hạn sau 5 phút)
+        user.setResetPasswordToken(otp);
+        user.setTokenExpirationTime(LocalDateTime.now().plusMinutes(5));
+        userRepository.save(user);
+
+        // Gửi mail
+        sendEmail(email, "Mã xác nhận quên mật khẩu", "Mã OTP của bạn là: " + otp);
+    }
+
+    // 2. Xác thực và đổi mật khẩu
+    public void resetPassword(String email, String otp, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+
+        // Kiểm tra OTP và thời gian hết hạn
+        if (user.getResetPasswordToken() == null || !user.getResetPasswordToken().equals(otp)) {
+            throw new RuntimeException("Mã OTP không chính xác");
+        }
+
+        if (user.getTokenExpirationTime().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Mã OTP đã hết hạn");
+        }
+
+        // Đổi mật khẩu
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+
+        // Xóa OTP
+        user.setResetPasswordToken(null);
+        user.setTokenExpirationTime(null);
+        userRepository.save(user);
+    }
+
+    // Hàm hỗ trợ gửi mail đơn giản
+    private void sendEmail(String to, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+        mailSender.send(message);
     }
 }

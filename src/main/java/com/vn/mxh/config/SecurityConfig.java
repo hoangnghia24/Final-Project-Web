@@ -62,7 +62,7 @@ public class SecurityConfig {
                                                                 "/edit-avatar",
                                                                 "/user-profile")
                                                 .permitAll()
-
+                                                .requestMatchers("/forgot-password", "/reset-password").permitAll()
                                                 // ============================================================
                                                 // NHÓM 3: API AUTH & GRAPHQL -> MỞ ĐỂ CLIENT GỌI VÀO
                                                 // ============================================================
