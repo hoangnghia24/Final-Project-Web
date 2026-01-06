@@ -7,11 +7,12 @@ import com.vn.mxh.domain.dto.UpdatePostInput;
 import com.vn.mxh.domain.enums.PrivacyLevel;
 import com.vn.mxh.repository.PostRepository;
 import com.vn.mxh.repository.UserRepository;
-import com.vn.mxh.service.NotificationService; // Thêm import Service thông báo
+import com.vn.mxh.service.NotificationService;
+import com.vn.mxh.service.PostService; // THÊM IMPORT NÀY
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.messaging.simp.SimpMessagingTemplate; // Import WS
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -29,23 +30,26 @@ public class PostController {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final SimpMessagingTemplate messagingTemplate; // Dùng để gửi Socket
+    private final SimpMessagingTemplate messagingTemplate;
     private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
-    private final NotificationService notificationService; // Khai báo Service thông báo
+    private final NotificationService notificationService;
+    private final PostService postService; // THÊM BIẾN NÀY
 
     public PostController(PostRepository postRepository,
             UserRepository userRepository,
             SimpMessagingTemplate messagingTemplate,
             LikeRepository likeRepository,
             CommentRepository commentRepository,
-            NotificationService notificationService) { // Inject Service thông báo vào Constructor
+            NotificationService notificationService,
+            PostService postService) { // Inject PostService vào đây
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.messagingTemplate = messagingTemplate;
         this.likeRepository = likeRepository;
         this.commentRepository = commentRepository;
         this.notificationService = notificationService;
+        this.postService = postService; // Gán giá trị
     }
 
     // ==========================================
@@ -55,7 +59,6 @@ public class PostController {
     @PreAuthorize("isAuthenticated()")
     public Post createPost(@Argument("input") CreatePostInput input) {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-
         User currentUser = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -72,12 +75,8 @@ public class PostController {
                 .commentCount(0)
                 .build();
 
-        Post savedPost = postRepository.save(newPost);
-
-        // Gửi bài viết mới đến tất cả client đang nghe topic này
-        messagingTemplate.convertAndSend("/topic/new-posts", savedPost);
-
-        return savedPost;
+        // --- SỬA ĐOẠN NÀY: Gọi qua Service để kích hoạt logic thông báo ---
+        return postService.createPost(newPost);
     }
 
     @MutationMapping
@@ -124,7 +123,6 @@ public class PostController {
 
         // 4. Xóa bài viết
         postRepository.delete(post);
-
         return true; // Trả về true nếu xóa thành công
     }
 

@@ -22,6 +22,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final FriendshipService friendshipService; // Inject để lấy danh sách bạn bè
     private final SimpMessagingTemplate messagingTemplate; // Inject để bắn WebSocket
+    private final NotificationService notificationService; // THÊM: Inject Service thông báo
 
     /**
      * TẠO BÀI VIẾT MỚI & BẮN REALTIME
@@ -77,28 +78,23 @@ public class PostService {
         User author = post.getUser();
 
         // 1. Lấy danh sách bạn bè của người đăng
-        // (Hàm này có sẵn trong FriendshipService bạn đã gửi)
+        // (Hàm này có sẵn trong FriendshipService)
         List<User> friends = friendshipService.getMyFriends(author.getId());
 
         if (friends.isEmpty())
             return;
 
-        // 2. Tạo nội dung thông báo
-        Map<String, Object> notificationPayload = new HashMap<>();
-        notificationPayload.put("postId", post.getId());
-        notificationPayload.put("senderId", author.getId());
-        notificationPayload.put("senderName", author.getFullName());
-        notificationPayload.put("senderAvatar", author.getAvatarUrl());
-        notificationPayload.put("content", author.getFullName() + " vừa đăng một bài viết mới.");
-        notificationPayload.put("type", "NEW_POST");
-        notificationPayload.put("timeAgo", "Vừa xong"); // Frontend có thể tự tính lại time
+        String content = author.getFullName() + " vừa đăng một bài viết mới.";
 
-        // 3. Gửi đến từng người qua kênh riêng
+        // 2. Gửi thông báo cho từng người
         for (User friend : friends) {
-            // Kênh: /topic/notifications/{userId}
-            messagingTemplate.convertAndSend(
-                    "/topic/notifications/" + friend.getId(),
-                    notificationPayload);
+            notificationService.sendNotification(
+                    friend, // Người nhận (Bạn bè)
+                    author, // Người gửi (Tác giả bài viết)
+                    content, // Nội dung
+                    "NEW_POST", // Loại thông báo (Cần xử lý icon bên Frontend nếu muốn đẹp)
+                    post.getId() // ID bài viết để click vào xem
+            );
         }
     }
 
@@ -152,8 +148,7 @@ public class PostService {
         // Logic like đơn giản: check xem user đã like chưa trong bảng Like (cần
         // LikeRepository)
         // Ở đây tạm thời giả lập tăng/giảm count để demo
-        // Bạn nên implement logic check Like entity thật ở đây
-
+        // Bạn nên implement logic check Like entity thật ở đây (giống PostController)
         post.setLikeCount(post.getLikeCount() + 1);
         postRepository.save(post);
         return true;

@@ -16,24 +16,29 @@ $(document).ready(function () {
         if (!currentUserId) return;
         const socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
-        stompClient.debug = null;
+        // stompClient.debug = null; // Bật lại log nếu cần debug
 
         stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+
             // Lắng nghe thông báo
             stompClient.subscribe('/topic/notifications/' + currentUserId, function (message) {
-                handleIncomingNotification(JSON.parse(message.body));
+                const body = JSON.parse(message.body);
+                handleIncomingNotification(body);
             });
+
             // Lắng nghe tin nhắn
             stompClient.subscribe('/user/' + currentUserId + '/queue/messages', function (message) {
                 let mBadge = parseInt($("#header-message-badge").text()) || 0;
                 $("#header-message-badge").text(mBadge + 1).show();
             });
         }, function (error) {
+            console.log("WS Error: " + error);
             setTimeout(connectWebSocket, 5000);
         });
     }
 
-    // --- XỬ LÝ SỰ KIỆN CLICK (Dùng Event Delegation để không bao giờ bị liệt nút) ---
+    // --- XỬ LÝ SỰ KIỆN CLICK (Dùng Event Delegation) ---
 
     // 1. Click Icon Thông báo
     $(document).on('click', '#notification-icon', function (e) {
@@ -42,7 +47,6 @@ $(document).ready(function () {
         $('#notification-popup').toggleClass('show');
         $('#profile-dropdown').removeClass('show');
         $('#messages-popup').hide();
-        console.log('Notification toggled');
     });
 
     // 2. Click Icon Tin nhắn
@@ -53,11 +57,10 @@ $(document).ready(function () {
         if (popup.is(':visible')) {
             popup.hide();
         } else {
-            popup.css('display', 'grid'); // Hiện dạng grid 2 cột theo style của bạn
+            popup.css('display', 'grid');
         }
         $('#notification-popup').removeClass('show');
         $('#profile-dropdown').removeClass('show');
-        console.log('Messages popup toggled');
     });
 
     // 3. Click Avatar Profile
@@ -71,17 +74,18 @@ $(document).ready(function () {
 
     // 4. Click bất kỳ đâu bên ngoài để đóng các Popup
     $(document).on('click', function (e) {
-        // Nếu click KHÔNG nằm trong các khu vực menu/popup thì mới đóng
         if (!$(e.target).closest('#notification-icon, #notification-popup, #profile-menu-container, #messages-popup, #message-icon').length) {
             $('.notification-popup').removeClass('show');
             $('.profile-dropdown').removeClass('show');
             $('#messages-popup').hide();
         }
     });
-    // --- CÁC HÀM HỖ TRỢ (GIỮ NGUYÊN LOGIC THẬT) ---
+
+    // --- CÁC HÀM HỖ TRỢ ---
+
     function loadMyNotifications() {
         if (!currentUserId) return;
-        const query = `query { getMyNotifications { id content isRead createdAt sender { fullName avatarUrl } } }`;
+        const query = `query { getMyNotifications { id content isRead createdAt type targetId sender { fullName avatarUrl } } }`;
         $.ajax({
             url: "/graphql",
             type: "POST",
@@ -90,8 +94,14 @@ $(document).ready(function () {
             data: JSON.stringify({ query: query }),
             success: function (response) {
                 if (response.data && response.data.getMyNotifications) {
-                    renderNotificationList(response.data.getMyNotifications);
+                    // FIX: Thêm || [] để đảm bảo không bao giờ truyền null vào hàm render
+                    renderNotificationList(response.data.getMyNotifications || []);
+                } else {
+                    renderNotificationList([]); // Render rỗng nếu không có data
                 }
+            },
+            error: function () {
+                renderNotificationList([]); // Render rỗng nếu lỗi
             }
         });
     }
@@ -99,45 +109,87 @@ $(document).ready(function () {
     function renderNotificationList(notifications) {
         const list = $("#notification-list");
         list.find(".notification-item").remove();
-        if (notifications.length === 0) {
+
+        // --- FIX LỖI "reading 'length' of undefined" TẠI ĐÂY ---
+        if (!notifications || notifications.length === 0) {
             $("#notification-empty").show();
             return;
         }
+        // -------------------------------------------------------
+
         $("#notification-empty").hide();
+
         notifications.forEach(n => {
             const isUnread = !n.isRead ? 'unread' : '';
-            const avatar = n.sender.avatarUrl || 'https://api.dicebear.com/9.x/avataaars/svg?seed=' + n.sender.fullName;
+            // Xử lý an toàn cho sender (tránh lỗi null)
+            const senderName = n.sender ? n.sender.fullName : "Hệ thống";
+            const avatar = (n.sender && n.sender.avatarUrl) ? n.sender.avatarUrl : 'https://api.dicebear.com/9.x/avataaars/svg?seed=' + senderName;
+
+            // Xử lý nội dung hiển thị
+            let contentDisplay = n.content;
+            if (n.type === "NEW_POST" && !n.content.includes("đăng")) contentDisplay = "vừa đăng một bài viết mới.";
+
             list.append(`
-                <div class="notification-item ${isUnread}" data-id="${n.id}">
+                <div class="notification-item ${isUnread}" data-id="${n.id}" data-target-id="${n.targetId}">
                     <div class="notification-avatar"><img src="${avatar}"></div>
                     <div class="notification-content">
-                        <p class="notification-text"><strong>${n.sender.fullName}</strong> ${n.content}</p>
+                        <p class="notification-text"><strong>${senderName}</strong> ${contentDisplay}</p>
                         <span class="notification-time">${timeSince(new Date(n.createdAt))}</span>
                     </div>
                     ${!n.isRead ? '<div class="unread-dot"></div>' : ''}
                 </div>
             `);
         });
+
         const unreadCount = notifications.filter(n => !n.isRead).length;
         if (unreadCount > 0) $("#notification-badge").text(unreadCount).show();
     }
 
     function handleIncomingNotification(n) {
+        console.log("Socket Data:", n);
         $("#notification-empty").hide();
-        const avatar = n.sender.avatarUrl || 'https://api.dicebear.com/9.x/avataaars/svg?seed=' + n.sender.fullName;
-        $("#notification-list").prepend(`
-            <div class="notification-item unread" id="notif-${n.id}">
-                <div class="notification-avatar"><img src="${avatar}"></div>
+
+        // Chuẩn hóa dữ liệu sender từ socket (đề phòng backend gửi cấu trúc khác)
+        let senderName = "Thành viên";
+        let senderAvatar = "";
+
+        if (n.sender) {
+            senderName = n.sender.fullName;
+            senderAvatar = n.sender.avatarUrl;
+        } else {
+            senderName = n.senderName || "Thành viên";
+            senderAvatar = n.senderAvatar;
+        }
+
+        if (!senderAvatar) {
+            senderAvatar = 'https://api.dicebear.com/9.x/avataaars/svg?seed=' + senderName;
+        }
+
+        const html = `
+            <div class="notification-item unread" id="notif-${n.id || Date.now()}" data-target-id="${n.targetId || n.postId}">
+                <div class="notification-avatar"><img src="${senderAvatar}"></div>
                 <div class="notification-content">
-                    <p class="notification-text"><strong>${n.sender.fullName}</strong> ${n.content}</p>
+                    <p class="notification-text"><strong>${senderName}</strong> ${n.content}</p>
                     <span class="notification-time">Vừa xong</span>
                 </div>
                 <div class="unread-dot"></div>
             </div>
-        `);
+        `;
+
+        $("#notification-list").prepend(html);
+
         let count = (parseInt($("#notification-badge").text()) || 0) + 1;
         $("#notification-badge").text(count).show();
+
+        // Hiệu ứng rung chuông
+        $("#notification-icon").addClass("animate-shake");
+        setTimeout(() => $("#notification-icon").removeClass("animate-shake"), 500);
     }
+
+    $(document).on('click', '.notification-item', function () {
+        const targetId = $(this).attr('data-target-id') || $(this).data('target-id');
+        if (targetId) window.location.href = "/post-detail?id=" + targetId;
+    });
 
     function loadUserAvatar() {
         if (!currentUser) return;
