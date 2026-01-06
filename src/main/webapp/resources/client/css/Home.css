@@ -417,8 +417,8 @@ body.dark-mode .reddit-post-card {
 }
 
 .action-btn:hover {
-    background: #f3e5f5;
-    color: #4e54c8;
+    background: rgba(78, 84, 200, 0.08) !important;
+    color: #4e54c8 !important;
 }
 
 body.dark-mode .action-btn:hover {
@@ -659,38 +659,28 @@ body.dark-mode .comment-bubble {
 }
 
 /* =========================================================================
-   FIX CỰC MẠNH: NÚT THÍCH, GỬI, Ô NHẬP (FORCE OVERRIDE)
+   FIX CỰC MẠNH: NÚT THÍCH MÀU TÍM, NÚT GỬI MÁY BAY (Light Mode)
    ========================================================================= */
 
-/* 1. NÚT THÍCH (LIKE) - TEXT CHUYỂN TÍM, ICON GIỮ VÀNG */
-/* Light Mode Only */
+/* 1. NÚT THÍCH (LIKE) - MÀU TÍM CHỦ ĐẠO */
 body:not(.dark-mode) .action-btn.liked,
 body:not(.dark-mode) .post-action-btn.liked,
-body:not(.dark-mode) .action-btn.liked>span,
-/* Nhắm trúng thẻ span chứa chữ */
-body:not(.dark-mode) .action-btn.liked>b,
-body:not(.dark-mode) .post-action-btn.liked>span {
+body:not(.dark-mode) .action-btn.liked span,
+body:not(.dark-mode) .action-btn.liked b {
     color: #4e54c8 !important;
-    /* Đổi màu chữ */
 }
 
-/* Ép ICON phải là màu vàng/cam (KHÔNG ĐỔI THEO CHỮ) */
-/* Dùng màu #ffc107 (Amber) hoặc #f59e0b (Cam) cho giống icon */
-body:not(.dark-mode) .action-btn.liked i,
-body:not(.dark-mode) .action-btn.liked svg,
-body:not(.dark-mode) .post-action-btn.liked i,
-body:not(.dark-mode) .post-action-btn.liked svg {
-    fill: #ffc107 !important;
-    stroke: #ffc107 !important;
-    color: #ffc107 !important;
+body:not(.dark-mode) .action-btn.liked svg {
+    fill: #4e54c8 !important;
+    stroke: #4e54c8 !important;
+    color: #4e54c8 !important;
+    filter: drop-shadow(0 0 2px rgba(78, 84, 200, 0.4));
 }
 
 /* 2. NÚT GỬI (SEND): Màu nền Gradient Tím, Chữ Trắng */
 .comment-send-btn,
 button.btn-primary,
-/* Nếu nút gửi dùng class này */
 button[type="submit"] {
-    /* Quét hết các nút submit */
     background: linear-gradient(135deg, #8f94fb 0%, #4e54c8 100%) !important;
     background-color: #4e54c8 !important;
     color: #ffffff !important;
@@ -698,7 +688,6 @@ button[type="submit"] {
     box-shadow: 0 4px 12px rgba(78, 84, 200, 0.3) !important;
 }
 
-/* Hover effect cho nút gửi */
 .comment-send-btn:hover,
 button.btn-primary:hover,
 button[type="submit"]:hover {
@@ -706,32 +695,43 @@ button[type="submit"]:hover {
     box-shadow: 0 6px 16px rgba(78, 84, 200, 0.4) !important;
 }
 
-/* 3. Ô NHẬP BÌNH LUẬN (COMMENT INPUT): Hiện rõ viền và nền */
-.comment-input-box,
-.comment-input,
-.comment-textarea {
+/* 3. Ô NHẬP BÌNH LUẬN VÀ NÚT MÁY BAY */
+body:not(.dark-mode) .comment-input-field {
+    padding-right: 45px !important;
+    /* Để text không đè lên nút máy bay */
     background-color: #ffffff !important;
-    /* Nền trắng tuyệt đối */
-    border: 1px solid #b8b8b8 !important;
-    /* Viền xám đậm rõ ràng */
+    border: 1px solid #dbdbdb !important;
+    color: #050505 !important;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05) !important;
-    /* Bóng đổ nhẹ bên trong */
-    color: #333 !important;
 }
 
-.comment-input-box:focus-within,
-.comment-input:focus,
-.comment-textarea:focus {
+body:not(.dark-mode) .comment-input-field:focus {
     border-color: #4e54c8 !important;
-    /* Viền tím khi focus */
     box-shadow: 0 0 0 3px rgba(78, 84, 200, 0.2) !important;
-    /* Highlight tím xung quanh */
 }
 
-/* --- DARK MODE RESTORE (Để không bị lỗi khi bật Dark Mode) --- */
+/* Style cho icon nút gửi máy bay giấy trong Home.js */
+body:not(.dark-mode) .btn-send-comment {
+    color: #4e54c8 !important;
+    opacity: 0.8;
+    transition: all 0.2s ease !important;
+}
+
+body:not(.dark-mode) .btn-send-comment:hover {
+    color: #8f94fb !important;
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.btn-send-comment:active {
+    transform: translate(2px, -2px) scale(0.9) !important;
+}
+
+/* --- DARK MODE RESTORE --- */
 body.dark-mode .comment-input-box,
 body.dark-mode .comment-input,
-body.dark-mode .comment-textarea {
+body.dark-mode .comment-textarea,
+body.dark-mode .comment-input-field {
     background-color: #272729 !important;
     border: 1px solid #3a3a3c !important;
     color: #e4e6eb !important;
@@ -741,6 +741,5 @@ body.dark-mode .comment-textarea {
 body.dark-mode .comment-send-btn,
 body.dark-mode button.btn-primary {
     background: #6200ea !important;
-    /* Giữ màu tím đậm cho dark mode */
     box-shadow: none !important;
 }

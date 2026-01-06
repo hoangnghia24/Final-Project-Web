@@ -660,4 +660,100 @@
         document.head.appendChild(style);
     }
 
+    $(document).ready(function () {
+        // Mỗi khi trang load, lấy danh sách thông báo cũ từ DB
+        loadMyNotifications();
+    });
+
+    function loadMyNotifications() {
+        const query = `
+        query {
+            getMyNotifications {
+                id
+                content
+                type
+                isRead
+                createdAt
+                sender {
+                    fullName
+                    avatarUrl
+                }
+            }
+        }
+    `;
+
+        $.ajax({
+            url: "/graphql",
+            type: "POST",
+            contentType: "application/json",
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("accessToken")
+            },
+            data: JSON.stringify({ query: query }),
+            success: function (response) {
+                if (response.data && response.data.getMyNotifications) {
+                    renderNotifications(response.data.getMyNotifications);
+                }
+            }
+        });
+    }
+
+    function renderNotifications(notifications) {
+        const listContainer = $("#notification-list");
+        listContainer.empty(); // Xóa sạch dữ liệu cũ/ảo
+
+        if (notifications.length === 0) {
+            listContainer.append('<p class="text-center p-3">Không có thông báo nào.</p>');
+            return;
+        }
+
+        notifications.forEach(n => {
+            const isUnread = !n.isRead ? 'unread' : '';
+            const avatar = n.sender.avatarUrl || 'https://api.dicebear.com/9.x/avataaars/svg?seed=' + n.sender.fullName;
+
+            const html = `
+            <div class="notification-item ${isUnread}" onclick="handleNotificationClick(${n.id})">
+                <div class="notification-avatar">
+                    <img src="${avatar}" alt="avatar">
+                </div>
+                <div class="notification-content">
+                    <p class="notification-text">
+                        <strong>${n.sender.fullName}</strong> ${n.content}
+                    </p>
+                    <span class="notification-time">${timeSince(new Date(n.createdAt))}</span>
+                </div>
+                ${!n.isRead ? '<div class="unread-dot"></div>' : ''}
+            </div>
+        `;
+            listContainer.append(html);
+        });
+
+        // Cập nhật con số trên icon chuông
+        const unreadCount = notifications.filter(n => !n.isRead).length;
+        updateBadgeCount(unreadCount);
+    }
+
+    function updateBadgeCount(count) {
+        const badge = $(".notification-badge");
+        if (count > 0) {
+            badge.text(count).show();
+        } else {
+            badge.hide();
+        }
+    }
+    function timeSince(date) {
+        var seconds = Math.floor((new Date() - date) / 1000);
+        var interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + " năm trước";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + " tháng trước";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + " ngày trước";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + " giờ trước";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + " phút trước";
+        return "Vừa xong";
+    }
+
 })();

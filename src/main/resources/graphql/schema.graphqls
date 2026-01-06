@@ -174,3 +174,21 @@ type Query {
     getSentFriendRequests: [Friendship]
     getUserById(id: ID!): User
 }
+
+type Notification {
+    id: ID
+    content: String
+    type: String
+    targetId: ID
+    isRead: Boolean
+    createdAt: String
+    sender: User
+}
+
+extend type Query {
+    getMyNotifications: [Notification]
+}
+
+extend type Mutation {
+    markAsRead(id: ID!): Boolean
+}

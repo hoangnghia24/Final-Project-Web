@@ -7,6 +7,7 @@ import com.vn.mxh.domain.dto.UpdatePostInput;
 import com.vn.mxh.domain.enums.PrivacyLevel;
 import com.vn.mxh.repository.PostRepository;
 import com.vn.mxh.repository.UserRepository;
+import com.vn.mxh.service.NotificationService; // Thêm import Service thông báo
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -31,17 +32,20 @@ public class PostController {
     private final SimpMessagingTemplate messagingTemplate; // Dùng để gửi Socket
     private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
+    private final NotificationService notificationService; // Khai báo Service thông báo
 
     public PostController(PostRepository postRepository,
             UserRepository userRepository,
             SimpMessagingTemplate messagingTemplate,
             LikeRepository likeRepository,
-            CommentRepository commentRepository) {
+            CommentRepository commentRepository,
+            NotificationService notificationService) { // Inject Service thông báo vào Constructor
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.messagingTemplate = messagingTemplate;
         this.likeRepository = likeRepository;
         this.commentRepository = commentRepository;
+        this.notificationService = notificationService;
     }
 
     // ==========================================
@@ -149,7 +153,15 @@ public class PostController {
             post.setLikeCount(post.getLikeCount() + 1); // Tăng count
             postRepository.save(post);
 
-            // TODO: Gửi thông báo cho chủ bài viết (Làm sau)
+            // --- GỬI THÔNG BÁO THẬT CHO CHỦ BÀI VIẾT ---
+            notificationService.sendNotification(
+                    post.getUser(), // Người nhận là chủ bài viết
+                    user, // Người gửi là người vừa ấn Like
+                    "đã thích bài viết của bạn", // Nội dung
+                    "LIKE", // Loại thông báo
+                    post.getId() // ID mục tiêu (Bài viết)
+            );
+
             return true; // Trả về true (đã like)
         }
     }
@@ -174,6 +186,15 @@ public class PostController {
         // Tăng số lượng comment trong Post
         post.setCommentCount(post.getCommentCount() + 1);
         postRepository.save(post);
+
+        // --- GỬI THÔNG BÁO THẬT CHO CHỦ BÀI VIẾT ---
+        notificationService.sendNotification(
+                post.getUser(), // Người nhận
+                user, // Người vừa comment
+                "đã bình luận bài viết của bạn: \"" + input.content() + "\"", // Nội dung
+                "COMMENT", // Loại
+                post.getId() // Target ID
+        );
 
         return savedComment;
     }
