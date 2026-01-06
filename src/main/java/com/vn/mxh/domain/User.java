@@ -13,7 +13,7 @@ import com.vn.mxh.domain.enums.Role;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.Formula;
 
 @Entity
@@ -22,6 +22,7 @@ import org.hibernate.annotations.Formula;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLRestriction("is_deleted = false")
 public class User implements UserDetails { // THÊM implements UserDetails
 
     @Id
@@ -51,6 +52,10 @@ public class User implements UserDetails { // THÊM implements UserDetails
     @Formula("(SELECT count(*) FROM friendships f WHERE (f.requester_id = id OR f.addressee_id = id) AND f.status = 'ACCEPTED')")
     private Integer friendCount;
 
+    @Column(name = "is_deleted")
+    @Builder.Default
+    private boolean isDeleted = false;
+
     @JsonIgnore
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Post> posts;
@@ -62,6 +67,10 @@ public class User implements UserDetails { // THÊM implements UserDetails
     // ============================================================
     // CÁC HÀM BẮT BUỘC TỪ USERDETAILS
     // ============================================================
+    @Override
+    public boolean isEnabled() {
+        return !isDeleted; // Nếu đã xóa (isDeleted = true) thì tài khoản bị vô hiệu hóa
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -93,10 +102,5 @@ public class User implements UserDetails { // THÊM implements UserDetails
     @Override
     public boolean isCredentialsNonExpired() {
         return true; // Mật khẩu không bị hết hạn
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true; // Tài khoản đang hoạt động
     }
 }

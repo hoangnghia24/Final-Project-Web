@@ -68,7 +68,7 @@ public class SecurityConfig {
                                                 // ============================================================
                                                 // API Login/Register REST (nếu có dùng)
                                                 .requestMatchers("/api/v1/auth/**").permitAll()
-
+                                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                                 // GraphQL Endpoint: Phải mở để Client gửi Request (Token nằm trong
                                                 // Header)
                                                 // Việc chặn quyền cụ thể sẽ dùng @PreAuthorize trong Controller.

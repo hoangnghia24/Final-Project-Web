@@ -4,6 +4,8 @@ import com.vn.mxh.domain.User;
 import com.vn.mxh.domain.enums.Role;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -26,4 +28,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAll();
 
     List<User> findAllByRoleNotAndIdNot(Role role, Long id);
+
+    @Modifying
+    @Query("UPDATE User u SET u.isDeleted = true WHERE u.id = :id")
+    void softDeleteUser(Long id);
 }

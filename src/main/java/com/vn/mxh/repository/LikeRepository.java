@@ -4,6 +4,8 @@ import com.vn.mxh.domain.Like;
 import com.vn.mxh.domain.Post;
 import com.vn.mxh.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
@@ -13,4 +15,8 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     Optional<Like> findByUserAndPost(User user, Post post);
 
     boolean existsByUserAndPost(User user, Post post);
+
+    @Modifying
+    @Query("UPDATE Like l SET l.isDeleted = true WHERE l.user.id = :userId")
+    void softDeleteLikesByUserId(Long userId);
 }

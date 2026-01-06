@@ -4,6 +4,7 @@ import com.vn.mxh.domain.Friendship;
 import com.vn.mxh.domain.User;
 import com.vn.mxh.domain.enums.FriendshipStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -49,4 +50,8 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
             +
             ")")
     List<Friendship> searchFriends(@Param("userId") Long userId, @Param("keyword") String keyword);
+
+    @Modifying
+    @Query("UPDATE Friendship f SET f.isDeleted = true WHERE f.requester.id = :userId OR f.addressee.id = :userId")
+    void softDeleteFriendshipsByUserId(Long userId);
 }

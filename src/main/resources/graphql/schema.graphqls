@@ -148,8 +148,9 @@ type Mutation {
     unfriend(targetUserId: ID!): String
 
     updateUserProfile(input: UpdateProfileInput!): User!
-}
 
+    deleteUserByAdmin(userId: ID!): String
+}
 # =========================
 # 6. ROOT QUERY (GỘP TẤT CẢ VÀO ĐÂY)
 # =========================

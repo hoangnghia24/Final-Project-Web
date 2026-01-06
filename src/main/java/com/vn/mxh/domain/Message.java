@@ -3,6 +3,8 @@ package com.vn.mxh.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -11,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLRestriction("is_deleted = false")
 public class Message {
 
     @Id
@@ -39,4 +42,8 @@ public class Message {
     @Column(nullable = false)
     @Builder.Default
     private Boolean isRetracted = false; // Mặc định là false (chưa thu hồi)
+
+    @Column(name = "is_deleted")
+    @Builder.Default
+    private boolean isDeleted = false;
 }

@@ -3,6 +3,8 @@ package com.vn.mxh.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
+
 import com.vn.mxh.domain.enums.PrivacyLevel;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLRestriction("is_deleted = false")
 public class Post {
 
     @Id
@@ -30,6 +33,9 @@ public class Post {
 
     private String feeling; // "đang cảm thấy vui", "đang chúc mừng"...
     // ---------------------------------------------
+    @Column(name = "is_deleted")
+    @Builder.Default
+    private boolean isDeleted = false;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

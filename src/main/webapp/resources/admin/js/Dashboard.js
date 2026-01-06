@@ -128,8 +128,8 @@ $(document).ready(function () {
                     <td><span class="badge ${roleClass}">${user.role}</span></td>
                     <td>${createdDate}</td>
                     <td>
-                        <button class="btn btn-sm btn-info text-white" onclick="viewDetail(${user.id})">Chi tiết</button>
-                        <button class="btn btn-sm btn-warning" onclick="blockUser(${user.id})">Chặn</button>
+                        <button class="btn btn-sm btn-info text-white" onclick="window.location.href='/profile?id=${user.id}'">Chi tiết</button>
+                        <button class="btn btn-sm btn-warning" onclick="blockUser(${user.id})">Xóa tài khoản</button>
                     </td>
                 </tr>
             `;
@@ -142,10 +142,58 @@ $(document).ready(function () {
         alert("Xem chi tiết user ID: " + id);
     };
 
+    // ================================================================
+    // 4. CHỨC NĂNG XÓA USER (GỌI GRAPHQL MUTATION)
+    // ================================================================
     window.blockUser = function (id) {
-        if (confirm("Bạn có chắc muốn chặn user này?")) {
-            // Gọi AJAX mutation block user ở đây...
-            alert("Đã chặn user ID: " + id);
+        if (!confirm("CẢNH BÁO: Bạn có chắc chắn muốn xóa tài khoản ID " + id + " này không? Hành động này sẽ ẩn toàn bộ bài viết và dữ liệu liên quan.")) {
+            return;
         }
+
+        // Tạo câu query Mutation
+        const graphqlMutation = {
+            query: `
+                mutation DeleteUserByAdmin {
+                    deleteUserByAdmin(userId: ${id})
+                }
+            `
+        };
+
+        $.ajax({
+            url: "/graphql",
+            type: "POST",
+            contentType: "application/json",
+            dataType: "json",
+            headers: {
+                "Authorization": "Bearer " + accessToken
+            },
+            data: JSON.stringify(graphqlMutation),
+            success: function (response) {
+                // Kiểm tra lỗi từ Backend trả về
+                if (response.errors) {
+                    alert("Lỗi khi xóa: " + response.errors[0].message);
+                    return;
+                }
+
+                // Nếu thành công
+                alert("Thành công: " + response.data.deleteUserByAdmin);
+
+                // Tải lại bảng dữ liệu để cập nhật danh sách
+                // (Giả sử hàm loadAllUsers được định nghĩa ở scope ngoài hoặc ta reload trang)
+                // Cách 1: Reload trang
+                // location.reload(); 
+
+                // Cách 2: Gọi lại hàm load data (Cần đảm bảo loadAllUsers truy cập được)
+                location.reload();
+            },
+            error: function (xhr) {
+                if (xhr.status === 403 || xhr.status === 401) {
+                    alert("Phiên đăng nhập hết hạn hoặc không có quyền.");
+                    window.location.href = "/login";
+                } else {
+                    alert("Lỗi hệ thống (" + xhr.status + ")");
+                }
+            }
+        });
     };
 });

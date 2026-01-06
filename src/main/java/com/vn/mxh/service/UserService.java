@@ -1,20 +1,44 @@
 package com.vn.mxh.service;
 
 import java.util.List;
-
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
 import com.vn.mxh.domain.User;
 import com.vn.mxh.domain.dto.InfoUserForAdmin;
 import com.vn.mxh.domain.dto.UpdateProfileInput;
+import com.vn.mxh.repository.CommentRepository;
+import com.vn.mxh.repository.FriendshipRepository;
+import com.vn.mxh.repository.LikeRepository;
+import com.vn.mxh.repository.MessageRepository;
+import com.vn.mxh.repository.NotificationRepository;
+import com.vn.mxh.repository.PostRepository;
 import com.vn.mxh.repository.UserRepository;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final PostRepository postRepository; // Thêm
+    private final MessageRepository messageRepository;
+    private final LikeRepository likeRepository; // Mới
+    private final CommentRepository commentRepository; // Mới
+    private final FriendshipRepository friendshipRepository;
+    private final NotificationRepository notificationRepository; // Mới
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+            PostRepository postRepository,
+            MessageRepository messageRepository,
+            LikeRepository likeRepository,
+            CommentRepository commentRepository,
+            FriendshipRepository friendshipRepository,
+            NotificationRepository notificationRepository) {
         this.userRepository = userRepository;
+        this.postRepository = postRepository;
+        this.messageRepository = messageRepository;
+        this.likeRepository = likeRepository;
+        this.commentRepository = commentRepository;
+        this.friendshipRepository = friendshipRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     public boolean isUsernameExists(String username) {
@@ -97,5 +121,27 @@ public class UserService {
     public User getUserById(Long id) {
         // Tìm trong DB, nếu không thấy thì trả về null (để Frontend xử lý lỗi)
         return userRepository.findById(id).orElse(null);
+    }
+
+    @Transactional
+    public void deleteAccount(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("Người dùng không tồn tại");
+        }
+
+        // 1. Ẩn Like & Comment trước (Dữ liệu phụ)
+        likeRepository.softDeleteLikesByUserId(userId);
+        commentRepository.softDeleteCommentsByUserId(userId);
+
+        // 2. Ẩn Bạn bè & Thông báo
+        friendshipRepository.softDeleteFriendshipsByUserId(userId);
+        notificationRepository.softDeleteNotificationsByUserId(userId);
+
+        // 3. Ẩn Bài viết & Tin nhắn (Dữ liệu chính)
+        postRepository.softDeletePostsByUserId(userId);
+        messageRepository.softDeleteMessagesBySenderId(userId);
+
+        // 4. Cuối cùng: Ẩn User
+        userRepository.softDeleteUser(userId);
     }
 }

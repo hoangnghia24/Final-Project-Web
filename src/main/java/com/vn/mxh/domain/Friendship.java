@@ -5,7 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.vn.mxh.domain.enums.FriendshipStatus;
-
+import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLRestriction("is_deleted = false")
 public class Friendship {
 
     @Id
@@ -40,4 +41,8 @@ public class Friendship {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "addressee_id", nullable = false)
     private User addressee; // Người nhận lời mời
+
+    @Column(name = "is_deleted")
+    @Builder.Default
+    private boolean isDeleted = false;
 }
