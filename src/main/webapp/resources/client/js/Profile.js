@@ -379,7 +379,7 @@ $(document).ready(function () {
                             <div class="post-user-info ms-2">
                                 <b>${post.user.fullName}</b>
                                 <small class="text-muted" style="font-size: 12px;">
-                                    ${calculateTimeAgo(post.createdAt)} • ${post.privacyLevel === 'PUBLIC' ? '🌎' : '🔒'}
+                                    ${calculateTimeAgo(post.createdAt)}
                                 </small>
                             </div>
                         </div>
@@ -394,7 +394,7 @@ $(document).ready(function () {
                     <div class="post-action-buttons">
                         <button class="action-btn">👍 <span>Thích</span></button>
                         <button class="action-btn">💬 <span>Bình luận</span></button>
-                        <button class="action-btn">↗️ <span>Chia sẻ</span></button>
+                     
                     </div>
                     
                     <div class="comment-input-wrapper">

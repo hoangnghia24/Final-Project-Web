@@ -298,7 +298,7 @@ $(document).ready(function () {
                         <span>Thích</span>
                     </button>
                     <button class="action-btn btn-show-comments" data-id="${post.id}">💬 <span>Bình luận</span></button>
-                    <button class="action-btn">↗️ <span>Chia sẻ</span></button>
+                  
                 </div>
                 <div class="post-comments-section" id="comment-section-${post.id}" style="display:none;">
                     <div class="comment-list" id="comment-list-${post.id}"></div>
