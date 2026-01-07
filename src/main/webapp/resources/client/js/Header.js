@@ -118,6 +118,7 @@ $(document).ready(function () {
         // --- FIX LỖI "reading 'length' of undefined" TẠI ĐÂY ---
         if (!notifications || notifications.length === 0) {
             $("#notification-empty").show();
+            $("#notification-badge").hide();
             return;
         }
         // -------------------------------------------------------
